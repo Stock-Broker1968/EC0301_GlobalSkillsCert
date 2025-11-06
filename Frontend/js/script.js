@@ -2,7 +2,8 @@
 
 // 1. Reemplaza esto con tu Clave Publicable real de Stripe (modo prueba primero)
 const stripePublicKey = 'pk_test_51SJ0gXFupe2fTa5zdrZlQfwpB1Y3esGAdUBw1r4Hc9vIerMj90cm0w4t6tJUJmVV7bEqZ3v5d11cqvPrFps4P31600xqM9IUsj'; // ¡Pega tu clave publicable aquí!
-const backendUrl = 'https://generando-ec0301.onrender.com'; // URL de tu backend
+const backendUrl = 'const backendUrl = "https://ec0301-globalskillscert-backend.onrender.com";
+'; // URL de tu backend
 
 // 2. Inicializa Stripe.js
 const stripe = Stripe(stripePublicKey);
