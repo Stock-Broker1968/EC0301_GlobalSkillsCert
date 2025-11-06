@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillsCert EC0301 - Sistema Integral de Diseño de Cursos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="https://js.stripe.com/v3/" defer></script>
+    
+    <script src="../sistema_central/ec0301-data-manager.js" defer></script>
+    <script src="../sistema_central/auth.js" defer></script>
+    
+    <style>
+        /* === VARIABLES Y ESTILOS BASE === */
+        :root {
+            --primary: #1E3A8A; --accent: #FF6B35; --success: #22C55E; --warning: #F59E0B;
+            --light: #F8FAFC; --border: #E5E7EB; --text: #1F2937; --muted: #6B7280;
+            --danger: #EF4444;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; color: var(--text); overflow-x: hidden;
+        }
+
+        /* === MEJORAS DE ACCESIBILIDAD === */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* === ANIMACIONES MEJORADAS === */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === COMPONENTES EXISTENTES (MANTENIDOS) === */
+        .hero-header {
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            padding: 1.5rem 0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px; margin: 0 auto; padding: 0 1rem;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+        }
+
+        .logo-section { display: flex; align-items: center; gap: 1rem; }
+        
+        .logo { 
+            width: 50px; height: 50px; background: var(--primary); border-radius: 12px; 
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; 
+        }
+        
+        .brand-info h1 { font-size: 1.75rem; color: var(--primary); font-weight: 700; }
+        .brand-info p { color: var(--muted); font-size: 0.9rem; margin: 0; }
+        
+        .header-actions { display: flex; gap: 1rem; align-items: center; }
+        
+        .btn {
+            padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; display: inline-flex;
+            align-items: center; gap: 0.5rem; text-decoration: none; font-size: 0.95rem;
+        }
+        
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+        /* === NUEVOS COMPONENTES === */
+        .loading-message {
+            text-align: center; padding: 2rem; color: white; font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.1); border-radius: 12px; margin: 1rem 0;
+        }
+
+        .toast-notification {
+            position: fixed; top: 20px; right: 20px; 
+            background: var(--success); color: white; 
+            padding: 12px 20px; border-radius: 8px; 
+            z-index: 10000; animation: slideInRight 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .toast-error { background: var(--danger); }
+        .toast-warning { background: var(--warning); }
+
+        /* === ESTILOS RESPONSIVE MEJORADOS === */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2rem; }
+            .hero-subtitle { font-size: 1.1rem; }
+            .header-content { flex-direction: column; text-align: center; }
+            .hero-actions { flex-direction: column; align-items: center; }
+            .modules-grid { grid-template-columns: 1fr; }
+            .project-info { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title { font-size: 1.75rem; }
+            .module-card { padding: 1.5rem; }
+            .btn { padding: 0.875rem 1rem; }
+            .header-actions { flex-direction: column; width: 100%; }
+            .header-actions .btn { width: 100%; justify-content: center; }
+        }
+
+        /* === ESTILOS EXISTENTES (MANTENIDOS) === */
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+        
+        .login-message {
+            text-align: center; color: white; padding: 4rem 1rem;
+            background: rgba(255, 255, 255, 0.05); border-radius: 24px;
+            backdrop-filter: blur(20px); margin-top: 3rem;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .user-info {
+            font-weight: 600; color: var(--primary); display: none;
+            padding: 0.5rem 1rem; background: var(--light); border-radius: 8px;
+        }
+        
+        .hero-section {
+            text-align: center; padding: 4rem 0; color: white;
+            background: rgba(255, 255, 255, 0.05); border-radius: 24px;
+            backdrop-filter: blur(20px); margin-bottom: 3rem;
+        }
+        
+        .project-status {
+            background: white; padding: 2rem; border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); margin-bottom: 3rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .modules-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem; margin-top: 2rem;
+        }
+        
+        .module-card {
+            background: white; padding: 2.5rem; border-radius: 20px; text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1); position: relative;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* ... (el resto de tus estilos existentes se mantienen igual) ... */
+    </style>
+</head>
+<body>
+    <header class="hero-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div class="brand-info">
+                    <h1>SkillsCert EC0301</h1> 
+                    <p>Sistema Integral de Diseño de Cursos</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span id="userInfo" class="user-info"></span>
+                <button id="projectOptionsButton" class="btn btn-secondary" onclick="showProjectOptions()" style="display: none;">
+                    <i class="fa-solid fa-cog"></i> <span class="sr-only">Opciones del</span> Proyecto
+                </button>
+                <button id="exportProjectButton" class="btn btn-success" onclick="exportProject()" style="display: none;">
+                    <i class="fa-solid fa-download"></i> <span class="sr-only">Exportar</span> Proyecto
+                </button>
+                <button class="btn btn-primary" id="authButton" onclick="handleAuth()">
+                    <i class="fa-solid fa-sign-in"></i> <span class="sr-only">Iniciar</span> Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="loginMessage" class="container login-message">
+        <h2>Bienvenido a SkillsCert</h2>
+        <p>Inicia sesión con el código que recibiste por WhatsApp para acceder a tu panel.</p>
+        <p style="font-size: 1rem; opacity: 0.8;">Si no tienes un código, debes realizar el pago primero.</p>
+        <br>
+        <button class="btn btn-warning" id="checkout-button" style="padding: 1rem 2rem; font-size: 1.1rem;">
+            <i class="fa-solid fa-credit-card"></i> Pagar Acceso (500 MXN)
+        </button>
+    </div>
+
+    <main class="container" id="mainContent" style="display: none;" aria-live="polite">
+        <!-- Mensaje de carga mejorado -->
+        <div id="loadingMessage" class="loading-message" style="display: none;">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <span>Cargando contenido...</span>
+        </div>
+        
+        <section class="hero-section">
+            <h1 class="hero-title">Panel de Diseño EC0301</h1>
+            <p class="hero-subtitle" id="hero-user-email">Cargando...</p>
+            <p class="hero-description">
+                Sistema completo para el diseño de cursos de capacitación
+                para ser impartidos mediante <strong>teleformación (en línea)</strong>,
+                sus instrumentos de evaluación y material didáctico.
+            </p>
+            <div class="hero-actions">
+                <a href="carta-descriptiva.html" id="startButton" class="btn btn-success">
+                    <i class="fa-solid fa-play"></i> Iniciar/Continuar Proyecto
+                </a>
+                <button id="loadButton" class="btn btn-secondary" onclick="loadExistingProject()">
+                    <i class="fa-solid fa-folder-open"></i> Cargar Proyecto
+                </button>
+            </div>
+        </section>
+
+        <div id="projectDashboard">
+            <section class="project-status" id="projectStatus">
+                <div class="status-header">
+                    <h2><i class="fa-solid fa-chart-line"></i> Estado del Proyecto</h2>
+                    <button class="btn btn-warning" onclick="refreshStatus()" id="refreshButton">
+                        <i class="fa-solid fa-refresh"></i> Actualizar
+                    </button>
+                </div>
+                <div class="project-info">
+                    <div class="info-card">
+                        <div class="info-value" id="projectName">-</div>
+                        <div class="info-label">Proyecto Actual</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-value" id="completionPercentage">0%</div>
+                        <div class="info-label">Completado</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-value" id="modulesCompleted">0/6</div>
+                        <div class="info-label">Módulos</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-value" id="lastUpdate">-</div>
+                        <div class="info-label">Última Actualización</div>
+                    </div>
+                </div>
+                <div class="progress-section">
+                    <h3>Progreso General del Proyecto</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Iniciando proyecto...</div>
+                </div>
+            </section>
+
+            <section class="modules-section">
+                <h2 class="section-title">Módulos del Sistema</h2>
+                <div class="modules-grid" id="modulesGrid">
+                    <!-- Los módulos se renderizan dinámicamente -->
+                </div>
+            </section>
+        </div>
+
+        <section class="features-section">
+            <h2 class="section-title">Características del Sistema</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-robot"></i></div>
+                    <h3 class="feature-title">Generación por IA</h3>
+                    <p class="feature-description">
+                        Utiliza inteligencia artificial para generar contenido educativo, 
+                        evaluaciones y manuales basados en tus objetivos de aprendizaje.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-shield-check"></i></div>
+                    <h3 class="feature-title">Cumplimiento EC0301</h3>
+                    <p class="feature-description">
+                        Garantiza el cumplimiento total del estándar EC0301 del CONOCER 
+                        con auditoría automática y validación de criterios.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa-solid fa-file-zipper"></i></div>
+                    <h3 class="feature-title">Portafolio Completo</h3>
+                    <p class="feature-description">
+                        Genera automáticamente un portafolio de evidencias completo 
+                        con todos los documentos en formato profesional.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 SkillsCert EC0301. Sistema profesional de diseño de cursos de capacitación.</p>
+    </footer>
+
+    <script>
+        // =============================================================
+        // CONFIGURACIÓN Y CONSTANTES
+        // =============================================================
+        
+        // ⚠️ IMPORTANTE: Mover esta clave a variables de entorno en producción
+        const STRIPE_PUBLIC_KEY = 'pk_test_51SJ0gXFupe2fTa5zdzZlQfwp81Y3esGAdUbW1R4hc9v1ezMj90cnow4t6TjUJVV7bEqz3v5d11cqvPrFps4P3f680xqM9IUsj';
+        const BACKEND_URL = 'https://generando-ec0301-backend.onrender.com';
+        
+        const SYSTEM_MODULES = [
+            { id: 'carta', title: 'Carta Descriptiva', description: 'Documento maestro que define objetivos, contenidos, metodología y sistema de evaluación del curso.', icon: 'fa-clipboard-list', url: 'carta-descriptiva.html', weight: 40 },
+            { id: 'logistica', title: 'Logística', description: 'Documentos operativos: lista de asistencia, contrato de aprendizaje y requerimientos técnicos.', icon: 'fa-tasks', url: 'logistica.html', weight: 15, dependsOn: ['carta'] },
+            { id: 'evaluaciones', title: 'Evaluaciones', description: 'Instrumentos completos: diagnóstica, formativa, sumativa y de satisfacción con IA.', icon: 'fa-file-signature', url: 'evaluaciones.html', weight: 20, dependsOn: ['carta'] },
+            { id: 'manuales', title: 'Manuales', description: 'Manual del participante y del instructor generados automáticamente por IA.', icon: 'fa-book-open', url: 'manuales.html', weight: 15, dependsOn: ['carta', 'evaluaciones'] },
+            { id: 'resultados', title: 'Resultados', description: 'Captura de calificaciones, generación de reportes y constancias de participación.', icon: 'fa-chart-bar', url: 'resultados.html', weight: 5, dependsOn: ['manuales'] },
+            { id: 'auditoria', title: 'Auditoría', description: 'Validación final y generación del portafolio completo de evidencias ZIP.', icon: 'fa-shield-check', url: 'auditoria.html', weight: 5, dependsOn: ['resultados'] }
+        ];
+
+        // =============================================================
+        // VARIABLES GLOBALES
+        // =============================================================
+        let projectData = {};
+        let currentUser = null;
+        let refreshTimeout;
+        let modulesCache = null;
+        let isProcessingPayment = false;
+
+        // =============================================================
+        // INICIALIZACIÓN
+        // =============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeAuth();
+            initializeStripePayment();
+        });
+
+        // =============================================================
+        // LÓGICA DE AUTENTICACIÓN MEJORADA
+        // =============================================================
+        async function initializeAuth() {
+            try {
+                if (typeof auth === 'undefined' || typeof EC0301Manager === 'undefined') {
+                    console.log('Esperando scripts (auth.js, ec0301-data-manager.js)...');
+                    setTimeout(initializeAuth, 100);
+                    return;
+                }
+
+                const loggedIn = await auth.isLoggedIn();
+
+                if (loggedIn) {
+                    await handleSuccessfulLogin();
+                } else {
+                    handleLoggedOutState();
+                }
+            } catch (error) {
+                console.error('Error en inicialización de autenticación:', error);
+                showTemporaryError('Error al inicializar la aplicación');
+            }
+        }
+
+        async function handleSuccessfulLogin() {
+            currentUser = await auth.getUser();
+            
+            document.getElementById('loginMessage').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            
+            const authButton = document.getElementById('authButton');
+            authButton.innerHTML = '<i class="fa-solid fa-sign-out"></i> Cerrar Sesión';
+            
+            document.getElementById('userInfo').textContent = `Hola, ${currentUser.email || 'usuario'}`;
+            document.getElementById('hero-user-email').textContent = `Proyecto de ${currentUser.email || 'usuario'}`;
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('projectOptionsButton').style.display = 'inline-flex';
+            document.getElementById('exportProjectButton').style.display = 'inline-flex';
+
+            document.getElementById('projectDashboard').style.display = 'block';
+            document.getElementById('startButton').style.display = 'inline-flex';
+            document.getElementById('loadButton').style.display = 'inline-flex';
+
+            await loadProjectStatus();
+            renderModules();
+        }
+
+        function handleLoggedOutState() {
+            document.getElementById('loginMessage').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'none';
+            
+            const authButton = document.getElementById('authButton');
+            authButton.innerHTML = '<i class="fa-solid fa-sign-in"></i> Iniciar Sesión';
+            
+            document.getElementById('userInfo').style.display = 'none';
+            document.getElementById('projectOptionsButton').style.display = 'none';
+            document.getElementById('exportProjectButton').style.display = 'none';
+        }
+
+        async function handleAuth() {
+            try {
+                if (await auth.isLoggedIn()) {
+                    await auth.logout();
+                    window.location.reload();
+                } else {
+                    const loginSuccess = await auth.login();
+                    if (loginSuccess) {
+                        window.location.reload();
+                    }
+                }
+            } catch (error) {
+                console.error('Error en autenticación:', error);
+                showTemporaryError('Error en el proceso de autenticación');
+            }
+        }
+
+        // =============================================================
+        // LÓGICA DE PAGO STRIPE MEJORADA
+        // =============================================================
+        function initializeStripePayment() {
+            try {
+                // Validación de clave de Stripe
+                if (!STRIPE_PUBLIC_KEY || STRIPE_PUBLIC_KEY.includes('pk_test')) {
+                    console.warn('⚠️ Usando clave de prueba de Stripe');
+                }
+                
+                const stripe = Stripe(STRIPE_PUBLIC_KEY);
+                setupCheckoutButton(stripe);
+                
+            } catch (error) {
+                console.error('Error inicializando Stripe:', error);
+                showPaymentError('Configuración de pagos temporalmente no disponible');
+            }
+        }
+
+        function setupCheckoutButton(stripe) {
+            const checkoutButton = document.getElementById('checkout-button');
+            if (!checkoutButton) {
+                console.warn('Botón de pago #checkout-button no encontrado.');
+                return;
+            }
+
+            checkoutButton.addEventListener('click', async () => {
+                if (isProcessingPayment) return;
+                await processPayment(stripe, checkoutButton);
+            });
+            
+            console.log('Listener de pago añadido al botón #checkout-button.');
+        }
+
+        async function processPayment(stripe, button) {
+            isProcessingPayment = true;
+            const originalButtonText = button.innerHTML;
+            
+            try {
+                button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+                button.disabled = true;
+
+                console.log('Solicitando sesión de Checkout al backend...');
+                
+                // Health check opcional al backend
+                await checkBackendHealth();
+                
+                const response = await fetchWithTimeout(`${BACKEND_URL}/create-checkout-session`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }, 10000); // 10 segundos timeout
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+                }
+
+                const session = await response.json();
+                console.log('Sesión de Checkout recibida:', session);
+
+                if (!session?.id) {
+                    throw new Error('Respuesta inválida del servidor de pagos');
+                }
+
+                console.log('Redirigiendo a Stripe Checkout...');
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id
+                });
+
+                if (result.error) {
+                    throw new Error(result.error.message);
+                }
+
+            } catch (error) {
+                console.error('Error en el proceso de pago:', error);
+                await showPaymentError(error.message);
+                
+                // Restaurar botón
+                button.innerHTML = originalButtonText;
+                button.disabled = false;
+                isProcessingPayment = false;
+            }
+        }
+
+        async function checkBackendHealth() {
+            try {
+                const healthResponse = await fetch(`${BACKEND_URL}/health`, { 
+                    method: 'GET',
+                    timeout: 5000 
+                });
+                if (!healthResponse.ok) {
+                    throw new Error('Servidor de pagos no disponible');
+                }
+            } catch (error) {
+                throw new Error('No se puede conectar con el servidor de pagos');
+            }
+        }
+
+        async function fetchWithTimeout(url, options, timeout = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(id);
+                return response;
+            } catch (error) {
+                clearTimeout(id);
+                if (error.name === 'AbortError') {
+                    throw new Error('La solicitud tardó demasiado tiempo');
+                }
+                throw error;
+            }
+        }
+
+        async function showPaymentError(message) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error de Pago',
+                text: message || 'No se pudo procesar la solicitud de pago',
+                confirmButtonColor: '#1E3A8A'
+            });
+        }
+
+        // =============================================================
+        // MANEJO DE ESTADO DEL PROYECTO MEJORADO
+        // =============================================================
+        async function loadProjectStatus() {
+            if (!window.EC0301Manager) {
+                console.warn('EC0301Manager no disponible');
+                return;
+            }
+            
+            showLoadingState();
+            
+            try {
+                projectData = EC0301Manager.getData();
+                
+                if (validateProjectData(projectData)) {
+                    const systemInfo = EC0301Manager.getSystemInfo();
+                    updateDashboardUI(systemInfo);
+                }
+                
+            } catch (error) {
+                console.error('Error cargando estado del proyecto:', error);
+                showNewProjectState();
+                showTemporaryError('Error cargando proyecto');
+            } finally {
+                hideLoadingState();
+            }
+        }
+
+        function validateProjectData(data) {
+            // Si no hay datos, es un proyecto nuevo - no es un error
+            if (!data || Object.keys(data).length === 0) {
+                return false;
+            }
+
+            if (typeof data !== 'object') {
+                throw new Error('Datos del proyecto inválidos');
+            }
+            
+            const requiredFields = ['nombre', 'version', 'created'];
+            const missingFields = requiredFields.filter(field => !data[field]);
+            
+            if (missingFields.length > 0) {
+                throw new Error(`Campos requeridos faltantes: ${missingFields.join(', ')}`);
+            }
+            
+            return true;
+        }
+
+        function updateDashboardUI(systemInfo) {
+            document.getElementById('projectName').textContent = projectData.nombre || 'Nuevo Proyecto';
+            document.getElementById('completionPercentage').textContent = systemInfo.compliance + '%';
+            document.getElementById('modulesCompleted').textContent = systemInfo.modules + '/6';
+            document.getElementById('lastUpdate').textContent = systemInfo.modified ? 
+                new Date(systemInfo.modified).toLocaleDateString() : 'Nunca';
+            
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            progressFill.style.width = systemInfo.compliance + '%';
+            
+            if (systemInfo.compliance === 0) progressText.textContent = 'Proyecto sin iniciar';
+            else if (systemInfo.compliance < 50) progressText.textContent = 'Proyecto en fase inicial';
+            else if (systemInfo.compliance < 90) progressText.textContent = 'Proyecto en desarrollo';
+            else progressText.textContent = 'Proyecto casi completado';
+        }
+
+        function showNewProjectState() {
+            document.getElementById('projectName').textContent = 'Nuevo Proyecto';
+            document.getElementById('completionPercentage').textContent = '0%';
+            document.getElementById('modulesCompleted').textContent = '0/6';
+            document.getElementById('lastUpdate').textContent = 'Nunca';
+            document.getElementById('progressText').textContent = 'Listo para comenzar';
+        }
+
+        // =============================================================
+        // SISTEMA DE MÓDULOS MEJORADO
+        // =============================================================
+        function renderModules() {
+            // Usar cache si está disponible y es reciente
+            if (modulesCache && Date.now() - modulesCache.timestamp < 5000) {
+                document.getElementById('modulesGrid').innerHTML = modulesCache.html;
+                return;
+            }
+
+            if (!window.EC0301Manager) return;
+            
+            const container = document.getElementById('modulesGrid');
+            container.innerHTML = '';
+            
+            SYSTEM_MODULES.forEach((module, index) => {
+                const moduleStatus = getModuleStatus(module);
+                const card = createModuleCard(module, moduleStatus);
+                container.appendChild(card);
+            });
+
+            // Actualizar cache
+            modulesCache = {
+                html: container.innerHTML,
+                timestamp: Date.now()
+            };
+        }
+
+        function getModuleStatus(module) {
+            const completedModules = EC0301Manager.getCompletedModules(projectData);
+            
+            if (module.dependsOn) {
+                const dependenciesComplete = module.dependsOn.every(dep => 
+                    completedModules.includes(dep)
+                );
+                if (!dependenciesComplete) {
+                    return { status: 'locked', label: 'Bloqueado' };
+                }
+            }
+            
+            if (completedModules.includes(module.id)) {
+                return { status: 'completed', label: 'Completado' };
+            } else if (module.id === 'carta' && projectData.nombre) {
+                return { status: 'in-progress', label: 'En Progreso' };
+            } else {
+                return { status: 'pending', label: 'Disponible' };
+            }
+        }
+
+        function createModuleCard(module, moduleStatus) {
+            const card = document.createElement('div');
+            card.className = `module-card status-${moduleStatus.status}`;
+            
+            card.innerHTML = `
+                <div class="module-icon"><i class="fa-solid ${module.icon}"></i></div>
+                <h3 class="module-title">${module.title}</h3>
+                <p class="module-description">${module.description}</p>
+                <div class="module-status status-${moduleStatus.status}">${moduleStatus.label}</div>
+                <button class="btn ${getButtonClass(moduleStatus.status)} module-action" 
+                        onclick="navigateToModule('${module.url}', '${moduleStatus.status}')"
+                        ${moduleStatus.status === 'locked' ? 'disabled' : ''}
+                        aria-label="${getButtonAriaLabel(moduleStatus.status, module.title)}">
+                    ${getButtonText(moduleStatus.status)}
+                </button>
+            `;
+            return card;
+        }
+
+        function getButtonClass(status) {
+            switch (status) {
+                case 'completed': return 'btn-success';
+                case 'in-progress': return 'btn-warning';
+                case 'pending': return 'btn-primary';
+                case 'locked': return 'btn-secondary';
+                default: return 'btn-primary';
+            }
+        }
+
+        function getButtonText(status) {
+            switch (status) {
+                case 'completed': return `<i class="fa-solid fa-check"></i> Revisar`;
+                case 'in-progress': return `<i class="fa-solid fa-edit"></i> Continuar`;
+                case 'pending': return `<i class="fa-solid fa-play"></i> Iniciar`;
+                case 'locked': return `<i class="fa-solid fa-lock"></i> Bloqueado`;
+                default: return `<i class="fa-solid fa-play"></i> Comenzar`;
+            }
+        }
+
+        function getButtonAriaLabel(status, moduleTitle) {
+            switch (status) {
+                case 'completed': return `Revisar módulo ${moduleTitle}`;
+                case 'in-progress': return `Continuar módulo ${moduleTitle}`;
+                case 'pending': return `Iniciar módulo ${moduleTitle}`;
+                case 'locked': return `Módulo ${moduleTitle} bloqueado`;
+                default: return `Acceder a ${moduleTitle}`;
+            }
+        }
+
+        function navigateToModule(url, status) {
+            if (status === 'locked') {
+                Swal.fire({
+                    icon: 'warning', 
+                    title: 'Módulo Bloqueado',
+                    text: 'Completa los módulos anteriores para acceder a este.',
+                    confirmButtonColor: '#1E3A8A'
+                });
+                return;
+            }
+            window.location.href = url;
+        }
+
+        // =============================================================
+        // SISTEMA DE NOTIFICACIONES Y FEEDBACK
+        // =============================================================
+        function showTemporarySuccess(message) {
+            showToast(message, 'success');
+        }
+
+        function showTemporaryError(message) {
+            showToast(message, 'error');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type === 'error' ? 'toast-error' : type === 'warning' ? 'toast-warning' : ''}`;
+            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function showLoadingState() {
+            const loadingElement = document.getElementById('loadingMessage');
+            if (loadingElement) {
+                loadingElement.style.display = 'block';
+            }
+            document.body.classList.add('loading');
+        }
+
+        function hideLoadingState() {
+            const loadingElement = document.getElementById('loadingMessage');
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+            document.body.classList.remove('loading');
+        }
+
+        // =============================================================
+        // FUNCIONALIDADES EXISTENTES MEJORADAS
+        // =============================================================
+        function refreshStatus() {
+            clearTimeout(refreshTimeout);
+            refreshTimeout = setTimeout(() => {
+                loadProjectStatus();
+                renderModules();
+                showTemporarySuccess('Estado actualizado correctamente');
+            }, 300); // Debounce de 300ms
+        }
+
+        function showProjectOptions() {
+            Swal.fire({
+                title: 'Opciones del Proyecto',
+                html: `
+                    <div style="text-align: left;">
+                        <button onclick="Swal.close(); newProject();" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-plus"></i> Nuevo Proyecto
+                        </button>
+                        <button onclick="Swal.close(); loadExistingProject();" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-folder-open"></i> Cargar Proyecto
+                        </button>
+                        <button onclick="Swal.close(); exportProject();" class="btn btn-success" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-download"></i> Exportar Proyecto
+                        </button>
+                        <button onclick="Swal.close(); showSystemInfo();" class="btn btn-warning" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-info-circle"></i> Información del Sistema
+                        </button>
+                        <button onclick="Swal.close(); clearProject();" class="btn btn-danger" style="width: 100%;">
+                            <i class="fa-solid fa-trash"></i> Limpiar Proyecto
+                        </button>
+                    </div>
+                `,
+                showConfirmButton: false, 
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar', 
+                width: 400
+            });
+        }
+
+        function newProject() {
+            Swal.fire({
+                title: '¿Crear Nuevo Proyecto?', 
+                text: 'Esto eliminará el proyecto actual. ¿Continuar?',
+                icon: 'warning', 
+                showCancelButton: true, 
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280', 
+                confirmButtonText: 'Sí, crear nuevo', 
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    EC0301Manager.clearProject();
+                    window.location.reload();
+                }
+            });
+        }
+
+        function loadExistingProject() {
+            const input = document.createElement('input');
+            input.type = 'file'; 
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    try {
+                        await EC0301Manager.importProject(file);
+                        showTemporarySuccess('Proyecto cargado exitosamente');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } catch (error) {
+                        showTemporaryError('No se pudo cargar el archivo: ' + error.message);
+                    }
+                }
+            };
+            input.click();
+        }
+
+        function exportProject() {
+            if (!projectData || !projectData.nombre) {
+                showTemporaryError('No hay datos para exportar. Crea un proyecto primero.');
+                return;
+            }
+            try {
+                EC0301Manager.exportProject();
+                showTemporarySuccess('Proyecto exportado correctamente');
+            } catch (error) {
+                showTemporaryError('No se pudo exportar el proyecto: ' + error.message);
+            }
+        }
+
+        function showSystemInfo() {
+            const systemInfo = EC0301Manager.getSystemInfo();
+            Swal.fire({
+                title: 'Información del Sistema',
+                html: `
+                    <div style="text-align: left;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr><td style="padding: 4px;"><strong>Versión:</strong></td><td>${systemInfo.version}</td></tr>
+                            <tr><td style="padding: 4px;"><strong>ID Proyecto:</strong></td><td style="font-family: monospace; font-size: 0.8rem;">${systemInfo.projectId || 'N/A'}</td></tr>
+                            <tr><td style="padding: 4px;"><strong>Creado:</strong></td><td>${systemInfo.created ? new Date(systemInfo.created).toLocaleString() : 'N/A'}</td></tr>
+                            <tr><td style="padding: 4px;"><strong>Modificado:</strong></td><td>${systemInfo.modified ? new Date(systemInfo.modified).toLocaleString() : 'N/A'}</td></tr>
+                            <tr><td style="padding: 4px;"><strong>Tamaño:</strong></td><td>${(systemInfo.dataSize / 1024).toFixed(2)} KB</td></tr>
+                            <tr><td style="padding: 4px;"><strong>Cumplimiento:</strong></td><td>${systemInfo.compliance}%</td></tr>
+                            <tr><td style="padding: 4px;"><strong>Módulos:</strong></td><td>${systemInfo.modules}/6</td></tr>
+                        </table>
+                    </div>
+                `,
+                confirmButtonText: 'Cerrar', 
+                width: 500
+            });
+        }
+
+        function clearProject() {
+            Swal.fire({
+                title: '¿Limpiar Proyecto?', 
+                text: 'Esto eliminará todos los datos guardados. Esta acción no se puede deshacer.',
+                icon: 'error', 
+                showCancelButton: true, 
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280', 
+                confirmButtonText: 'Sí, limpiar todo', 
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    EC0301Manager.clearProject();
+                    window.location.reload();
+                }
+            });
+        }
+
+        // =============================================================
+        // AUTO-ACTUALIZACIÓN MEJORADA
+        // =============================================================
+        setInterval(() => {
+            if (currentUser) {
+                loadProjectStatus();
+            }
+        }, 30000); // Actualizar cada 30 segundos
+    </script>
+</body>
+</html>
