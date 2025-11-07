@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo de Manuales - EC0301</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <script src="ec0301-data-manager.js"></script>
+    <style>
+        :root {
+            --primary: #1E3A8A; --accent: #FF6B35; --success: #22C55E; --warning: #F59E0B;
+            --light: #F8FAFC; --border: #E5E7EB; --text: #1F2937; --muted: #6B7280;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #F1F5F9; color: var(--text); line-height: 1.7;
+        }
+        .header {
+            background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 3px solid var(--accent);
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+        .header-content {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; gap: 1rem;
+        }
+        h1 { font-size: 1.75rem; color: var(--primary); }
+        .btn {
+            padding: 0.6rem 1.2rem; border: none; border-radius: 8px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; display: inline-flex;
+            align-items: center; gap: 0.5rem; text-decoration: none;
+        }
+        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-ai { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+
+        .tabs {
+            display: flex; background: var(--primary); padding: 0.5rem; border-radius: 10px;
+            justify-content: center; margin-bottom: 2rem;
+        }
+        .tab-button {
+            padding: 0.75rem 1.5rem; cursor: pointer; background: none; border: none;
+            font-size: 1.1rem; font-weight: 600; color: white; opacity: 0.7;
+            border-radius: 8px; transition: all 0.3s ease;
+        }
+        .tab-button.active { background: white; color: var(--primary); opacity: 1; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .manual-container {
+            background: white; padding: 3rem; border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07); min-height: 600px;
+        }
+        .manual-cover { 
+            text-align: center; border: 2px solid var(--border); padding: 4rem 2rem; 
+            border-radius: 8px; margin-bottom: 3rem;
+        }
+        .manual-cover h2 { font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; }
+        .manual-cover h3 { font-size: 1.5rem; color: var(--muted); margin-bottom: 2rem; }
+        .manual-cover .meta { color: var(--muted); }
+
+        .generation-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 2rem; border-radius: 16px; margin-bottom: 2rem;
+        }
+        .generation-panel h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .generation-controls { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+        .generation-controls label { color: white; font-weight: 600; }
+        .generation-controls select, .generation-controls input {
+            padding: 0.5rem; border: none; border-radius: 8px; background: rgba(255,255,255,0.9);
+        }
+
+        .manual-section { 
+            margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);
+        }
+        .manual-section h4 { 
+            font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent);
+            padding-bottom: 0.5rem; margin-bottom: 1.5rem;
+        }
+        .section-content {
+            background: var(--light); padding: 1.5rem; border-radius: 8px; 
+            border: 1px solid var(--border); position: relative;
+        }
+        .section-content.editing { border-color: var(--accent); background: #FFF7ED; }
+        .edit-controls {
+            position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem;
+        }
+        .edit-btn, .save-btn, .cancel-btn {
+            width: 35px; height: 35px; border: none; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .edit-btn { background: var(--warning); color: white; }
+        .save-btn { background: var(--success); color: white; display: none; }
+        .cancel-btn { background: var(--muted); color: white; display: none; }
+
+        .content-editable {
+            background: transparent; border: none; width: 100%; min-height: 100px;
+            resize: vertical; font-family: inherit; line-height: 1.6; padding: 0;
+        }
+        .content-editable:focus { outline: 2px solid var(--accent); border-radius: 4px; padding: 0.5rem; }
+
+        .tema-item {
+            margin-bottom: 2.5rem; padding: 1.5rem; background: white; 
+            border: 1px solid var(--border); border-radius: 8px;
+        }
+        .tema-title { 
+            font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; 
+            font-weight: 600; border-bottom: 2px solid var(--accent); 
+            padding-bottom: 0.5rem;
+        }
+        .tema-content { margin-bottom: 1rem; }
+        .tema-content ul { list-style-position: inside; padding-left: 1rem; }
+        .tema-content li { margin-bottom: 0.5rem; }
+        
+        .instructor-note {
+            background: #FFFBEB; border-left: 4px solid #FBBF24; padding: 1.5rem;
+            margin: 1.5rem 0; border-radius: 8px;
+        }
+        .instructor-note p { margin: 0; }
+        .instructor-note strong { color: #B45309; }
+
+        .generation-status { 
+            text-align: center; padding: 3rem; color: var(--muted);
+        }
+        .generation-status.loading { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border-radius: 16px;
+        }
+        .generation-status .spinner {
+            width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white; border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 0 auto 1rem;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .validation-panel {
+            background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px;
+            padding: 1.5rem; margin-top: 2rem; text-align: center;
+        }
+        .validation-panel h4 { color: #166534; margin-bottom: 1rem; }
+        .validation-panel p { color: #166534; margin-bottom: 1.5rem; }
+
+        .ai-suggestions {
+            background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px;
+            padding: 1rem; margin: 1rem 0;
+        }
+        .ai-suggestions h4 { color: #92400E; margin-bottom: 0.5rem; }
+        .ai-suggestions p { color: #92400E; font-size: 0.9rem; margin: 0; }
+
+        /* Estilos para impresión */
+        @media print {
+            body * { visibility: hidden; }
+            .printable, .printable * { visibility: visible; }
+            .printable { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+            .manual-container { padding: 1rem; box-shadow: none; }
+            .edit-controls { display: none !important; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .generation-controls { flex-direction: column; align-items: stretch; }
+            .edit-controls { position: static; margin-top: 1rem; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header no-print">
+        <div class="header-content">
+            <h1><i class="fa-solid fa-book-open" style="color: var(--accent);"></i> Módulo de Manuales</h1>
+            <div>
+                <a href="evaluaciones.html" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Evaluaciones</a>
+                <a href="auditoria.html" class="btn btn-success"><i class="fa-solid fa-arrow-right"></i> Auditoría</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="tabs no-print">
+            <button class="tab-button active" onclick="showTab('participante')">
+                <i class="fa-solid fa-user"></i> Manual del Participante
+            </button>
+            <button class="tab-button" onclick="showTab('instructor')">
+                <i class="fa-solid fa-user-graduate"></i> Manual del Instructor
+            </button>
+        </div>
+
+        <!-- MANUAL DEL PARTICIPANTE -->
+        <div id="participante" class="tab-content active">
+            <div class="generation-panel">
+                <h3><i class="fa-solid fa-robot"></i> Generador de Manual del Participante</h3>
+                <div class="generation-controls">
+                    <div>
+                        <label>Nivel de detalle:</label>
+                        <select id="part-detalle">
+                            <option value="basico">Básico</option>
+                            <option value="intermedio" selected>Intermedio</option>
+                            <option value="avanzado">Avanzado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Incluir ejercicios:</label>
+                        <select id="part-ejercicios">
+                            <option value="si" selected>Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-ai" onclick="generateManual('participante')">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generar Manual
+                    </button>
+                    <button class="btn btn-success" onclick="validateManual('participante')" style="display: none;" id="part-validate-btn">
+                        <i class="fa-solid fa-check"></i> Validar Manual
+                    </button>
+                </div>
+            </div>
+
+            <div id="participante-content" class="manual-container printable">
+                <div class="generation-status">
+                    <i class="fa-solid fa-book" style="font-size: 3rem; color: var(--muted);"></i>
+                    <h3>Genera el Manual del Participante con IA</h3>
+                    <p>Basado en los objetivos, temas y contenido de tu carta descriptiva</p>
+                </div>
+            </div>
+
+            <div class="ai-suggestions" style="display: none;" id="part-suggestions">
+                <h4><i class="fa-solid fa-lightbulb"></i> Sugerencias de IA</h4>
+                <p>El manual ha sido generado con contenido educativo estructurado. Puedes editar cualquier sección antes de validar.</p>
+            </div>
+
+            <div class="validation-panel" style="display: none;" id="part-validation">
+                <h4><i class="fa-solid fa-shield-check"></i> Manual Validado</h4>
+                <p>El Manual del Participante ha sido validado y está listo para su uso.</p>
+                <button class="btn btn-primary" onclick="printManual('participante-content')">
+                    <i class="fa-solid fa-print"></i> Imprimir Manual
+                </button>
+                <button class="btn btn-success" onclick="generatePDF('participante')">
+                    <i class="fa-solid fa-file-pdf"></i> Generar PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- MANUAL DEL INSTRUCTOR -->
+        <div id="instructor" class="tab-content">
+            <div class="generation-panel">
+                <h3><i class="fa-solid fa-robot"></i> Generador de Manual del Instructor</h3>
+                <div class="generation-controls">
+                    <div>
+                        <label>Incluir metodología:</label>
+                        <select id="inst-metodologia">
+                            <option value="si" selected>Sí</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Notas pedagógicas:</label>
+                        <select id="inst-notas">
+                            <option value="basicas">Básicas</option>
+                            <option value="detalladas" selected>Detalladas</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-ai" onclick="generateManual('instructor')">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generar Manual
+                    </button>
+                    <button class="btn btn-success" onclick="validateManual('instructor')" style="display: none;" id="inst-validate-btn">
+                        <i class="fa-solid fa-check"></i> Validar Manual
+                    </button>
+                </div>
+            </div>
+
+            <div id="instructor-content" class="manual-container printable">
+                <div class="generation-status">
+                    <i class="fa-solid fa-chalkboard-teacher" style="font-size: 3rem; color: var(--muted);"></i>
+                    <h3>Genera el Manual del Instructor con IA</h3>
+                    <p>Incluye metodología, notas pedagógicas y guías de facilitación</p>
+                </div>
+            </div>
+
+            <div class="ai-suggestions" style="display: none;" id="inst-suggestions">
+                <h4><i class="fa-solid fa-lightbulb"></i> Sugerencias de IA</h4>
+                <p>El manual incluye metodología didáctica y notas para facilitación. Personaliza según tu estilo de enseñanza.</p>
+            </div>
+
+            <div class="validation-panel" style="display: none;" id="inst-validation">
+                <h4><i class="fa-solid fa-shield-check"></i> Manual Validado</h4>
+                <p>El Manual del Instructor ha sido validado y está listo para su uso.</p>
+                <button class="btn btn-primary" onclick="printManual('instructor-content')">
+                    <i class="fa-solid fa-print"></i> Imprimir Manual
+                </button>
+                <button class="btn btn-success" onclick="generatePDF('instructor')">
+                    <i class="fa-solid fa-file-pdf"></i> Generar PDF
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let manualesData = {
+            participante: { content: null, validated: false },
+            instructor: { content: null, validated: false }
+        };
+
+        let currentEditingSection = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadManualData();
+        });
+
+        function loadManualData() {
+            try {
+                const moduleData = EC0301Manager.getModuleData('manuales');
+                console.log('Datos de manuales cargados:', moduleData);
+            } catch (error) {
+                console.error('Error cargando datos de manuales:', error);
+                showMissingDataAlert();
+            }
+        }
+
+        function showMissingDataAlert() {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Datos Incompletos',
+                html: 'No se encontraron datos de la carta descriptiva.<br>Por favor, completa primero la <strong>Carta Descriptiva</strong>.',
+                confirmButtonText: 'Ir a Carta Descriptiva',
+                confirmButtonColor: '#1E3A8A'
+            }).then(() => {
+                window.location.href = 'carta-descriptiva.html';
+            });
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function generateManual(type) {
+            const container = document.getElementById(`${type}-content`);
+            const validateBtn = document.getElementById(`${type === 'participante' ? 'part' : 'inst'}-validate-btn`);
+            const suggestionsEl = document.getElementById(`${type === 'participante' ? 'part' : 'inst'}-suggestions`);
+            
+            // Mostrar estado de carga
+            container.innerHTML = `
+                <div class="generation-status loading">
+                    <div class="spinner"></div>
+                    <h3>Generando Manual del ${type === 'participante' ? 'Participante' : 'Instructor'}...</h3>
+                    <p>Analizando carta descriptiva y estructurando contenido educativo</p>
+                </div>
+            `;
+
+            // Simular generación con IA
+            setTimeout(() => {
+                const manualContent = generateManualWithAI(type);
+                manualesData[type].content = manualContent;
+                displayManual(type, manualContent);
+                validateBtn.style.display = 'inline-flex';
+                suggestionsEl.style.display = 'block';
+            }, 4000);
+        }
+
+        function generateManualWithAI(type) {
+            const moduleData = EC0301Manager.getModuleData('manuales');
+            const cartaData = EC0301Manager.getData();
+            
+            if (type === 'participante') {
+                return generateParticipanteManual(moduleData, cartaData);
+            } else {
+                return generateInstructorManual(moduleData, cartaData);
+            }
+        }
+
+        function generateParticipanteManual(moduleData, cartaData) {
+            const temas = cartaData.temas || [];
+            
+            return {
+                cover: {
+                    title: `MANUAL DEL PARTICIPANTE`,
+                    subtitle: moduleData.nombre || 'Curso de Capacitación',
+                    author: `Diseñado por: ${moduleData.diseñador || moduleData.facilitador || 'Instructor'}`
+                },
+                sections: [
+                    {
+                        id: 'presentacion',
+                        title: 'Presentación y Bienvenida',
+                        content: `¡Te damos la más cordial bienvenida a este curso!
+
+Este manual ha sido diseñado especialmente para ser tu herramienta principal de consulta y aprendizaje durante el desarrollo del curso "${moduleData.nombre || 'Curso de Capacitación'}".
+
+Te recomendamos que lo leas antes de cada sesión y lo utilices para tomar notas, realizar ejercicios y consultar información clave que te ayudará a alcanzar los objetivos de aprendizaje establecidos.
+
+**¿Cómo usar este manual?**
+- Léelo secuencialmente antes de cada tema
+- Toma notas en los espacios destinados para ello
+- Realiza los ejercicios propuestos
+- Consulta el glosario cuando encuentres términos nuevos
+- Utiliza las referencias para profundizar en los temas
+
+¡Esperamos que tengas una excelente experiencia de aprendizaje!`
+                    },
+                    {
+                        id: 'introduccion',
+                        title: 'Introducción al Curso',
+                        content: `**Propósito del Curso**
+
+${moduleData.perfil || 'Este curso está diseñado para desarrollar competencias profesionales especializadas en el área de conocimiento correspondiente.'}
+
+**Perfil del Participante**
+
+Al finalizar este curso, habrás desarrollado las competencias necesarias para ${moduleData.objetivo_general || 'aplicar los conocimientos y habilidades adquiridas en tu entorno profesional'}.
+
+**Estructura del Curso**
+
+El curso está organizado en ${temas.length} módulos temáticos que se desarrollarán de manera secuencial, cada uno construyendo sobre los conocimientos previos adquiridos.
+
+**Duración:** ${moduleData.duracion || 'Por definir'} horas académicas
+**Modalidad:** Presencial con actividades prácticas
+**Participantes:** Máximo ${moduleData.participantes || '20'} personas`
+                    },
+                    {
+                        id: 'objetivo',
+                        title: 'Objetivo General',
+                        content: `Al finalizar el curso, serás capaz de:
+
+**${moduleData.objetivo_general || 'Desarrollar las competencias establecidas en la carta descriptiva del curso'}**
+
+**Objetivos Particulares:**
+
+${(moduleData.objetivos_particulares || []).map((obj, index) => 
+    `${index + 1}. **${obj.tipo || `Objetivo ${index + 1}`}:** ${obj.descripcion || 'Objetivo por definir'}`
+).join('\n\n')}`
+                    },
+                    ...temas.map((tema, index) => ({
+                        id: `tema_${index + 1}`,
+                        title: `${index + 1}. ${tema.nombre || `Tema ${index + 1}`}`,
+                        content: generateTemaContent(tema, false)
+                    })),
+                    {
+                        id: 'evaluacion',
+                        title: 'Sistema de Evaluación',
+                        content: `**Criterios de Evaluación**
+
+Tu desempeño será evaluado mediante los siguientes instrumentos:
+
+**Evaluación Formativa (${moduleData.evaluacion?.formativa_porcentaje || 40}%)**
+- ${moduleData.evaluacion?.formativa?.instrumento || 'Guía de observación del desempeño'}
+- Se evalúa tu participación y aplicación práctica durante las actividades del curso
+
+**Evaluación Sumativa (${moduleData.evaluacion?.sumativa_porcentaje || 60}%)**
+- ${moduleData.evaluacion?.sumativa?.instrumento || 'Examen final de conocimientos'}
+- Se evalúa el logro de los objetivos de aprendizaje al finalizar el curso
+
+**Calificación Mínima Aprobatoria:** ${moduleData.evaluacion?.calificacion_minima || 80} puntos
+
+**Criterios de Acreditación:**
+- Asistencia mínima del 90% a las sesiones
+- Participación activa en las actividades
+- Cumplimiento de tareas y ejercicios asignados
+- Aprobación de las evaluaciones programadas`
+                    },
+                    {
+                        id: 'recursos',
+                        title: 'Recursos y Materiales',
+                        content: `**Materiales del Curso**
+
+Durante el desarrollo del curso utilizaremos los siguientes recursos:
+
+**Materiales Proporcionados:**
+${(moduleData.requerimientos?.materiales || '').split(/[.,;]/).filter(item => item.trim()).map(item => `- ${item.trim()}`).join('\n') || '- Material didáctico especializado\n- Formatos de trabajo\n- Guías de ejercicios'}
+
+**Equipo Disponible:**
+${(moduleData.requerimientos?.equipo || '').split(/[.,;]/).filter(item => item.trim()).map(item => `- ${item.trim()}`).join('\n') || '- Proyector multimedia\n- Computadoras\n- Material audiovisual'}
+
+**Bibliografía Recomendada:**
+- Manual técnico especializado (se proporcionará durante el curso)
+- Normatividad aplicable actualizada
+- Casos prácticos y estudios de campo
+
+**Recursos Adicionales:**
+- Acceso a plataforma virtual (si aplica)
+- Documentos de consulta especializados
+- Herramientas digitales de apoyo`
+                    }
+                ]
+            };
+        }
+
+        function generateInstructorManual(moduleData, cartaData) {
+            const temas = cartaData.temas || [];
+            
+            return {
+                cover: {
+                    title: `MANUAL DEL INSTRUCTOR`,
+                    subtitle: moduleData.nombre || 'Curso de Capacitación',
+                    author: `Diseñado por: ${moduleData.diseñador || moduleData.facilitador || 'Instructor'}`
+                },
+                sections: [
+                    {
+                        id: 'introduccion_instructor',
+                        title: 'Introducción para el Instructor',
+                        content: `**Propósito de este Manual**
+
+Este manual está diseñado para proporcionar al instructor todas las herramientas necesarias para facilitar efectivamente el curso "${moduleData.nombre || 'Curso de Capacitación'}".
+
+**Metodología Didáctica**
+
+El curso está basado en una metodología constructivista que combina:
+- Exposición magistral para fundamentos teóricos
+- Talleres prácticos para desarrollo de habilidades
+- Estudios de caso para aplicación contextual
+- Trabajo colaborativo para intercambio de experiencias
+
+**Perfil del Instructor**
+
+Para facilitar este curso exitosamente, se recomienda:
+- Experiencia profesional mínima de 3 años en el área
+- Conocimientos actualizados de la normatividad aplicable
+- Habilidades de facilitación y manejo de grupos
+- Capacidad para adaptar contenidos según las necesidades del grupo
+
+**Estructura Metodológica**
+
+Cada sesión sigue la estructura: Apertura → Desarrollo → Cierre
+- **Apertura (15%):** Bienvenida, objetivos, conexión con sesión anterior
+- **Desarrollo (70%):** Contenido teórico, actividades prácticas, ejercicios
+- **Cierre (15%):** Síntesis, evaluación, preview de siguiente sesión`
+                    },
+                    {
+                        id: 'requerimientos_instructor',
+                        title: 'Requerimientos y Preparación',
+                        content: `**Preparación del Espacio**
+
+**Instalaciones Requeridas:**
+${(moduleData.requerimientos?.instalaciones || '').split(/[.,;]/).filter(item => item.trim()).map(item => `- ${item.trim()}`).join('\n') || '- Aula con capacidad adecuada\n- Iluminación y ventilación apropiadas\n- Acceso a servicios básicos'}
+
+**Equipo y Tecnología:**
+${(moduleData.requerimientos?.equipo || '').split(/[.,;]/).filter(item => item.trim()).map(item => `- ${item.trim()}`).join('\n') || '- Proyector y pantalla\n- Sistema de audio\n- Computadora portátil\n- Flipchart y marcadores'}
+
+**Materiales por Sesión:**
+${(moduleData.requerimientos?.materiales || '').split(/[.,;]/).filter(item => item.trim()).map(item => `- ${item.trim()}`).join('\n') || '- Formatos de trabajo\n- Material impreso\n- Suministros de papelería'}
+
+**Preparación Previa:**
+- Revisar perfil de participantes inscritos
+- Preparar ejemplos contextualizados al grupo
+- Verificar funcionamiento de equipo audiovisual
+- Organizar materiales por sesión
+- Preparar evaluaciones y formatos de seguimiento`
+                    },
+                    {
+                        id: 'cronograma_instructor',
+                        title: 'Cronograma Detallado',
+                        content: `**Distribución de Tiempo**
+
+**Duración Total:** ${moduleData.duracion || 'Por definir'} horas académicas
+**Número de Participantes:** Máximo ${moduleData.participantes || '20'} personas
+**Modalidad:** Presencial con actividades prácticas
+
+**Apertura del Curso (2 horas):**
+- Presentación de participantes e instructor (30 min)
+- Presentación del curso y objetivos (30 min)
+- Aplicación de evaluación diagnóstica (30 min)
+- Establecimiento de acuerdos de aprendizaje (30 min)
+
+**Desarrollo Temático:**
+${temas.map((tema, index) => `
+**Sesión ${index + 1}: ${tema.nombre || `Tema ${index + 1}`} (${tema.duracion || '60'} minutos)**
+- Tiempo estimado: ${tema.duracion || '60'} minutos
+- Modalidad: Teórico-práctica
+- Técnicas: Exposición, práctica dirigida, estudio de casos
+`).join('')}
+
+**Cierre del Curso (1 hora):**
+- Síntesis y conclusiones generales (20 min)
+- Evaluación sumativa (30 min)
+- Evaluación de satisfacción y cierre (10 min)`
+                    },
+                    ...temas.map((tema, index) => ({
+                        id: `tema_instructor_${index + 1}`,
+                        title: `Desarrollo Temático ${index + 1}: ${tema.nombre || `Tema ${index + 1}`}`,
+                        content: generateTemaContent(tema, true)
+                    })),
+                    {
+                        id: 'evaluacion_instructor',
+                        title: 'Guía de Evaluación',
+                        content: `**Sistema de Evaluación Integral**
+
+**Evaluación Diagnóstica**
+- **Propósito:** Identificar conocimientos previos y nivel de entrada
+- **Momento:** Al inicio del curso
+- **Instrumento:** Cuestionario de opción múltiple (5-10 preguntas)
+- **Uso de resultados:** Adaptar nivel de explicación y ejemplos
+
+**Evaluación Formativa (${moduleData.evaluacion?.formativa_porcentaje || 40}%)**
+- **Propósito:** Monitorear progreso y proporcionar retroalimentación
+- **Momento:** Durante actividades prácticas
+- **Instrumento:** ${moduleData.evaluacion?.formativa?.instrumento || 'Guía de observación'}
+- **Criterios clave:** Aplicación correcta, resolución de problemas, trabajo colaborativo
+
+**Evaluación Sumativa (${moduleData.evaluacion?.sumativa_porcentaje || 60}%)**
+- **Propósito:** Medir logro de objetivos de aprendizaje
+- **Momento:** Al final del curso
+- **Instrumento:** ${moduleData.evaluacion?.sumativa?.instrumento || 'Examen final'}
+- **Calificación mínima:** ${moduleData.evaluacion?.calificacion_minima || 80} puntos
+
+**Evaluación de Satisfacción**
+- **Propósito:** Obtener retroalimentación del proceso formativo
+- **Momento:** Al cierre del curso
+- **Uso:** Mejora continua del programa
+
+**Registro de Resultados:**
+- Mantener registro individual de cada participante
+- Documentar observaciones de desempeño
+- Proporcionar retroalimentación específica y oportuna`
+                    },
+                    {
+                        id: 'tecnicas_instructor',
+                        title: 'Técnicas Didácticas Recomendadas',
+                        content: `**Técnicas de Enseñanza por Tipo de Contenido**
+
+**Para Contenidos Conceptuales:**
+- **Exposición Magistral:** Presentación estructurada de fundamentos teóricos
+- **Mapas Conceptuales:** Organización visual de relaciones entre conceptos
+- **Analogías:** Comparaciones para facilitar la comprensión
+- **Preguntas Dirigidas:** Indagación para verificar comprensión
+
+**Para Contenidos Procedimentales:**
+- **Demostración:** Modelado paso a paso del proceso
+- **Práctica Dirigida:** Ejercicios supervisados con retroalimentación
+- **Simulación:** Recreación de situaciones reales de aplicación
+- **Casos Prácticos:** Análisis y resolución de problemas contextuales
+
+**Para Contenidos Actitudinales:**
+- **Modelado:** Ejemplo personal del instructor
+- **Discusión Dirigida:** Reflexión grupal sobre valores y actitudes
+- **Juego de Roles:** Representación de diferentes perspectivas
+- **Proyecto Colaborativo:** Trabajo en equipo con objetivos comunes
+
+**Manejo de Dinámicas Grupales:**
+- Establecer rapport desde el inicio
+- Manejar participantes disruptivos con tacto
+- Fomentar participación equilibrada
+- Mantener atención y motivación del grupo
+- Gestionar tiempo efectivamente`
+                    }
+                ]
+            };
+        }
+
+        function generateTemaContent(tema, forInstructor) {
+            const baseContent = `**${tema.nombre || 'Tema de Desarrollo'}**
+
+${tema.contenido || 'En este apartado se desarrollará el contenido teórico y conceptual del tema, incluyendo definiciones clave, explicaciones detalladas y ejemplos relevantes para el contexto profesional.'}
+
+**Objetivos Específicos:**
+- Comprender los fundamentos teóricos del tema
+- Aplicar los conceptos en situaciones prácticas
+- Desarrollar habilidades específicas relacionadas
+
+**Contenido Principal:**
+- Conceptos fundamentales y definiciones
+- Principios y metodologías aplicables
+- Casos prácticos y ejemplos contextualizados
+- Errores comunes y cómo evitarlos
+
+**Actividades de Aprendizaje:**
+- Ejercicio práctico individual
+- Discusión grupal sobre aplicaciones
+- Análisis de caso real
+- Síntesis de puntos clave`;
+
+            if (forInstructor) {
+                return baseContent + `
+
+**Notas para el Instructor:**
+- **Duración estimada:** ${tema.duracion || '60'} minutos
+- **Técnica principal:** Exposición con práctica dirigida
+- **Materiales:** Presentación PowerPoint, casos prácticos, formatos de trabajo
+- **Puntos críticos:** Enfatizar la aplicación práctica y verificar comprensión
+- **Evaluación:** Observar participación y calidad de ejercicios realizados
+- **Recursos adicionales:** Tener ejemplos alternativos preparados según el grupo
+
+**Secuencia Didáctica Sugerida:**
+1. **Introducción (10%):** Conexión con tema anterior y presentación de objetivos
+2. **Desarrollo Teórico (30%):** Conceptos fundamentales con ejemplos
+3. **Práctica Dirigida (40%):** Ejercicios supervisados
+4. **Síntesis (15%):** Recapitulación de puntos clave
+5. **Evaluación (5%):** Verificación de comprensión`;
+            }
+
+            return baseContent;
+        }
+
+        function displayManual(type, manualContent) {
+            const container = document.getElementById(`${type}-content`);
+            
+            let html = `
+                <div class="manual-cover">
+                    <h2>${manualContent.cover.title}</h2>
+                    <h3>${manualContent.cover.subtitle}</h3>
+                    <div class="meta">
+                        <p><strong>${manualContent.cover.author}</strong></p>
+                    </div>
+                </div>
+            `;
+
+            manualContent.sections.forEach(section => {
+                html += `
+                    <div class="manual-section">
+                        <h4>${section.title}</h4>
+                        <div class="section-content" data-section-id="${section.id}">
+                            <div class="edit-controls">
+                                <button class="edit-btn" onclick="editSection('${section.id}', '${type}')" title="Editar sección">
+                                    <i class="fa-solid fa-edit"></i>
+                                </button>
+                                <button class="save-btn" onclick="saveSection('${section.id}', '${type}')" title="Guardar cambios">
+                                    <i class="fa-solid fa-save"></i>
+                                </button>
+                                <button class="cancel-btn" onclick="cancelEdit('${section.id}', '${type}')" title="Cancelar edición">
+                                    <i class="fa-solid fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="content-display">${formatContent(section.content)}</div>
+                            <textarea class="content-editable" style="display: none;">${section.content}</textarea>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function formatContent(content) {
+            // Convertir markdown básico a HTML
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/^\*\*(.+?)\*\*$/gm, '<h5>$1</h5>')
+                .replace(/^- (.+)$/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/^(.+)$/gm, '<p>$1</p>')
+                .replace(/<p><\/p>/g, '')
+                .replace(/<p><ul>/g, '<ul>')
+                .replace(/<\/ul><\/p>/g, '</ul>')
+                .replace(/<p><h5>/g, '<h5>')
+                .replace(/<\/h5><\/p>/g, '</h5>');
+        }
+
+        function editSection(sectionId, type) {
+            if (currentEditingSection && currentEditingSection !== sectionId) {
+                cancelEdit(currentEditingSection, type);
+            }
+
+            currentEditingSection = sectionId;
+            const sectionEl = document.querySelector(`[data-section-id="${sectionId}"]`);
+            
+            sectionEl.classList.add('editing');
+            sectionEl.querySelector('.content-display').style.display = 'none';
+            sectionEl.querySelector('.content-editable').style.display = 'block';
+            sectionEl.querySelector('.edit-btn').style.display = 'none';
+            sectionEl.querySelector('.save-btn').style.display = 'flex';
+            sectionEl.querySelector('.cancel-btn').style.display = 'flex';
+            
+            // Enfocar el textarea
+            sectionEl.querySelector('.content-editable').focus();
+        }
+
+        function saveSection(sectionId, type) {
+            const sectionEl = document.querySelector(`[data-section-id="${sectionId}"]`);
+            const newContent = sectionEl.querySelector('.content-editable').value;
+            
+            // Actualizar datos
+            const sectionIndex = manualesData[type].content.sections.findIndex(s => s.id === sectionId);
+            if (sectionIndex !== -1) {
+                manualesData[type].content.sections[sectionIndex].content = newContent;
+            }
+            
+            // Actualizar vista
+            sectionEl.querySelector('.content-display').innerHTML = formatContent(newContent);
+            
+            // Salir del modo edición
+            cancelEdit(sectionId, type);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Sección actualizada',
+                timer: 1500,
+                timerProgressBar: true
+            });
+        }
+
+        function cancelEdit(sectionId, type) {
+            const sectionEl = document.querySelector(`[data-section-id="${sectionId}"]`);
+            
+            sectionEl.classList.remove('editing');
+            sectionEl.querySelector('.content-display').style.display = 'block';
+            sectionEl.querySelector('.content-editable').style.display = 'none';
+            sectionEl.querySelector('.edit-btn').style.display = 'flex';
+            sectionEl.querySelector('.save-btn').style.display = 'none';
+            sectionEl.querySelector('.cancel-btn').style.display = 'none';
+            
+            currentEditingSection = null;
+        }
+
+        function validateManual(type) {
+            if (!manualesData[type].content) {
+                Swal.fire('Error', 'No hay manual para validar', 'error');
+                return;
+            }
+
+            Swal.fire({
+                title: `¿Validar Manual del ${type === 'participante' ? 'Participante' : 'Instructor'}?`,
+                text: 'Una vez validado, el manual estará listo para su impresión y uso',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, validar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    manualesData[type].validated = true;
+                    
+                    // Guardar en el sistema de datos
+                    const currentData = EC0301Manager.getData();
+                    currentData.manuales = manualesData;
+                    EC0301Manager.saveData(currentData, 'manuales');
+                    
+                    // Mostrar panel de validación
+                    document.getElementById(`${type === 'participante' ? 'part' : 'inst'}-validation`).style.display = 'block';
+                    document.getElementById(`${type === 'participante' ? 'part' : 'inst'}-validate-btn`).style.display = 'none';
+                    
+                    Swal.fire('Validado', `Manual del ${type === 'participante' ? 'Participante' : 'Instructor'} validado correctamente`, 'success');
+                }
+            });
+        }
+
+        function printManual(elementId) {
+            const printContent = document.getElementById(elementId);
+            
+            // Obtener estilos
+            const styles = Array.from(document.styleSheets).map(styleSheet => {
+                try {
+                    return Array.from(styleSheet.cssRules).map(rule => rule.cssText).join('');
+                } catch (e) {
+                    return '';
+                }
+            }).filter(Boolean).join('\n');
+
+            // Crear ventana de impresión
+            const printWindow = window.open('', '', 'height=800,width=1200');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Imprimir Manual</title>
+                    <style>
+                        ${styles}
+                        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+                        .manual-container { padding: 20px; }
+                        .edit-controls { display: none !important; }
+                        .manual-section { page-break-inside: avoid; margin-bottom: 2rem; }
+                        .manual-cover { page-break-after: always; }
+                        @media print { 
+                            body { margin: 0; }
+                            .manual-container { padding: 10px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContent.innerHTML}
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            printWindow.focus();
+            
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+
+        function generatePDF(type) {
+            Swal.fire({
+                title: 'Generando PDF...',
+                text: 'Creando manual en formato PDF',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            setTimeout(() => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const manualContent = manualesData[type].content;
+
+                // Título
+                doc.setFontSize(18);
+                doc.setTextColor(30, 58, 138);
+                doc.text(manualContent.cover.title, 105, 30, { align: 'center' });
+                
+                doc.setFontSize(14);
+                doc.text(manualContent.cover.subtitle, 105, 45, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.text(manualContent.cover.author, 105, 60, { align: 'center' });
+
+                // Contenido simplificado
+                let yPos = 90;
+                manualContent.sections.forEach(section => {
+                    if (yPos > 250) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    
+                    doc.setFontSize(14);
+                    doc.setTextColor(30, 58, 138);
+                    doc.text(section.title, 20, yPos);
+                    yPos += 10;
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    const content = section.content.substring(0, 500) + '...';
+                    const lines = doc.splitTextToSize(content, 170);
+                    doc.text(lines, 20, yPos);
+                    yPos += lines.length * 5 + 10;
+                });
+
+                doc.save(`Manual_${type === 'participante' ? 'Participante' : 'Instructor'}_${Date.now()}.pdf`);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'PDF Generado',
+                    text: 'El manual se ha descargado correctamente',
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            }, 2000);
+        }
+
+        // Suscribirse a cambios en la carta descriptiva
+        EC0301Manager.onDataChange('manuales', (changedFields, fullData) => {
+            console.log('Datos actualizados desde carta descriptiva:', changedFields);
+            loadManualData();
+        });
+    </script>
+</body>
+</html>
