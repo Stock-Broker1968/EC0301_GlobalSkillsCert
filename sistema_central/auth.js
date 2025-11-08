@@ -1,471 +1,325 @@
 /**
- * Sistema de Autenticación para SkillsCert EC0301
- * Maneja login, sesiones y verificación de usuarios
- * @version 2.0.0
+ * SkillsCert EC0301 - Sistema de Autenticación
+ * Gestiona login, logout y sesiones de usuario (90 días)
+ * @version 1.0
  */
 
-const auth = (function() {
-    'use strict';
+const auth = (() => {
+    const BACKEND_URL = 'https://ec0301-globalskillscert-backend.onrender.com';
+    const SESSION_KEY = 'ec0301_session';
+    const SESSION_DURATION = 90 * 24 * 60 * 60 * 1000; // 90 días en milisegundos
 
-    // ==================== CONFIGURACIÓN ====================
-    const CONFIG = {
-        STORAGE_KEY: 'ec0301_auth_token',
-        USER_KEY: 'ec0301_user_data',
-        SESSION_DURATION: 24 * 60 * 60 * 1000, // 24 horas
-        BACKEND_URL: 'https://ec0301-globalskillscert-backend.onrender.com',
-        CODE_LENGTH: 6,
-        MAX_LOGIN_ATTEMPTS: 5,
-        LOCKOUT_DURATION: 15 * 60 * 1000 // 15 minutos
-    };
-
-    // ==================== ESTADO INTERNO ====================
-    let currentUser = null;
-    let authToken = null;
-    let sessionTimer = null;
-    let loginAttempts = 0;
-    let lockoutUntil = null;
-
-    // ==================== INICIALIZACIÓN ====================
-    function init() {
-        console.log('[Auth] Inicializando sistema de autenticación...');
-        loadSession();
-        setupSessionMonitoring();
-        console.log('[Auth] Sistema de autenticación inicializado');
-    }
-
-    // ==================== GESTIÓN DE SESIÓN ====================
-    function loadSession() {
+    /**
+     * Verifica si el usuario está autenticado
+     * @returns {Promise<boolean>}
+     */
+    async function isLoggedIn() {
         try {
-            const token = localStorage.getItem(CONFIG.STORAGE_KEY);
-            const userData = localStorage.getItem(CONFIG.USER_KEY);
+            const session = getSession();
             
-            if (token && userData) {
-                const user = JSON.parse(userData);
-                
-                // Verificar expiración
-                if (user.expiresAt && user.expiresAt > Date.now()) {
-                    authToken = token;
-                    currentUser = user;
-                    console.log('[Auth] Sesión restaurada para:', user.email);
-                    return true;
-                } else {
-                    console.log('[Auth] Sesión expirada');
-                    clearSession();
-                }
+            if (!session) {
+                return false;
             }
-            return false;
-        } catch (error) {
-            console.error('[Auth] Error cargando sesión:', error);
-            clearSession();
-            return false;
-        }
-    }
 
-    function saveSession(token, user) {
-        try {
-            const sessionData = {
-                ...user,
-                loginTime: Date.now(),
-                expiresAt: Date.now() + CONFIG.SESSION_DURATION
-            };
+            // Verificar si la sesión ha expirado
+            if (Date.now() > session.expiresAt) {
+                console.log('Sesión expirada');
+                await logout();
+                return false;
+            }
+
+            // Verificar token con el backend
+            const isValid = await validateTokenWithBackend(session.token);
             
-            localStorage.setItem(CONFIG.STORAGE_KEY, token);
-            localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(sessionData));
-            
-            authToken = token;
-            currentUser = sessionData;
-            
-            console.log('[Auth] Sesión guardada exitosamente');
+            if (!isValid) {
+                console.log('Token inválido en backend');
+                await logout();
+                return false;
+            }
+
             return true;
         } catch (error) {
-            console.error('[Auth] Error guardando sesión:', error);
+            console.error('Error verificando autenticación:', error);
             return false;
         }
     }
 
-    function clearSession() {
-        localStorage.removeItem(CONFIG.STORAGE_KEY);
-        localStorage.removeItem(CONFIG.USER_KEY);
-        authToken = null;
-        currentUser = null;
-        
-        if (sessionTimer) {
-            clearInterval(sessionTimer);
-            sessionTimer = null;
-        }
-        
-        console.log('[Auth] Sesión limpiada');
-    }
-
-    function setupSessionMonitoring() {
-        // Verificar sesión cada 5 minutos
-        sessionTimer = setInterval(() => {
-            if (currentUser && currentUser.expiresAt) {
-                if (currentUser.expiresAt < Date.now()) {
-                    console.log('[Auth] Sesión expirada automáticamente');
-                    logout();
-                    window.location.reload();
-                }
-            }
-        }, 5 * 60 * 1000);
-    }
-
-    // ==================== AUTENTICACIÓN ====================
-    async function login() {
+    /**
+     * Obtiene la sesión actual del almacenamiento local
+     * @returns {Object|null}
+     */
+    function getSession() {
         try {
-            // Verificar lockout
-            if (isLockedOut()) {
-                const remainingTime = Math.ceil((lockoutUntil - Date.now()) / 60000);
-                throw new Error(`Demasiados intentos fallidos. Intenta nuevamente en ${remainingTime} minutos.`);
-            }
+            const sessionData = localStorage.getItem(SESSION_KEY);
+            if (!sessionData) return null;
 
-            // Solicitar código de acceso
-            const result = await Swal.fire({
-                title: 'Iniciar Sesión',
-                html: `
-                    <div style="text-align: left;">
-                        <p style="margin-bottom: 1rem;">Ingresa el código de acceso que recibiste por WhatsApp:</p>
-                        <input id="loginCode" type="text" class="swal2-input" 
-                               placeholder="Código de 6 dígitos" 
-                               maxlength="6" 
-                               style="font-size: 1.5rem; text-align: center; letter-spacing: 0.5rem;"
-                               autocomplete="off">
-                        <p style="font-size: 0.9rem; color: #6B7280; margin-top: 1rem;">
-                            <i class="fa-solid fa-info-circle"></i> Si no tienes un código, debes realizar el pago primero.
-                        </p>
-                    </div>
-                `,
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Iniciar Sesión',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#1E3A8A',
-                preConfirm: () => {
-                    const code = document.getElementById('loginCode').value.trim();
-                    
-                    if (!code) {
-                        Swal.showValidationMessage('Por favor ingresa el código');
-                        return false;
-                    }
-                    
-                    if (code.length !== CONFIG.CODE_LENGTH) {
-                        Swal.showValidationMessage(`El código debe tener ${CONFIG.CODE_LENGTH} dígitos`);
-                        return false;
-                    }
-                    
-                    if (!/^\d+$/.test(code)) {
-                        Swal.showValidationMessage('El código solo debe contener números');
-                        return false;
-                    }
-                    
-                    return code;
-                },
-                allowOutsideClick: false
-            });
-
-            if (result.isConfirmed && result.value) {
-                const code = result.value;
-                
-                // Mostrar indicador de carga
-                Swal.fire({
-                    title: 'Verificando...',
-                    text: 'Por favor espera',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                // Verificar código con el backend
-                const loginResult = await verifyLoginCode(code);
-                
-                if (loginResult.success) {
-                    // Guardar sesión
-                    saveSession(loginResult.token, loginResult.user);
-                    
-                    // Resetear intentos fallidos
-                    loginAttempts = 0;
-                    lockoutUntil = null;
-                    
-                    await Swal.fire({
-                        icon: 'success',
-                        title: '¡Bienvenido!',
-                        text: `Sesión iniciada como ${loginResult.user.email}`,
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    
-                    console.log('[Auth] Login exitoso');
-                    return true;
-                } else {
-                    throw new Error(loginResult.message || 'Código inválido');
-                }
-            }
-            
-            return false;
+            const session = JSON.parse(sessionData);
+            return session;
         } catch (error) {
-            console.error('[Auth] Error en login:', error);
-            
-            // Incrementar intentos fallidos
-            loginAttempts++;
-            
-            if (loginAttempts >= CONFIG.MAX_LOGIN_ATTEMPTS) {
-                lockoutUntil = Date.now() + CONFIG.LOCKOUT_DURATION;
-            }
-            
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error de Autenticación',
-                text: error.message || 'No se pudo iniciar sesión',
-                confirmButtonColor: '#EF4444'
-            });
-            
-            return false;
+            console.error('Error obteniendo sesión:', error);
+            return null;
         }
     }
 
-    async function verifyLoginCode(code) {
+    /**
+     * Guarda la sesión en localStorage
+     * @param {Object} sessionData - Datos de la sesión
+     */
+    function saveSession(sessionData) {
         try {
-            const response = await fetch(`${CONFIG.BACKEND_URL}/api/auth/verify-code`, {
+            const session = {
+                token: sessionData.token,
+                user: sessionData.user,
+                email: sessionData.email,
+                accessCode: sessionData.accessCode,
+                createdAt: Date.now(),
+                expiresAt: Date.now() + SESSION_DURATION
+            };
+
+            localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+            console.log('✅ Sesión guardada exitosamente');
+        } catch (error) {
+            console.error('Error guardando sesión:', error);
+            throw new Error('No se pudo guardar la sesión');
+        }
+    }
+
+    /**
+     * Valida el token con el backend
+     * @param {string} token - JWT token
+     * @returns {Promise<boolean>}
+     */
+    async function validateTokenWithBackend(token) {
+        try {
+            const response = await fetch(`${BACKEND_URL}/validate-token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ code })
+                body: JSON.stringify({ token })
+            });
+
+            if (!response.ok) {
+                return false;
+            }
+
+            const data = await response.json();
+            return data.valid === true;
+        } catch (error) {
+            console.error('Error validando token con backend:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Inicia sesión con código de acceso
+     * @returns {Promise<boolean>}
+     */
+    async function login() {
+        try {
+            // Solicitar código al usuario
+            const { value: accessCode } = await Swal.fire({
+                title: 'Iniciar Sesión',
+                html: `
+                    <p style="margin-bottom: 1rem;">Ingresa el código de 6 dígitos que recibiste por WhatsApp y correo electrónico.</p>
+                    <input id="accessCode" class="swal2-input" placeholder="Código de acceso" maxlength="6" pattern="[0-9]{6}" style="font-size: 1.5rem; text-align: center; letter-spacing: 0.5rem;">
+                `,
+                icon: 'info',
+                confirmButtonText: 'Validar Código',
+                confirmButtonColor: '#1E3A8A',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const code = document.getElementById('accessCode').value;
+                    if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
+                        Swal.showValidationMessage('El código debe tener exactamente 6 dígitos numéricos');
+                        return false;
+                    }
+                    return code;
+                }
+            });
+
+            if (!accessCode) {
+                return false;
+            }
+
+            // Mostrar loading
+            Swal.fire({
+                title: 'Validando código...',
+                html: 'Por favor espera',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Validar código con el backend
+            const response = await fetch(`${BACKEND_URL}/validate-access-code`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ accessCode })
             });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Error ${response.status}`);
+                throw new Error(errorData.message || 'Código inválido o expirado');
             }
 
             const data = await response.json();
-            
-            if (!data.token || !data.user) {
-                throw new Error('Respuesta inválida del servidor');
-            }
 
-            return {
-                success: true,
+            // Guardar sesión
+            saveSession({
                 token: data.token,
-                user: {
-                    email: data.user.email,
-                    name: data.user.name || data.user.email,
-                    userId: data.user.id,
-                    hasAccess: true
-                }
-            };
+                user: data.user,
+                email: data.email,
+                accessCode: accessCode
+            });
+
+            // Mostrar éxito
+            await Swal.fire({
+                icon: 'success',
+                title: '¡Bienvenido!',
+                text: `Acceso concedido. Tu sesión es válida por 90 días.`,
+                confirmButtonText: 'Continuar',
+                confirmButtonColor: '#22C55E'
+            });
+
+            return true;
         } catch (error) {
-            console.error('[Auth] Error verificando código:', error);
+            console.error('Error en login:', error);
             
-            // Modo demo/fallback para desarrollo (REMOVER EN PRODUCCIÓN)
-            if (code === '123456') {
-                console.warn('[Auth] Usando modo DEMO - REMOVER EN PRODUCCIÓN');
-                return {
-                    success: true,
-                    token: 'demo_token_' + Date.now(),
-                    user: {
-                        email: 'demo@skillscert.com',
-                        name: 'Usuario Demo',
-                        userId: 'demo-' + Date.now(),
-                        hasAccess: true,
-                        isDemoMode: true
-                    }
-                };
-            }
-            
-            return {
-                success: false,
-                message: error.message || 'Código inválido o expirado'
-            };
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error de Autenticación',
+                text: error.message || 'No se pudo validar el código. Verifica e intenta de nuevo.',
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#EF4444'
+            });
+
+            return false;
         }
     }
 
+    /**
+     * Cierra la sesión del usuario
+     * @returns {Promise<void>}
+     */
     async function logout() {
         try {
-            // Intentar notificar al backend
-            if (authToken) {
+            const session = getSession();
+            
+            // Notificar al backend (opcional)
+            if (session && session.token) {
                 try {
-                    await fetch(`${CONFIG.BACKEND_URL}/api/auth/logout`, {
+                    await fetch(`${BACKEND_URL}/logout`, {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${authToken}`,
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.token}`
                         }
                     });
                 } catch (error) {
-                    console.warn('[Auth] No se pudo notificar logout al backend:', error);
+                    console.warn('Error notificando logout al backend:', error);
                 }
             }
 
-            clearSession();
-            console.log('[Auth] Logout exitoso');
-            return true;
+            // Eliminar sesión local
+            localStorage.removeItem(SESSION_KEY);
+            console.log('✅ Sesión cerrada exitosamente');
         } catch (error) {
-            console.error('[Auth] Error en logout:', error);
-            clearSession(); // Limpiar sesión de todas formas
-            return false;
+            console.error('Error en logout:', error);
         }
     }
 
-    // ==================== VERIFICACIÓN ====================
-    async function isLoggedIn() {
-        if (!authToken || !currentUser) {
-            return false;
-        }
-
-        // Verificar expiración local
-        if (currentUser.expiresAt && currentUser.expiresAt < Date.now()) {
-            console.log('[Auth] Sesión expirada');
-            clearSession();
-            return false;
-        }
-
-        return true;
-    }
-
+    /**
+     * Obtiene los datos del usuario actual
+     * @returns {Promise<Object|null>}
+     */
     async function getUser() {
-        if (await isLoggedIn()) {
-            return { ...currentUser };
-        }
-        return null;
-    }
-
-    function getToken() {
-        return authToken;
-    }
-
-    function isLockedOut() {
-        if (lockoutUntil && lockoutUntil > Date.now()) {
-            return true;
-        }
-        if (lockoutUntil && lockoutUntil <= Date.now()) {
-            // Limpiar lockout si ya expiró
-            lockoutUntil = null;
-            loginAttempts = 0;
-        }
-        return false;
-    }
-
-    // ==================== UTILIDADES ====================
-    function requireAuth(callback) {
-        return async function(...args) {
-            if (await isLoggedIn()) {
-                return callback.apply(this, args);
-            } else {
-                console.warn('[Auth] Acción requiere autenticación');
-                const loginSuccess = await login();
-                if (loginSuccess) {
-                    return callback.apply(this, args);
-                }
-                throw new Error('Autenticación requerida');
+        try {
+            const session = getSession();
+            
+            if (!session) {
+                return null;
             }
-        };
+
+            return {
+                email: session.email,
+                user: session.user,
+                accessCode: session.accessCode,
+                expiresAt: new Date(session.expiresAt),
+                createdAt: new Date(session.createdAt)
+            };
+        } catch (error) {
+            console.error('Error obteniendo usuario:', error);
+            return null;
+        }
     }
 
+    /**
+     * Obtiene el token JWT actual
+     * @returns {string|null}
+     */
+    function getToken() {
+        const session = getSession();
+        return session ? session.token : null;
+    }
+
+    /**
+     * Refresca el token JWT
+     * @returns {Promise<boolean>}
+     */
     async function refreshToken() {
         try {
-            if (!authToken) {
-                throw new Error('No hay sesión activa');
+            const session = getSession();
+            
+            if (!session || !session.token) {
+                return false;
             }
 
-            const response = await fetch(`${CONFIG.BACKEND_URL}/api/auth/refresh`, {
+            const response = await fetch(`${BACKEND_URL}/refresh-token`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.token}`
                 }
             });
 
             if (!response.ok) {
-                throw new Error('No se pudo renovar la sesión');
+                return false;
             }
 
             const data = await response.json();
             
-            if (data.token) {
-                saveSession(data.token, currentUser);
-                console.log('[Auth] Token renovado exitosamente');
-                return true;
-            }
+            // Actualizar token en la sesión
+            session.token = data.token;
+            session.expiresAt = Date.now() + SESSION_DURATION;
+            localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 
-            return false;
+            console.log('✅ Token refrescado exitosamente');
+            return true;
         } catch (error) {
-            console.error('[Auth] Error renovando token:', error);
+            console.error('Error refrescando token:', error);
             return false;
         }
     }
 
-    // ==================== INTERCEPTOR FETCH ====================
-    function setupAuthInterceptor() {
-        const originalFetch = window.fetch;
-        
-        window.fetch = async function(...args) {
-            const [url, options = {}] = args;
-            
-            // Agregar token automáticamente a requests del backend
-            if (typeof url === 'string' && url.includes(CONFIG.BACKEND_URL)) {
-                if (authToken) {
-                    options.headers = {
-                        ...options.headers,
-                        'Authorization': `Bearer ${authToken}`
-                    };
-                }
-            }
-            
-            try {
-                const response = await originalFetch(url, options);
-                
-                // Manejar 401 Unauthorized
-                if (response.status === 401) {
-                    console.warn('[Auth] Token inválido o expirado');
-                    clearSession();
-                    
-                    // Opcional: redirigir o mostrar mensaje
-                    if (!window.location.pathname.includes('index.html')) {
-                        window.location.href = '/index.html';
-                    }
-                }
-                
-                return response;
-            } catch (error) {
-                console.error('[Auth] Error en request:', error);
-                throw error;
-            }
-        };
-        
-        console.log('[Auth] Interceptor de autenticación configurado');
-    }
-
-    // ==================== API PÚBLICA ====================
-    const publicAPI = {
-        init,
+    // API pública
+    return {
+        isLoggedIn,
         login,
         logout,
-        isLoggedIn,
         getUser,
         getToken,
-        requireAuth,
         refreshToken,
-        get isAuthenticated() {
-            return !!authToken && !!currentUser;
-        }
+        getSession
     };
-
-    // Auto-inicialización
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            init();
-            setupAuthInterceptor();
-        });
-    } else {
-        init();
-        setupAuthInterceptor();
-    }
-
-    return publicAPI;
 })();
 
-// Exportar para uso global
+// Hacer disponible globalmente
 window.auth = auth;
+
+console.log('✅ Módulo auth.js cargado correctamente');
