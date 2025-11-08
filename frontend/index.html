@@ -7,9 +7,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://js.stripe.com/v3/"></script>
+    
     <script src="../sistema_central/ec0301-data-manager.js" defer></script>
     <script src="../sistema_central/auth.js" defer></script>
     <script src="../sistema_central/payment.js" defer></script>
+    
     <style>
         :root {
             --primary: #1E3A8A;
@@ -338,8 +340,9 @@
     </footer>
 
     <script>
-        const STRIPE_PUBLIC_KEY = "pk_test_51SJ0gXFupe2fTa5zdzZlQfwpB1Y3esGAdUBw1R4hc9vIerMj90cm0w4t6tJUJmVV7bEqZ3v5d11cqvPrFps4P31600xqM9IUsj";
-        const BACKEND_URL = "https://ec0301-globalskillscert-backend.onrender.com";
+        // Constantes globales (opcional, payment.js y auth.js ya tienen las suyas)
+        // const STRIPE_PUBLIC_KEY = "pk_test_...";
+        // const BACKEND_URL = "https://...";
         
         const SYSTEM_MODULES = [
             { id: "carta", title: "Carta Descriptiva", description: "Documento maestro que define objetivos, contenidos, metodología y sistema de evaluación del curso.", icon: "fa-clipboard-list", url: "carta-descriptiva.html", weight: 40 },
@@ -350,16 +353,46 @@
             { id: "auditoria", title: "Auditoría", description: "Validación final y generación del portafolio completo de evidencias (ZIP).", icon: "fa-shield-check", url: "auditoria.html", weight: 5, dependsOn: ["resultados"] }
         ];
 
+        // Estado de la aplicación
         let projectData;
         let currentUser = null;
         let refreshTimeout;
         let modulesCache = null;
-        let isProcessingPayment = false;
+        // La variable 'isProcessingPayment' se eliminó porque ahora la maneja 'payment.js'
 
+        // ==================== INICIALIZACIÓN ====================
+        
         document.addEventListener('DOMContentLoaded', () => {
             initializeAuth();
-            initializeStripePayment();
+            
+            // ¡LÓGICA CORREGIDA!
+            // Llama a la nueva función para conectar el botón de pago.
+            setupPaymentButton();
         });
+        
+        /**
+         * Conecta el botón de pago al módulo 'payment.js'
+         */
+        function setupPaymentButton() {
+            // Espera a que 'payment.js' esté cargado
+            if (typeof payment === 'undefined') {
+                setTimeout(setupPaymentButton, 100);
+                return;
+            }
+
+            const checkoutButton = document.getElementById('checkout-button');
+            if (checkoutButton) {
+                checkoutButton.addEventListener('click', () => {
+                    // Llama a la función 'processPayment' del módulo externo
+                    payment.processPayment();
+                });
+                console.log('Listener de pago V2 añadido al botón #checkout-button.');
+            } else {
+                console.error('Botón de pago #checkout-button no encontrado.');
+            }
+        }
+
+        // ==================== AUTENTICACIÓN (Módulo auth.js) ====================
 
         async function initializeAuth() {
             try {
@@ -429,114 +462,13 @@
                 showTemporaryError('Error en el proceso de autenticación');
             }
         }
+        
+        // ==================== LÓGICA DE PAGO (Eliminada) ====================
+        // Todas las funciones (initializeStripePayment, setupCheckoutButton, 
+        // processPayment, checkBackendHealth, fetchWithTimeout, showPaymentError)
+        // se eliminaron de aquí. Ahora son manejadas por 'payment.js'.
 
-        function initializeStripePayment() {
-            try {
-                if (!STRIPE_PUBLIC_KEY || !STRIPE_PUBLIC_KEY.includes('pk_test')) {
-                    console.warn('Usando clave de prueba de Stripe');
-                }
-                const stripe = Stripe(STRIPE_PUBLIC_KEY);
-                setupCheckoutButton(stripe);
-            } catch (error) {
-                console.error('Error inicializando Stripe:', error);
-                showPaymentError('Configuración de pagos temporalmente no disponible');
-            }
-        }
-
-        function setupCheckoutButton(stripe) {
-            // Esta es la función que fallaba por el ID incorrecto
-            const checkoutButton = document.getElementById('checkout-button'); 
-            if (!checkoutButton) {
-                console.error('Botón de pago "checkout-button" no encontrado. Verifica el ID en el HTML.');
-                return;
-            }
-            checkoutButton.addEventListener('click', async () => {
-                if (isProcessingPayment) return;
-                await processPayment(stripe, checkoutButton);
-            });
-            console.log('Listener de pago añadido al botón #checkout-button.');
-        }
-
-        async function processPayment(stripe, button) {
-            isProcessingPayment = true;
-            const originalButtonText = button.innerHTML;
-            try {
-                button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
-                button.disabled = true;
-                console.log('Solicitando sesión de Checkout al backend...');
-                
-                await checkBackendHealth();
-                
-                const response = await fetchWithTimeout(`${BACKEND_URL}/create-checkout-session`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                }, 10000);
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
-                }
-
-                const session = await response.json();
-                console.log('Sesión de Checkout recibida:', session);
-
-                if (!session?.id) {
-                    throw new Error('Respuesta inválida del servidor de pagos');
-                }
-
-                console.log('Redirigiendo a Stripe Checkout...');
-                const result = await stripe.redirectToCheckout({ sessionId: session.id });
-                
-                if (result.error) {
-                    throw new Error(result.error.message);
-                }
-            } catch (error) {
-                console.error('Error en el proceso de pago:', error);
-                await showPaymentError(error.message);
-                button.innerHTML = originalButtonText;
-                button.disabled = false;
-                isProcessingPayment = false;
-            }
-        }
-
-        async function checkBackendHealth() {
-            try {
-                const healthResponse = await fetch(`${BACKEND_URL}/health`, { method: 'GET', timeout: 5000 });
-                if (!healthResponse.ok) {
-                    throw new Error('Servidor de pagos no disponible');
-                }
-            } catch (error) {
-                throw new Error('No se puede conectar con el servidor de pagos');
-            }
-        }
-
-        async function fetchWithTimeout(url, options, timeout = 10000) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
-            try {
-                const response = await fetch(url, { ...options, signal: controller.signal });
-                clearTimeout(id);
-                return response;
-            } catch (error) {
-                clearTimeout(id);
-                if (error.name === 'AbortError') {
-                    throw new Error('La solicitud tardó demasiado tiempo');
-                }
-                throw error;
-            }
-        }
-
-        async function showPaymentError(message) {
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error de Pago',
-                text: message || 'No se pudo procesar la solicitud de pago',
-                confirmButtonColor: '#1E3A8A'
-            });
-        }
+        // ==================== LÓGICA DEL PROYECTO (Módulo ec0301-data-manager.js) ====================
 
         async function loadProjectStatus() {
             if (!window.EC0301Manager) {
@@ -550,7 +482,6 @@
                     const systemInfo = EC0301Manager.getSystemInfo();
                     updateDashboardUI(systemInfo);
                 } else {
-                    // Si no hay datos válidos, muestra el estado de nuevo proyecto
                     showNewProjectState();
                 }
             } catch (error) {
@@ -569,7 +500,6 @@
             if (typeof data !== 'object') {
                 throw new Error('Datos del proyecto inválidos');
             }
-            // Validamos solo campos esenciales. Si no existe 'nombre', asumimos que es un proyecto vacío/inválido.
             return data.nombre && data.version && data.created;
         }
 
@@ -626,15 +556,10 @@
                 timestamp: Date.now()
             };
         }
-
-        // ========================
-        //  ¡CORRECCIÓN LÓGICA!
-        // ========================
+        
         function getModuleStatus(module) {
-            // Asumimos que EC0301Manager está disponible (verificado en initializeAuth)
             const completedModules = EC0301Manager.getCompletedModules(projectData);
 
-            // 1. Verificar dependencias (Bloqueado)
             if (module.dependsOn) {
                 const dependenciesComplete = module.dependsOn.every(dep => completedModules.includes(dep));
                 if (!dependenciesComplete) {
@@ -642,18 +567,14 @@
                 }
             }
 
-            // 2. Verificar si está completado
             if (completedModules.includes(module.id)) {
                 return { status: 'completed', label: 'Completado' };
             }
 
-            // 3. Verificar si está "En Progreso" (si hay datos guardados para este módulo)
             if (projectData && projectData[module.id] && Object.keys(projectData[module.id]).length > 0) {
                 return { status: 'in-progress', label: 'En Progreso' };
             }
             
-            // 4. Caso especial: 'carta' es el inicio. Si el proyecto tiene nombre, 'carta' está "en progreso" o "pendiente".
-            // Si no tiene datos (punto 3), pero las dependencias están listas (punto 1), está "Disponible".
             return { status: 'pending', label: 'Disponible' };
         }
 
@@ -718,9 +639,7 @@
             window.location.href = url;
         }
 
-        // ===========================================
-        //  FUNCIONES JS FALTANTES (RESTAURADAS)
-        // ===========================================
+        // ==================== UTILIDADES DE UI ====================
 
         function showTemporarySuccess(message) {
             showToast(message, 'success');
@@ -772,6 +691,8 @@
                 showTemporarySuccess('Estado actualizado correctamente');
             }, 300);
         }
+
+        // ==================== OPCIONES DE PROYECTO ====================
 
         function showProjectOptions() {
             Swal.fire({
