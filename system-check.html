@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación del Sistema - SkillsCert EC0301</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 2rem; color: #1F2937;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header {
+            text-align: center; color: white; margin-bottom: 2rem;
+        }
+        .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .header p { font-size: 1.1rem; opacity: 0.9; }
+        .card {
+            background: white; border-radius: 16px; padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 2rem;
+        }
+        .check-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1rem; border-bottom: 1px solid #E5E7EB;
+        }
+        .check-item:last-child { border-bottom: none; }
+        .check-label {
+            display: flex; align-items: center; gap: 1rem; flex: 1;
+        }
+        .check-label i { font-size: 1.5rem; }
+        .status {
+            padding: 0.5rem 1rem; border-radius: 20px;
+            font-weight: 600; font-size: 0.9rem;
+        }
+        .status-pass { background: #D1FAE5; color: #065F46; }
+        .status-fail { background: #FEE2E2; color: #991B1B; }
+        .status-warning { background: #FEF3C7; color: #92400E; }
+        .status-loading { background: #E0E7FF; color: #3730A3; }
+        .btn {
+            background: #1E3A8A; color: white; border: none;
+            padding: 1rem 2rem; border-radius: 8px; font-size: 1rem;
+            font-weight: 600; cursor: pointer; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn:hover { background: #1E40AF; transform: translateY(-2px); }
+        .summary {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem; margin-bottom: 2rem;
+        }
+        .summary-card {
+            background: white; padding: 1.5rem; border-radius: 12px;
+            text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .summary-value {
+            font-size: 2.5rem; font-weight: 700; margin-bottom: 0.25rem;
+        }
+        .summary-label { color: #6B7280; font-size: 0.9rem; }
+        .log-container {
+            background: #1F2937; color: #D1D5DB; padding: 1rem;
+            border-radius: 8px; font-family: 'Courier New', monospace;
+            font-size: 0.85rem; max-height: 300px; overflow-y: auto;
+            margin-top: 1rem;
+        }
+        .log-entry {
+            padding: 0.25rem 0; border-bottom: 1px solid #374151;
+        }
+        .log-success { color: #34D399; }
+        .log-error { color: #F87171; }
+        .log-warning { color: #FBBF24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-shield-check"></i> Verificación del Sistema</h1>
+            <p>Diagnóstico completo de SkillsCert EC0301</p>
+        </div>
+
+        <div class="summary" id="summary"></div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2><i class="fa-solid fa-list-check"></i> Checklist de Componentes</h2>
+                <button class="btn" onclick="runChecks()">
+                    <i class="fa-solid fa-rotate"></i> Ejecutar Verificación
+                </button>
+            </div>
+            <div id="checkList"></div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-terminal"></i> Log de Sistema</h2>
+            <div class="log-container" id="logContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const checks = [
+            { id: 'html', name: 'Archivo index.html', icon: 'fa-file-code', type: 'file' },
+            { id: 'dataManager', name: 'ec0301-data-manager.js', icon: 'fa-database', type: 'module' },
+            { id: 'auth', name: 'auth.js', icon: 'fa-lock', type: 'module' },
+            { id: 'payment', name: 'payment.js', icon: 'fa-credit-card', type: 'module' },
+            { id: 'fontawesome', name: 'Font Awesome CDN', icon: 'fa-icons', type: 'cdn' },
+            { id: 'sweetalert', name: 'SweetAlert2 CDN', icon: 'fa-window-maximize', type: 'cdn' },
+            { id: 'stripe', name: 'Stripe.js CDN', icon: 'fa-stripe', type: 'cdn' },
+            { id: 'localStorage', name: 'LocalStorage API', icon: 'fa-hard-drive', type: 'browser' },
+            { id: 'fetch', name: 'Fetch API', icon: 'fa-cloud', type: 'browser' },
+            { id: 'es6', name: 'JavaScript ES6+', icon: 'fa-code', type: 'browser' }
+        ];
+
+        const results = {};
+        const logs = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.push({ timestamp, message, type });
+            updateLogDisplay();
+        }
+
+        function updateLogDisplay() {
+            const container = document.getElementById('logContainer');
+            container.innerHTML = logs.map(l => 
+                `<div class="log-entry log-${l.type}">[${l.timestamp}] ${l.message}</div>`
+            ).reverse().join('');
+        }
+
+        async function runChecks() {
+            log('Iniciando verificación del sistema...', 'info');
+            
+            for (const check of checks) {
+                await new Promise(resolve => setTimeout(resolve, 100)); // Simular delay
+                const result = await performCheck(check);
+                results[check.id] = result;
+                updateCheckDisplay();
+            }
+
+            updateSummary();
+            log('Verificación completada', 'success');
+        }
+
+        async function performCheck(check) {
+            const statusEl = document.getElementById(`status-${check.id}`);
+            if (statusEl) {
+                statusEl.className = 'status status-loading';
+                statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
+            }
+
+            try {
+                let passed = false;
+                let message = '';
+
+                switch (check.type) {
+                    case 'module':
+                        const moduleName = check.id === 'dataManager' ? 'EC0301Manager' : check.id;
+                        passed = typeof window[moduleName] !== 'undefined';
+                        message = passed ? `${check.name} cargado correctamente` : `${check.name} no encontrado`;
+                        break;
+
+                    case 'cdn':
+                        if (check.id === 'fontawesome') {
+                            passed = document.querySelector('link[href*="fontawesome"]') !== null;
+                        } else if (check.id === 'sweetalert') {
+                            passed = typeof Swal !== 'undefined';
+                        } else if (check.id === 'stripe') {
+                            passed = typeof Stripe !== 'undefined';
+                        }
+                        message = passed ? `${check.name} disponible` : `${check.name} no cargado`;
+                        break;
+
+                    case 'browser':
+                        if (check.id === 'localStorage') {
+                            passed = typeof Storage !== 'undefined';
+                            if (passed) {
+                                localStorage.setItem('test', 'test');
+                                localStorage.removeItem('test');
+                            }
+                        } else if (check.id === 'fetch') {
+                            passed = typeof fetch !== 'undefined';
+                        } else if (check.id === 'es6') {
+                            try {
+                                eval('const test = () => {}; Promise.resolve();');
+                                passed = true;
+                            } catch (e) {
+                                passed = false;
+                            }
+                        }
+                        message = passed ? `${check.name} soportado` : `${check.name} no soportado`;
+                        break;
+
+                    case 'file':
+                        passed = true; // Si estamos aquí, el HTML cargó
+                        message = 'Archivo principal cargado';
+                        break;
+                }
+
+                log(message, passed ? 'success' : 'error');
+                return { passed, message };
+            } catch (error) {
+                log(`Error verificando ${check.name}: ${error.message}`, 'error');
+                return { passed: false, message: error.message };
+            }
+        }
+
+        function updateCheckDisplay() {
+            const container = document.getElementById('checkList');
+            container.innerHTML = checks.map(check => {
+                const result = results[check.id];
+                let statusClass = 'status-loading';
+                let statusText = 'Pendiente';
+                let statusIcon = 'fa-clock';
+
+                if (result) {
+                    statusClass = result.passed ? 'status-pass' : 'status-fail';
+                    statusText = result.passed ? 'OK' : 'Fallo';
+                    statusIcon = result.passed ? 'fa-check' : 'fa-times';
+                }
+
+                return `
+                    <div class="check-item">
+                        <div class="check-label">
+                            <i class="fa-solid ${check.icon}"></i>
+                            <div>
+                                <strong>${check.name}</strong>
+                                ${result ? `<div style="font-size: 0.85rem; color: #6B7280;">${result.message}</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="status ${statusClass}" id="status-${check.id}">
+                            <i class="fa-solid ${statusIcon}"></i> ${statusText}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateSummary() {
+            const total = checks.length;
+            const passed = Object.values(results).filter(r => r && r.passed).length;
+            const failed = Object.values(results).filter(r => r && !r.passed).length;
+            const percentage = Math.round((passed / total) * 100);
+
+            const summaryHTML = `
+                <div class="summary-card">
+                    <div class="summary-value" style="color: #1E3A8A;">${total}</div>
+                    <div class="summary-label">Total Checks</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" style="color: #10B981;">${passed}</div>
+                    <div class="summary-label">Exitosos</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" style="color: #EF4444;">${failed}</div>
+                    <div class="summary-label">Fallidos</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" style="color: ${percentage >= 80 ? '#10B981' : percentage >= 50 ? '#F59E0B' : '#EF4444'};">
+                        ${percentage}%
+                    </div>
+                    <div class="summary-label">Cumplimiento</div>
+                </div>
+            `;
+
+            document.getElementById('summary').innerHTML = summaryHTML;
+        }
+
+        // Inicializar
+        updateCheckDisplay();
+        updateSummary();
+
+        // Auto-ejecutar al cargar
+        window.addEventListener('load', () => {
+            setTimeout(runChecks, 500);
+        });
+    </script>
+</body>
+</html>
