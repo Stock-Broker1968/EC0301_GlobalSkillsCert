@@ -233,7 +233,8 @@
         <p>Inicia sesión con el código que recibiste por WhatsApp para acceder a tu panel.</p>
         <p style="font-size: 1rem; opacity: 0.8;">Si no tienes un código, debes realizar el pago primero.</p>
         <br>
-        <button class="btn btn-warning" id="checkout  -button" style="padding: 1rem 2rem; font-size: 1.1rem;">
+        
+        <button class="btn btn-warning" id="checkout-button" style="padding: 1rem 2rem; font-size: 1.1rem;">
             <i class="fa-solid fa-credit-card"></i> Pagar Acceso (500 MXN)
         </button>
     </div>
@@ -443,9 +444,10 @@
         }
 
         function setupCheckoutButton(stripe) {
-            const checkoutButton = document.getElementById('checkout-button');
+            // Esta es la función que fallaba por el ID incorrecto
+            const checkoutButton = document.getElementById('checkout-button'); 
             if (!checkoutButton) {
-                console.warn('Botón de pago "checkout-button" no encontrado.');
+                console.error('Botón de pago "checkout-button" no encontrado. Verifica el ID en el HTML.');
                 return;
             }
             checkoutButton.addEventListener('click', async () => {
@@ -547,6 +549,9 @@
                 if (validateProjectData(projectData)) {
                     const systemInfo = EC0301Manager.getSystemInfo();
                     updateDashboardUI(systemInfo);
+                } else {
+                    // Si no hay datos válidos, muestra el estado de nuevo proyecto
+                    showNewProjectState();
                 }
             } catch (error) {
                 console.error('Error cargando estado del proyecto:', error);
@@ -564,12 +569,8 @@
             if (typeof data !== 'object') {
                 throw new Error('Datos del proyecto inválidos');
             }
-            const requiredFields = ['nombre', 'version', 'created'];
-            const missingFields = requiredFields.filter(field => !data[field]);
-            if (missingFields.length > 0) {
-                throw new Error(`Campos requeridos faltantes: ${missingFields.join(', ')}`);
-            }
-            return true;
+            // Validamos solo campos esenciales. Si no existe 'nombre', asumimos que es un proyecto vacío/inválido.
+            return data.nombre && data.version && data.created;
         }
 
         function updateDashboardUI(systemInfo) {
@@ -600,6 +601,7 @@
             document.getElementById('modulesCompleted').textContent = '0/6';
             document.getElementById('lastUpdate').textContent = 'Nunca';
             document.getElementById('progressText').textContent = 'Listo para comenzar';
+            document.getElementById('progressFill').style.width = '0%';
         }
 
         function renderModules() {
@@ -625,9 +627,14 @@
             };
         }
 
+        // ========================
+        //  ¡CORRECCIÓN LÓGICA!
+        // ========================
         function getModuleStatus(module) {
+            // Asumimos que EC0301Manager está disponible (verificado en initializeAuth)
             const completedModules = EC0301Manager.getCompletedModules(projectData);
 
+            // 1. Verificar dependencias (Bloqueado)
             if (module.dependsOn) {
                 const dependenciesComplete = module.dependsOn.every(dep => completedModules.includes(dep));
                 if (!dependenciesComplete) {
@@ -635,13 +642,19 @@
                 }
             }
 
+            // 2. Verificar si está completado
             if (completedModules.includes(module.id)) {
                 return { status: 'completed', label: 'Completado' };
-            } else if (module.id === 'carta' || projectData.nombre) {
-                return { status: 'in-progress', label: 'En Progreso' };
-            } else {
-                return { status: 'pending', label: 'Disponible' };
             }
+
+            // 3. Verificar si está "En Progreso" (si hay datos guardados para este módulo)
+            if (projectData && projectData[module.id] && Object.keys(projectData[module.id]).length > 0) {
+                return { status: 'in-progress', label: 'En Progreso' };
+            }
+            
+            // 4. Caso especial: 'carta' es el inicio. Si el proyecto tiene nombre, 'carta' está "en progreso" o "pendiente".
+            // Si no tiene datos (punto 3), pero las dependencias están listas (punto 1), está "Disponible".
+            return { status: 'pending', label: 'Disponible' };
         }
 
         function createModuleCard(module, moduleStatus) {
@@ -654,7 +667,8 @@
                 <div class="module-status status-${moduleStatus.status}">${moduleStatus.label}</div>
                 <button class="btn ${getButtonClass(moduleStatus.status)} module-action" 
                         onclick="navigateToModule('${module.url}', '${moduleStatus.status}')"
-                        ${moduleStatus.status === 'locked' ? 'disabled' : ''}>
+                        ${moduleStatus.status === 'locked' ? 'disabled' : ''}
+                        aria-label="${getButtonAriaLabel(moduleStatus.status, module.title)}">
                     ${getButtonText(moduleStatus.status)}
                 </button>
             `;
@@ -681,6 +695,16 @@
             }
         }
 
+        function getButtonAriaLabel(status, moduleTitle) {
+            switch (status) {
+                case 'completed': return `Revisar módulo ${moduleTitle}`;
+                case 'in-progress': return `Continuar módulo ${moduleTitle}`;
+                case 'pending': return `Iniciar módulo ${moduleTitle}`;
+                case 'locked': return `Módulo ${moduleTitle} bloqueado`;
+                default: return `Acceder a ${moduleTitle}`;
+            }
+        }
+
         function navigateToModule(url, status) {
             if (status === 'locked') {
                 Swal.fire({
@@ -693,6 +717,188 @@
             }
             window.location.href = url;
         }
+
+        // ===========================================
+        //  FUNCIONES JS FALTANTES (RESTAURADAS)
+        // ===========================================
+
+        function showTemporarySuccess(message) {
+            showToast(message, 'success');
+        }
+
+        function showTemporaryError(message) {
+            showToast(message, 'error');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type === 'error' ? 'toast-error' : type === 'warning' ? 'toast-warning' : ''}`;
+            toast.textContent = message;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function showLoadingState() {
+            const loadingElement = document.getElementById('loadingMessage');
+            if (loadingElement) {
+                loadingElement.style.display = 'block';
+            }
+            document.body.classList.add('loading');
+        }
+
+        function hideLoadingState() {
+            const loadingElement = document.getElementById('loadingMessage');
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+            document.body.classList.remove('loading');
+        }
+
+        function refreshStatus() {
+            clearTimeout(refreshTimeout);
+            refreshTimeout = setTimeout(() => {
+                loadProjectStatus();
+                renderModules();
+                showTemporarySuccess('Estado actualizado correctamente');
+            }, 300);
+        }
+
+        function showProjectOptions() {
+            Swal.fire({
+                title: 'Opciones del Proyecto',
+                html: `
+                    <div style="text-align: left;">
+                        <button onclick="Swal.close(); newProject();" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-plus"></i> Nuevo Proyecto
+                        </button>
+                        <button onclick="Swal.close(); loadExistingProject();" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-folder-open"></i> Cargar Proyecto
+                        </button>
+                        <button onclick="Swal.close(); exportProject();" class="btn btn-success" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-download"></i> Exportar Proyecto
+                        </button>
+                        <button onclick="Swal.close(); showSystemInfo();" class="btn btn-warning" style="width: 100%; margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-info-circle"></i> Información del Sistema
+                        </button>
+                        <button onclick="Swal.close(); clearProject();" class="btn btn-danger" style="width: 100%;">
+                            <i class="fa-solid fa-trash"></i> Limpiar Proyecto
+                        </button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar',
+                width: 400
+            });
+        }
+
+        function newProject() {
+            Swal.fire({
+                title: '¿Crear Nuevo Proyecto?',
+                text: 'Esto eliminará el proyecto actual. ¿Continuar?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Sí, crear nuevo',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    EC0301Manager.clearProject();
+                    window.location.reload();
+                }
+            });
+        }
+
+        function loadExistingProject() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    try {
+                        await EC0301Manager.importProject(file);
+                        showTemporarySuccess('Proyecto cargado exitosamente');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } catch (error) {
+                        showTemporaryError(`No se pudo cargar el archivo: ${error.message}`);
+                    }
+                }
+            };
+            input.click();
+        }
+
+        function exportProject() {
+            if (!projectData || !projectData.nombre) {
+                showTemporaryError('No hay datos para exportar. Crea un proyecto primero.');
+                return;
+            }
+            try {
+                EC0301Manager.exportProject();
+                showTemporarySuccess('Proyecto exportado correctamente');
+            } catch (error) {
+                showTemporaryError(`No se pudo exportar el proyecto: ${error.message}`);
+            }
+        }
+
+        function showSystemInfo() {
+            const systemInfo = EC0301Manager.getSystemInfo();
+            Swal.fire({
+                title: 'Información del Sistema',
+                html: `
+                    <div style="text-align: left;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr><td style="padding: 4px;"><strong>Versión:</strong></td><td>${systemInfo.version}</td></tr>
+                            <tr><td style="padding: 4px;"><strong>ID Proyecto:</strong></td><td style="font-family: monospace; font-size: 0.8rem;">${systemInfo.projectId || 'N/A'}</td></tr>
+                            <tr><td style="padding: 4px;"><strong>Creado:</strong></td><td>${systemInfo.created ? new Date(systemInfo.created).toLocaleString() : 'N/A'}</td></tr>
+                            <tr><td style="padding: 4px;"><strong>Modificado:</strong></td><td>${systemInfo.modified ? new Date(systemInfo.modified).toLocaleString() : 'N/A'}</td></tr>
+                            <tr><td style="padding: 4px;"><strong>Tamaño:</strong></td><td>${(systemInfo.dataSize / 1024).toFixed(2)} KB</td></tr>
+                            <tr><td style="padding: 4px;"><strong>Cumplimiento:</strong></td><td>${systemInfo.compliance}</td></tr>
+                            <tr><td style="padding: 4px;"><strong>Módulos:</strong></td><td>${systemInfo.modules}/6</td></tr>
+                        </table>
+                    </div>
+                `,
+                confirmButtonText: 'Cerrar',
+                width: 500
+            });
+        }
+
+        function clearProject() {
+            Swal.fire({
+                title: '¿Limpiar Proyecto?',
+                text: 'Esto eliminará todos los datos guardados. Esta acción no se puede deshacer.',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Sí, limpiar todo',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    EC0301Manager.clearProject();
+                    window.location.reload();
+                }
+            });
+        }
+
+        setInterval(() => {
+            if (currentUser) {
+                // Actualiza el estado del proyecto y los módulos en segundo plano
+                loadProjectStatus();
+                renderModules();
+            }
+        }, 30000); // Actualiza cada 30 segundos
     </script>
 </body>
 </html>
