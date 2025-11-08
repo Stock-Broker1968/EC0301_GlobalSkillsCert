@@ -1,14 +1,205 @@
-# Dependencias
-node_modules
+# ==================================================
+# SKILLSCERT EC0301 - GITIGNORE
+# ==================================================
 
-# Archivos de entorno (contiene secretos!)
+# ==================================================
+# ARCHIVOS DE CONFIGURACIÓN SENSIBLES
+# ==================================================
 .env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+config/secrets.json
+credentials.json
 
-# Logs
+# ==================================================
+# NODE MODULES & DEPENDENCIES
+# ==================================================
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
-# Archivos del sistema operativo
+# ==================================================
+# ARCHIVOS DE BUILD
+# ==================================================
+dist/
+build/
+out/
+.next/
+.nuxt/
+.vuepress/dist
+
+# ==================================================
+# CACHE & TEMPORALES
+# ==================================================
+.cache/
+.temp/
+tmp/
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+
+# ==================================================
+# ARCHIVOS DEL SISTEMA OPERATIVO
+# ==================================================
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.fuse_hidden*
+
+# ==================================================
+# IDEs & EDITORES
+# ==================================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# JetBrains (WebStorm, IntelliJ, etc.)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ==================================================
+# ARCHIVOS DE PRUEBA Y DESARROLLO
+# ==================================================
+test-results/
+coverage/
+.nyc_output/
+*.test.local.js
+*.spec.local.js
+
+# ==================================================
+# BACKUPS Y DATOS
+# ==================================================
+*.backup
+*.bak
+*.old
+backup/
+backups/
+datos_prueba/
+*.sql
+*.sqlite
+*.db
+
+# ==================================================
+# STRIPE & PAGOS
+# ==================================================
+# Logs de webhooks locales
+stripe-webhooks.log
+payment-logs/
+
+# ==================================================
+# ARCHIVOS GENERADOS
+# ==================================================
+# Proyectos exportados (si no quieres versionarlos)
+# exports/
+# *.json (descomenta si no quieres versionar JSONs de proyectos)
+
+# PDFs generados
+generated-pdfs/
+temp-pdfs/
+
+# ZIPs de portafolio
+portafolios/
+*.zip
+
+# ==================================================
+# CERTIFICADOS SSL (SOLO LOCAL)
+# ==================================================
+*.pem
+*.key
+*.cert
+*.crt
+localhost.key
+localhost.crt
+
+# ==================================================
+# LOGS
+# ==================================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+error.log
+access.log
+
+# ==================================================
+# DOCUMENTACIÓN GENERADA
+# ==================================================
+docs/_build/
+site/
+
+# ==================================================
+# OTROS
+# ==================================================
+# Archivos de lock de editores
+.lock-wscript
+
+# Directorios opcionales de npm
+.npm
+.eslintcache
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variable files
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# parcel-bundler cache
+.parcel-cache
+
+# ==================================================
+# ARCHIVOS ESPECÍFICOS DEL PROYECTO
+# ==================================================
+# Si tienes datos de prueba sensibles
+test-data/private/
+usuarios-test.json
+
+# Archivos temporales de desarrollo
+scratch/
+notas.md
+TODO-private.md
