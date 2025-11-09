@@ -338,8 +338,7 @@
     </footer>
 
     <script>
-        const STRIPE_PUBLIC_KEY = "pk_test_51SJ0gXFupe2fTa5zdzZlQfwpB1Y3esGAdUBw1R4hc9vIerMj90cm0w4t6tJUJmVV7bEqZ3v5d11cqvPrFps4P31600xqM9IUsj";
-        const BACKEND_URL = "https://ec0301-globalskillscert-backend.onrender.com";
+    const STRIPE_PUBLIC_KEY = "pk_test_51SJ0gXFupe2fTa5zdzZlQfwpB1Y3esGAdUBw1R4hc9vIerMj90cm0w4t6tJUJmVV7bEqZ3v5d11cqvPrFps4P31600xqM9IUsj";        const BACKEND_URL = "https://ec0301-globalskillscert-backend.onrender.com";
         
         const SYSTEM_MODULES = [
             { id: "carta", title: "Carta Descriptiva", description: "Documento maestro que define objetivos, contenidos, metodología y sistema de evaluación del curso.", icon: "fa-clipboard-list", url: "carta-descriptiva.html", weight: 40 },
@@ -458,6 +457,11 @@
         }
 
         async function processPayment(stripe, button) {
+                // Obtener email del usuario
+    const userEmail = prompt('Ingresa tu email para recibir el código de acceso:');
+    if (!userEmail || !userEmail.includes('@')) {
+      throw new Error('Email válido es requerido');
+    }
             isProcessingPayment = true;
             const originalButtonText = button.innerHTML;
             try {
@@ -473,6 +477,11 @@
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     }
+                          body: JSON.stringify({
+        email: userEmail,
+        courseName: 'Acceso SkillsCert EC0301',
+        amount: 500
+      }),
                 }, 10000);
 
                 if (!response.ok) {
