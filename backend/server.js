@@ -302,8 +302,12 @@ app.post('/create-checkout-session', async (req, res) => {
     }
 
     const origin = req.headers.origin || req.headers.referer?.replace(/\/$/, '') || 'https://ec0301-globalskillscert.onrender.com';
-    const successUrl = `${origin}/landing.html?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${origin}/landing.html?canceled=true`;
+    
+    // === ESTA ES LA LÍNEA CORREGIDA ===
+    const successUrl = `${origin}/?session_id={CHECKOUT_SESSION_ID}`; 
+    // ==================================
+    
+    const cancelUrl = `${origin}/?canceled=true`; // También la apuntamos a la raíz
 
     console.log('Origin:', origin);
     console.log('Success URL:', successUrl);
@@ -470,7 +474,7 @@ app.post('/login', async (req, res) => {
     const token = Buffer.from(JSON.stringify({
       userId: user.id,
       email: user.email,
-      exp: Date.now() + (7 * 24 * 60 * 60 * 1000)
+      exp: Date.now() + (7 * 24 * 60 * 60 * 1000) // Token (no-JWT) simple
     })).toString('base64');
 
     console.log('✅ Login exitoso:', email);
