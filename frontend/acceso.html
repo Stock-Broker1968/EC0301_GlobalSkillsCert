@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script src="sistema_central/auth.js" defer></script>
-    <script>
+    <script src="sistema_central/ec0301-data-manager.js" defer></script> <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof auth === 'undefined') {
                 console.error("Error crítico: auth.js no se cargó. Revisa la ruta.");
@@ -28,6 +28,8 @@
             --light: #f1f5f9;
             --white: #ffffff;
             --danger: #ef4444;
+            --success: #10b981;
+            --accent: #FF6B35;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -109,15 +111,15 @@
             text-decoration: none;
             color: var(--dark);
             transition: all 0.3s;
+            border: 1px solid transparent;
         }
         .module-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 30px rgba(99, 102, 241, 0.2);
-            border: 1px solid var(--primary);
+            border-color: var(--primary);
         }
         .module-card i {
             font-size: 2rem;
-            color: var(--primary);
             margin-bottom: 1rem;
         }
         .module-card h3 {
@@ -129,16 +131,27 @@
             margin-bottom: 0;
             color: #64748b;
         }
-        .module-card.soon {
-            background: #f9fafb;
-            opacity: 0.7;
-            cursor: not-allowed;
+        /* Icon Colors */
+        .module-card .fa-file-alt { color: var(--primary); }
+        .module-card .fa-tasks { color: var(--success); }
+        .module-card .fa-book-open { color: var(--accent); }
+        .module-card .fa-truck { color: #0ea5e9; } /* cian */
+        .module-card .fa-key { color: #f59e0b; } /* amarillo */
+        .module-card .fa-shield-check { color: var(--danger); }
+        
+        /* Estilo especial para el módulo de exportación */
+        .module-card.export-card {
+            background: var(--dark);
+            border-color: var(--dark);
         }
-         .module-card.soon:hover {
-            transform: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border: none;
-         }
+        .module-card.export-card:hover {
+            box-shadow: 0 15px 30px rgba(30, 41, 59, 0.3);
+            border-color: var(--primary);
+        }
+        .module-card.export-card i { color: #94a3b8; }
+        .module-card.export-card h3 { color: var(--white); }
+        .module-card.export-card p { color: #94a3b8; }
+
     </style>
 </head>
 <body>
@@ -180,17 +193,29 @@
                 <p>Desarrolla los manuales del participante y del facilitador.</p>
             </a>
 
-            <div class="module-card soon">
-                <i class="fas fa-gavel"></i>
-                <h3>Auditoría</h3>
-                <p>Revisa el cumplimiento de tu curso (Próximamente).</p>
-            </div>
-
-            <div class="module-card soon">
+            <a href="logistica.html" class="module-card">
                 <i class="fas fa-truck"></i>
-                <h3>Logística</h3>
-                <p>Define la logística de tu curso (Próximamente).</p>
-            </div>
+                <h3>Logística y Formatos</h3>
+                <p>Genera la lista de asistencia, contrato y lista de requerimientos.</p>
+            </a>
+            
+            <a href="respuestas.html" class="module-card">
+                <i class="fas fa-key"></i>
+                <h3>Hoja de Respuestas</h3>
+                <p>Genera la clave de respuestas de la evaluación sumativa.</p>
+            </a>
+            
+            <a href="auditoria.html" class="module-card">
+                <i class="fas fa-shield-check"></i>
+                <h3>Auditoría EC0301</h3>
+                <p>Valida tu portafolio de productos contra el estándar.</p>
+            </a>
+            
+            <a href="exportar.html" class="module-card export-card">
+                <i class="fas fa-file-zipper"></i>
+                <h3>Exportar Portafolio</h3>
+                <p>Genera tu portafolio final en PDF o .ZIP para la auditoría.</p>
+            </a>
             
         </div>
     </main>
