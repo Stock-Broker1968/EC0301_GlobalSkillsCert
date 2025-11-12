@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma SkillsCert EC0301</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        // === GUARDIA DE SEGURIDAD ===
+        // Esto se ejecuta INMEDIATAMENTE.
+        // Si el usuario no tiene un token, lo expulsa al index.
+        const authToken = localStorage.getItem('authToken');
+        if (!authToken) {
+            window.location.href = 'index.html';
+        }
+    </script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--light);
+        }
+        .header {
+            background: var(--white);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { display: flex; align-items: center; gap: 0.75rem; color: var(--dark); }
+        .logo i { font-size: 1.5rem; color: var(--primary); }
+        .logo h1 { font-size: 1.25rem; }
+        .btn-logout {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-logout i { margin-right: 0.5rem; }
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .container h2 {
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+        .container p {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>Plataforma EC0301</h1>
+        </div>
+        <button id="logoutButton" class="btn-logout">
+            <i class="fas fa-sign-out-alt"></i>Cerrar Sesión
+        </button>
+    </header>
+
+    <main class="container">
+        <h2>Bienvenido, <span id="userEmail"></span></h2>
+        <p>Aquí comenzarás a generar tus productos del Estándar de Competencia EC0301.</p>
+        
+            </main>
+
+    <script>
+        // Script de la página de acceso (se ejecuta después de la guardia de seguridad)
+        document.addEventListener('DOMContentLoaded', () => {
+            // Personalizar bienvenida
+            const email = localStorage.getItem('userEmail');
+            if (email) {
+                document.getElementById('userEmail').textContent = email;
+            }
+
+            // Configurar botón de cerrar sesión
+            const logoutButton = document.getElementById('logoutButton');
+            logoutButton.addEventListener('click', () => {
+                // Limpiar los datos de sesión
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('accessCode');
+                
+                // Redirigir al inicio
+                window.location.href = 'index.html';
+            });
+
+            // Aquí irá la lógica de tu aplicación (Generar carta descriptiva, etc.)
+            // ...
+        });
+    </script>
+
+</body>
+</html>
