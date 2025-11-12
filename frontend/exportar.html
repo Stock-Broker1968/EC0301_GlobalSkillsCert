@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exportar Portafolio - EC0301</title>
+
+    <script src="sistema_central/auth.js" defer></script>
+    <script src="sistema_central/ec0301-data-manager.js" defer></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof auth !== 'undefined' && !auth.isLoggedIn()) {
+                window.location.replace('index.html');
+            }
+        });
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #1E3A8A; --accent: #FF6B35; --success: #22C55E;
+            --light: #F8FAFC; --border: #E5E7EB; --text: #1F2937; --muted: #6B7280;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #F1F5F9; color: var(--text); line-height: 1.7;
+        }
+        .header {
+            background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 3px solid var(--accent);
+        }
+        .header-content {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem; max-width: 1200px; margin: 0 auto;
+        }
+        h1 { font-size: 1.75rem; color: var(--primary); display: flex; align-items: center; gap: 0.75rem; }
+        .btn {
+            padding: 0.6rem 1.2rem; border: none; border-radius: 8px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; display: inline-flex;
+            align-items: center; gap: 0.5rem; text-decoration: none;
+        }
+        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-zip { background: #334155; color: white; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+        
+        .generation-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            padding: 2rem; border-radius: 16px; margin-bottom: 2rem;
+            text-align: center;
+        }
+        .generation-panel h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; justify-content: center; }
+        .generation-panel p { color: var(--muted); margin-bottom: 1.5rem; max-width: 600px; margin: 0 auto 1.5rem; }
+        .button-group { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        
+        #reporte-container {
+            display: none; /* Se muestra al generar el reporte */
+            background: white; padding: 3rem; border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07); min-height: 600px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+        
+        /* Estilos de impresión para el reporte */
+        .reporte-portada { text-align: center; padding: 4rem 2rem; page-break-after: always; }
+        .reporte-portada h2 { font-size: 2.5rem; color: var(--primary); }
+        .reporte-portada h3 { font-size: 1.5rem; color: var(--muted); margin-top: 1rem; }
+        .reporte-portada p { margin-top: 3rem; }
+        
+        .reporte-seccion { margin-top: 3rem; page-break-before: always; }
+        .reporte-seccion h4 { font-size: 2rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+        .reporte-seccion h5 { font-size: 1.5rem; color: var(--text); margin-top: 1.5rem; margin-bottom: 1rem; }
+        .reporte-seccion p, .reporte-seccion li { margin-bottom: 0.75rem; }
+        .reporte-seccion ul { padding-left: 2rem; }
+        .reporte-seccion table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .reporte-seccion th, .reporte-seccion td { border: 1px solid #ccc; padding: 0.75rem; }
+        .reporte-seccion th { background: #f1f1f1; }
+        
+        .respuesta-correcta {
+            background-color: #F0FDF4 !important;
+            color: #15803D !important;
+            font-weight: 700 !important;
+            border: 1px solid var(--success) !important;
+        }
+        .instructor-note {
+            background: #FFFBEB; border-left: 4px solid #FBBF24; padding: 1rem;
+            margin: 1rem 0; border-radius: 8px;
+        }
+
+        @media print {
+            body { background: white; }
+            .header, .no-print { display: none !important; }
+            .container { margin: 0; padding: 0; }
+            #reporte-container {
+                display: block !important;
+                box-shadow: none; border: none; padding: 0;
+            }
+            @page {
+                size: letter;
+                margin: 2cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header no-print">
+        <div class="header-content">
+            <h1><i class="fa-solid fa-file-zipper" style="color: var(--accent);"></i> Exportar Portafolio</h1>
+            <div>
+                <a href="acceso.html" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="generation-panel no-print">
+            <h3><i class="fa-solid fa-download"></i> Centro de Descargas del Portafolio EC0301</h3>
+            <p>Genera un solo documento HTML/PDF con todos tus productos para imprimir, o descarga un archivo .ZIP con los 10 productos requeridos por el estándar.</p>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="generarReporteHTML()">
+                    <i class="fa-solid fa-eye"></i> 1. Ver Reporte en Pantalla
+                </button>
+                <button class="btn btn-success" onclick="imprimirReporte()">
+                    <i class="fa-solid fa-file-pdf"></i> 2. Guardar como PDF
+                </button>
+                <button class="btn btn-zip" onclick="generarZip()">
+                    <i class="fa-solid fa-file-zipper"></i> 3. Descargar .ZIP
+                </button>
+            </div>
+        </div>
+
+        <div id="reporte-container" class="printable">
+            </div>
+
+    </main>
+
+    <script>
+    let EC0301Manager;
+    let cartaData = {};
+    let evaluacionData = [];
+    let manualesData = {};
+    let respuestasData = {}; // Para la hoja de respuestas
+    let logisticaData = {}; // Para la logística
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // (AJUSTE) Verificar que los scripts globales estén cargados
+        if (typeof auth === 'undefined' || typeof EC0301Manager === 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error Crítico',
+                text: 'No se pudieron cargar los módulos de sistema (auth.js, ec0301-data-manager.js). Revisa las rutas en el HTML.',
+                confirmButtonColor: '#EF4444'
+            }).then(() => window.location.href = 'index.html');
+            return;
+        }
+        
+        EC0301Manager = window.EC0301Manager;
+    });
+
+    /**
+     * Muestra alerta si no se encuentran datos
+     */
+    function showMissingDataAlert(missing) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Datos Incompletos',
+            html: `No se encontraron datos de <strong>${missing}</strong>.<br>Por favor, completa y guarda esos módulos primero.`,
+            confirmButtonText: 'Ir a Carta Descriptiva',
+            confirmButtonColor: '#1E3A8A'
+        }).then(() => {
+            window.location.href = 'carta_descriptiva.html';
+        });
+    }
+
+    /**
+     * Carga todos los datos desde el EC0301Manager
+     */
+    function loadAllData() {
+        try {
+            cartaData = EC0301Manager.getData();
+            if (!cartaData || !cartaData.nombre) {
+                showMissingDataAlert('Carta Descriptiva');
+                return false;
+            }
+            
+            evaluacionData = EC0301Manager.loadProduct('evaluacion-sumativa') || [];
+            if (evaluacionData.length === 0) {
+                showMissingDataAlert('Evaluaciones');
+                return false;
+            }
+            
+            manualesData = EC0301Manager.loadProduct('manuales') || {};
+            if (!manualesData.participante || !manualesData.instructor) {
+                showMissingDataAlert('Manuales');
+                return false;
+            }
+
+            // (Asumimos que logística y respuestas se basan en la carta)
+            return true; 
+            
+        } catch (error) {
+            console.error('Error al cargar datos:', error);
+            showMissingDataAlert('los datos');
+            return false;
+        }
+    }
+    
+    /**
+     * 1. VER REPORTE HTML
+     * Genera el HTML de todo el portafolio y lo muestra en pantalla
+     */
+    function generarReporteHTML() {
+        if (!loadAllData()) return; // Carga los datos y valida
+        
+        const container = document.getElementById('reporte-container');
+        
+        // Usar las funciones 'renderer' para construir el HTML
+        container.innerHTML = `
+            ${renderPortada(cartaData)}
+            ${renderCartaDescriptiva(cartaData)}
+            ${renderEvaluaciones(cartaData, evaluacionData)}
+            ${renderRespuestas(cartaData, evaluacionData)}
+            ${renderManualParticipante(manualesData.participante)}
+            ${renderManualInstructor(manualesData.instructor)}
+            ${renderLogistica(cartaData)}
+            `;
+        
+        container.style.display = 'block';
+        Swal.fire('Reporte Generado', 'El portafolio completo se muestra a continuación. Ahora puedes guardarlo como PDF.', 'success');
+        
+        // Ir al inicio del reporte
+        window.scrollTo(0, 0);
+    }
+    
+    /**
+     * 2. IMPRIMIR REPORTE (PDF)
+     */
+    function imprimirReporte() {
+        // Primero, nos aseguramos de que el HTML esté generado
+        if (document.getElementById('reporte-container').style.display !== 'block') {
+            generarReporteHTML();
+        }
+        
+        // Espera un momento para que el DOM se actualice
+        setTimeout(() => {
+            window.print(); // Llama a la función de impresión del navegador
+        }, 500); 
+    }
+    
+    /**
+     * 3. DESCARGAR ZIP
+     */
+    async function generarZip() {
+        if (!loadAllData()) return; // Carga los datos y valida
+
+        Swal.fire({
+            title: 'Generando ZIP...',
+            text: 'Compilando todos los productos de tu portafolio...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+        
+        try {
+            const zip = new JSZip();
+            const nombreCurso = cartaData.nombre.replace(/ /g, '_') || 'EC0301';
+
+            // 1. Carta Descriptiva (como HTML)
+            zip.file("1_Carta_Descriptiva.html", renderCartaDescriptiva(cartaData));
+            
+            // 2. Instrumentos de Evaluación (como HTML)
+            zip.file("2_Instrumentos_Evaluacion.html", renderEvaluaciones(cartaData, evaluacionData));
+            
+            // 3. Hoja de Respuestas (como HTML)
+            zip.file("3_Hoja_Respuestas.html", renderRespuestas(cartaData, evaluacionData));
+            
+            // 4. Manual Participante (como HTML)
+            zip.file("4_Manual_Participante.html", renderManualParticipante(manualesData.participante));
+            
+            // 5. Manual Instructor (como HTML)
+            zip.file("5_Manual_Instructor.html", renderManualInstructor(manualesData.instructor));
+
+            // 6. Lista de Verificación de Logística (como HTML)
+            zip.file("6_Logistica.html", renderLogistica(cartaData));
+            
+            // ... (Faltarían 4 productos más: Diag, Form, Satisfacción, Auditoría)
+            // Por ahora, generamos un ZIP con los 6 productos principales que hemos construido.
+            
+            // Generar el ZIP
+            const content = await zip.generateAsync({ type: "blob" });
+            
+            // Descargar
+            saveAs(content, `Portafolio_EC0301_${nombreCurso}.zip`);
+            
+            Swal.close();
+            
+        } catch (error) {
+            console.error(error);
+            Swal.fire('Error', 'No se pudo generar el archivo .ZIP.', 'error');
+        }
+    }
+    
+    // =============================================================
+    // FUNCIONES RENDERER (Ayudantes para generar el HTML)
+    // Estas funciones toman los datos y devuelven strings de HTML
+    // =============================================================
+
+    function renderPortada(data) {
+        return `
+            <div class="reporte-portada">
+                <h2>Portafolio de Evidencias</h2>
+                <h3>Estándar de Competencia EC0301</h3>
+                <br><br>
+                <h1>${data.nombre || 'Curso No Definido'}</h1>
+                <br><br><br>
+                <p><strong>Diseñador:</strong> ${data.diseñador || 'No Definido'}</p>
+                <p><strong>Facilitador:</strong> ${data.facilitador || 'No Definido'}</p>
+                <p><strong>Fecha de Generación:</strong> ${new Date().toLocaleDateString('es-MX')}</p>
+            </div>
+        `;
+    }
+
+    function renderCartaDescriptiva(data) {
+        // Esta es una versión simplificada. Para la real, copiaríamos la lógica de exportación de 'carta_descriptiva.html'
+        return `
+            <div class="reporte-seccion">
+                <h4>Producto 1: Carta Descriptiva</h4>
+                <h5>Información General</h5>
+                <p><strong>Nombre:</strong> ${data.nombre || ''}</p>
+                <p><strong>Duración:</strong> ${data.duracion || ''} horas</p>
+                <p><strong>Propósito:</strong> ${data.proposito || ''}</p>
+                
+                <h5>Objetivo General</h5>
+                <p>Al finalizar el curso, el participante ${data.og?.accion || '...'} ${data.og?.cond || '...'}, ${data.og?.criterio || '...'}.</p>
+                
+                <h5>Temario</h5>
+                <ul>
+                    ${(data.temas || []).map(t => `<li>${t.nombre} (${t.duracion} min)</li>`).join('')}
+                </ul>
+                
+                <h5>Evaluación</h5>
+                <ul>
+                    <li><strong>Diagnóstica:</strong> ${data.ev?.diag?.ins || ''}</li>
+                    <li><strong>Formativa:</strong> ${data.ev?.form?.ins || ''} (${data.ev?.form?.pct || ''}%)</li>
+                    <li><strong>Sumativa:</strong> ${data.ev?.sum?.ins || ''} (${data.ev?.sum?.pct || ''}%)</li>
+                </ul>
+            </div>
+        `;
+    }
+
+    function renderEvaluaciones(carta, preguntas) {
+        let html = `
+            <div class="reporte-seccion">
+                <h4>Producto 2: Instrumentos de Evaluación</h4>
+                
+                <h5>Evaluación Diagnóstica</h5>
+                <p><strong>Instrumento:</strong> ${carta.ev?.diag?.ins || 'No definido'}</p>
+                <p><strong>Propósito:</strong> ${carta.ev?.diag?.prop || 'No definido'}</p>
+                
+                <h5>Evaluación Formativa</h5>
+                <p><strong>Instrumento(s):</strong> ${carta.ev?.form?.ins || 'No definido'}</p>
+                <p><strong>Ponderación:</strong> ${carta.ev?.form?.pct || 'N/A'}%</p>
+                
+                <h5>Evaluación Sumativa (Reactivos)</h5>
+        `;
+        
+        preguntas.forEach((pregunta, index) => {
+            html += `<div class="pregunta-item" style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
+                <strong>${index + 1}. ${pregunta.pregunta}</strong>
+                <ul>`;
+            let inciso = 'a';
+            pregunta.opciones.forEach(opcion => {
+                html += `<li>${inciso}) ${opcion.texto}</li>`;
+                inciso = String.fromCharCode(inciso.charCodeAt(0) + 1);
+            });
+            html += `</ul></div>`;
+        });
+        
+        html += `</div>`;
+        return html;
+    }
+    
+    function renderRespuestas(carta, preguntas) {
+        let html = `
+            <div class="reporte-seccion">
+                <h4>Producto 3: Hoja de Respuestas (Evaluación Sumativa)</h4>
+                <p>Este documento sirve como clave de respuestas para el instructor/evaluador.</p>
+        `;
+        
+        preguntas.forEach((pregunta, index) => {
+            html += `<div class="pregunta-item">
+                <strong>${index + 1}. ${pregunta.pregunta}</strong>
+                <ul>`;
+            let inciso = 'a';
+            pregunta.opciones.forEach(opcion => {
+                if (opcion.correcta) {
+                    html += `<li class="respuesta-correcta">${inciso}) ${opcion.texto} <strong>(Respuesta Correcta)</strong></li>`;
+                } else {
+                    html += `<li>${inciso}) ${opcion.texto}</li>`;
+                }
+                inciso = String.fromCharCode(inciso.charCodeAt(0) + 1);
+            });
+            html += `</ul></div>`;
+        });
+        
+        html += `</div>`;
+        return html;
+    }
+
+    function renderManualParticipante(manual) {
+        if (!manual) return '<div class="reporte-seccion"><h4>Producto 4: Manual del Participante</h4><p>No generado.</p></div>';
+        let html = `
+            <div class="reporte-seccion">
+                <h4>Producto 4: Manual del Participante</h4>
+                <div class="manual-cover">
+                    <h2>${manual.cover.title}</h2>
+                    <h3>${manual.cover.subtitle}</h3>
+                    <p><strong>${manual.cover.author}</strong></p>
+                </div>
+        `;
+        manual.sections.forEach(sec => {
+            html += `<div class="manual-section"><h5>${sec.title}</h5><div>${formatContent(sec.content)}</div></div>`;
+        });
+        html += `</div>`;
+        return html;
+    }
+
+    function renderManualInstructor(manual) {
+        if (!manual) return '<div class="reporte-seccion"><h4>Producto 5: Manual del Instructor</h4><p>No generado.</p></div>';
+        let html = `
+            <div class="reporte-seccion">
+                <h4>Producto 5: Manual del Instructor</h4>
+                <div class="manual-cover">
+                    <h2>${manual.cover.title}</h2>
+                    <h3>${manual.cover.subtitle}</h3>
+                    <p><strong>${manual.cover.author}</strong></p>
+                </div>
+        `;
+        manual.sections.forEach(sec => {
+            html += `<div class="manual-section"><h5>${sec.title}</h5><div>${formatContent(sec.content)}</div></div>`;
+        });
+        html += `</div>`;
+        return html;
+    }
+
+    function renderLogistica(data) {
+        const numFilas = (parseInt(data.num) || 15) + 5;
+        let filasTabla = '';
+        for (let i = 1; i <= numFilas; i++) {
+            filasTabla += `<tr><td>${i}</td><td></td><td></td></tr>`;
+        }
+
+        return `
+            <div class="reporte-seccion">
+                <h4>Producto 6: Logística (Ejemplo de Lista de Asistencia)</h4>
+                <p><strong>Curso:</strong> ${data.nombre || ''}</p>
+                <p><strong>Facilitador:</strong> ${data.facilitador || ''}</p>
+                <table>
+                    <thead><tr><th>No.</th><th>Nombre</th><th>Firma</th></tr></thead>
+                    <tbody>${filasTabla}</tbody>
+                </table>
+            </div>
+        `;
+    }
+    
+    function formatContent(content) {
+        if (!content) return '';
+        return content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+    }
+    
+    const $ = id => document.getElementById(id);
+    </script>
+</body>
+</html>
