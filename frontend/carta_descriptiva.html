@@ -7,7 +7,6 @@
 
     <script src="sistema_central/auth.js" defer></script>
     <script src="sistema_central/ec0301-data-manager.js" defer></script>
-
     <script>
         // Si auth.js no se ha cargado, espera
         document.addEventListener('DOMContentLoaded', () => {
@@ -50,9 +49,9 @@
                     Carta Descriptiva EC0301
                 </h1>
                 <div class="toolbar">
-                   <a href="acceso.html" class="btn btn-secondary">
-                    <i class="fa-solid fa-arrow-left"></i> Volver al Dashboard
-                </a>
+                    <a href="acceso.html" class="btn btn-secondary">
+                        <i class="fa-solid fa-arrow-left"></i> Volver al Dashboard
+                    </a>
                     <button class="btn btn-secondary" onclick="showHelp()">
                         <i class="fa-solid fa-question-circle"></i> Ayuda
                     </button>
@@ -265,7 +264,6 @@
 
     <script>
     // ========== CONSTANTES Y CONFIGURACIÓN ==========
-    // (AJUSTE) Cargar el DataManager desde el window global
     let EC0301Manager; 
     
     const KEY = 'EC0301_CARTA_PRO';
@@ -740,15 +738,15 @@
         Swal.fire({
             title: 'Guía Rápida EC0301',
             html: `<div style="text-align: left;">
-                    <h4>📝 Guion Instruccional (EC0301)</h4>
-                    <p>Este formulario te ayuda a crear el guion instruccional (carta descriptiva) para un <strong>curso en línea</strong>, según el estándar EC0301.</p>
-                    <h5 style="margin-top: 1rem;">✅ Elementos clave:</h5>
-                    <ul>
-                        <li><strong>Perfil:</strong> Debe incluir habilidades tecnológicas.</li>
-                        <li><strong>Requerimientos:</strong> Enfocados en plataforma y recursos digitales.</li>
-                        <li><strong>Guion:</strong> Detalla actividades <strong>en plataforma</strong> y tipo de interacción (síncrona/asíncrona).</li>
-                    </ul>
-                   </div>`,
+                     <h4>📝 Guion Instruccional (EC0301)</h4>
+                     <p>Este formulario te ayuda a crear el guion instruccional (carta descriptiva) para un <strong>curso en línea</strong>, según el estándar EC0301.</p>
+                     <h5 style="margin-top: 1rem;">✅ Elementos clave:</h5>
+                     <ul>
+                         <li><strong>Perfil:</strong> Debe incluir habilidades tecnológicas.</li>
+                         <li><strong>Requerimientos:</strong> Enfocados en plataforma y recursos digitales.</li>
+                         <li><strong>Guion:</strong> Detalla actividades <strong>en plataforma</strong> y tipo de interacción (síncrona/asíncrona).</li>
+                     </ul>
+                    </div>`,
             width: 600, confirmButtonText: 'Entendido', confirmButtonColor: '#1E3A8A'
         });
     }
