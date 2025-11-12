@@ -4,10 +4,9 @@
  * en el LocalStorage del navegador.
  */
 const EC0301Manager = (function() {
-    'useS trict';
+    'use strict';
 
     const DATA_KEY = 'EC0301_ProyectoData';
-
     let projectData = {};
 
     /**
@@ -18,10 +17,10 @@ const EC0301Manager = (function() {
             const storedData = localStorage.getItem(DATA_KEY);
             if (storedData) {
                 projectData = JSON.parse(storedData);
-                console.log('[DataManager] Datos cargados desde localStorage.');
+                console.log('[DataManager] Datos cargados.');
             } else {
                 projectData = {};
-                console.log('[DataManager] No se encontraron datos, iniciando proyecto vacío.');
+                console.log('[DataManager] Proyecto vacío.');
             }
         } catch (e) {
             console.error('[DataManager] Error al cargar datos:', e);
@@ -35,14 +34,13 @@ const EC0301Manager = (function() {
     function saveDataToStorage() {
         try {
             localStorage.setItem(DATA_KEY, JSON.stringify(projectData));
-            console.log('[DataManager] Datos guardados en localStorage.');
         } catch (e) {
             console.error('[DataManager] Error al guardar datos:', e);
         }
     }
 
     /**
-     * Obtiene una copia de todos los datos del proyecto.
+     * Obtiene una copia de todos los datos del proyecto (la Carta Descriptiva principal).
      * @returns {object}
      */
     function getData() {
@@ -58,10 +56,7 @@ const EC0301Manager = (function() {
             projectData = data;
             saveDataToStorage();
             return true;
-        } catch (e) {
-            console.error('[DataManager] Error en saveData:', e);
-            return false;
-        }
+        } catch (e) { return false; }
     }
 
     /**
@@ -78,10 +73,7 @@ const EC0301Manager = (function() {
             saveDataToStorage();
             console.log(`[DataManager] Producto "${productName}" guardado.`);
             return true;
-        } catch (e) {
-            console.error(`[DataManager] Error en saveProduct (${productName}):`, e);
-            return false;
-        }
+        } catch (e) { return false; }
     }
 
     /**
@@ -96,10 +88,7 @@ const EC0301Manager = (function() {
                 return projectData.productos[productName];
             }
             return null;
-        } catch (e) {
-            console.error(`[DataManager] Error en loadProduct (${productName}):`, e);
-            return null;
-        }
+        } catch (e) { return null; }
     }
 
     /**
@@ -108,10 +97,10 @@ const EC0301Manager = (function() {
     function clearData() {
         projectData = {};
         localStorage.removeItem(DATA_KEY);
-        console.log('[DataManager] Todos los datos han sido borrados.');
+        console.log('[DataManager] Datos borrados.');
     }
 
-    // Inicializar al cargar el script
+    // Carga inicial al momento de que el script es leído
     loadDataFromStorage();
 
     // Exponer la API pública
