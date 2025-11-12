@@ -7,13 +7,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script src="sistema_central/auth.js" defer></script>
-    <script src="sistema_central/ec0301-data-manager.js" defer></script>
+    <script src="sistema_central/ec0301-data-manager.js" defer></script> 
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Esta guardia es MÁS ROBUSTA. Espera a que auth.js cargue.
             if (typeof auth === 'undefined') {
                 console.error("Error crítico: auth.js no se cargó. Revisa la ruta.");
-                // Mostrar el error en la página de acceso
                 document.body.innerHTML = `<h1 style="color: red; padding: 2rem;">Error crítico de seguridad. No se pudo cargar el módulo de autenticación. Revisa la ruta a 'sistema_central/auth.js'.</h1>`;
                 return;
             }
@@ -27,7 +27,7 @@
         :root {
             --primary: #6366f1; --primary-dark: #4f46e5; --dark: #1e293b;
             --light: #f1f5f9; --white: #ffffff; --danger: #ef4444;
-            --success: #10b981; --accent: #FF6B35;
+            --success: #10b981; --accent: #FF6B35; --warning: #F59E0B;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -74,43 +74,43 @@
         .module-card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
         .module-card p { font-size: 0.9rem; margin-bottom: 0; color: #64748b; }
         
-        /* --- ESTILO DE MÓDULO BLOQUEADO --- */
+        /* Icon Colors */
+        .module-card .fa-file-alt { color: var(--primary); }
+        .module-card .fa-tasks { color: var(--success); }
+        .module-card .fa-book-open { color: var(--accent); }
+        .module-card .fa-truck { color: #0ea5e9; } /* cian */
+        .module-card .fa-key { color: var(--warning); } /* amarillo */
+        .module-card .fa-shield-check { color: #8b5cf6; } /* purpura */
+        
+        /* Estilo especial para el módulo de exportación */
+        .module-card.export-card {
+            background: var(--dark);
+            border-color: var(--dark);
+        }
+        .module-card.export-card:hover {
+            box-shadow: 0 15px 30px rgba(30, 41, 59, 0.3);
+            border-color: var(--primary);
+        }
+        .module-card.export-card i { color: #94a3b8; }
+        .module-card.export-card h3 { color: var(--white); }
+        .module-card.export-card p { color: #94a3b8; }
+
+        /* Estilo de módulo bloqueado (lógica de JS) */
         .module-card.locked {
-            background: #f1f5f9;
-            opacity: 0.7;
-            cursor: not-allowed;
-            position: relative;
-            overflow: hidden;
+            background: #f1f5f9; opacity: 0.7; cursor: not-allowed;
+            position: relative; overflow: hidden;
         }
         .module-card.locked::before {
-            content: '\f023'; /* Icono de candado de FontAwesome */
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            font-size: 1rem;
-            color: var(--muted);
+            content: '\f023'; /* Icono de candado */
+            font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            position: absolute; top: 1rem; right: 1rem;
+            font-size: 1rem; color: var(--muted);
         }
         .module-card.locked:hover {
             transform: none;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             border-color: transparent;
         }
-        /* --- --- */
-        
-        .module-card .fa-file-alt { color: var(--primary); }
-        .module-card .fa-tasks { color: var(--success); }
-        .module-card .fa-book-open { color: var(--accent); }
-        .module-card .fa-truck { color: #0ea5e9; }
-        .module-card .fa-key { color: #f59e0b; }
-        .module-card .fa-shield-check { color: var(--danger); }
-        
-        .module-card.export-card { background: var(--dark); border-color: var(--dark); }
-        .module-card.export-card:hover { box-shadow: 0 15px 30px rgba(30, 41, 59, 0.3); border-color: var(--primary); }
-        .module-card.export-card i { color: #94a3b8; }
-        .module-card.export-card h3 { color: var(--white); }
-        .module-card.export-card p { color: #94a3b8; }
     </style>
 </head>
 <body>
@@ -151,7 +151,7 @@
                 <h3>Manuales del Curso</h3>
                 <p>Desarrolla los manuales del participante y del facilitador.</p>
             </a>
-
+            
             <a href="logistica.html" class="module-card" id="logistica-card">
                 <i class="fas fa-truck"></i>
                 <h3>Logística y Formatos</h3>
@@ -180,7 +180,6 @@
     </main>
 
     <script>
-        // Script de la página de acceso (se ejecuta después de la guardia de seguridad)
         document.addEventListener('DOMContentLoaded', () => {
             
             // 1. Configurar Bienvenida y Logout
@@ -192,9 +191,9 @@
             const logoutButton = document.getElementById('logoutButton');
             logoutButton.addEventListener('click', () => {
                 if (typeof auth !== 'undefined') {
-                    auth.logout();
+                    auth.logout(); // Llama a la función de logout en auth.js
                 } else {
-                    localStorage.clear();
+                    localStorage.clear(); // Fallback
                     window.location.href = 'index.html';
                 }
             });
@@ -204,8 +203,7 @@
                 const cartaData = EC0301Manager.getData();
                 
                 // El "guardián": Si la carta NO tiene un nombre de curso, está incompleta.
-                // (Usamos 'cd_nombre' porque es el primer campo de la carta)
-                const isCartaComplete = cartaData && cartaData.nombre; 
+                const isCartaComplete = cartaData && cartaData.nombre && cartaData.nombre.trim() !== '';
 
                 if (!isCartaComplete) {
                     const lockMessage = 'Debes completar y guardar tu "Carta Descriptiva" primero.';
