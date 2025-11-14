@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carta Descriptiva EC0301 - Sistema Profesional</title>
 
     <script src="sistema_central/auth.js" defer></script>
     <script src="sistema_central/ec0301-data-manager.js" defer></script>
+
     <script>
-        // Si auth.js no se ha cargado, espera
         document.addEventListener('DOMContentLoaded', () => {
-            if (typeof auth !== 'undefined' && !auth.isLoggedIn()) {
-                // Si no está logueado, expulsa al index (página de login)
-                window.location.replace('index.html');
-            }
+            setTimeout(() => { // Espera 50ms a que auth.js cargue
+                if (typeof auth === 'undefined') {
+                    console.error("Error crítico: auth.js no se cargó. Revisa la ruta.");
+                    document.body.innerHTML = `<h1 style="color: red; padding: 2rem;">Error crítico de seguridad. No se pudo cargar el módulo de autenticación. Revisa la ruta a 'sistema_central/auth.js'.</h1>`;
+                    return;
+                }
+                if (!auth.isLoggedIn()) {
+                    window.location.replace('index.html');
+                }
+            }, 50);
         });
     </script>
 
@@ -27,17 +33,7 @@
     
     <style>
         /* (Tu CSS de 600+ líneas va aquí) */
-        :root { 
-            --primary: #1E3A8A; --accent: #FF6B35; --success: #22C55E; --warning: #F59E0B;
-            --danger: #EF4444; --light: #F8FAFC; --border: #E5E7EB; --text: #1F2937; --muted: #6B7280;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh; color: var(--text);
-        }
-        /* ... Tu CSS ... */
+        /* ... */
     </style>
 </head>
 <body>
