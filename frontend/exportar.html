@@ -8,14 +8,6 @@
     <script src="sistema_central/auth.js" defer></script>
     <script src="sistema_central/ec0301-data-manager.js" defer></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof auth !== 'undefined' && !auth.isLoggedIn()) {
-                window.location.replace('index.html');
-            }
-        });
-    </script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -36,9 +28,10 @@
             background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: sticky; top: 0; z-index: 1000; border-bottom: 3px solid var(--accent);
         }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
         .header-content {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 1rem; max-width: 1200px; margin: 0 auto;
+            padding: 1rem; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; gap: 1rem;
         }
         h1 { font-size: 1.75rem; color: var(--primary); display: flex; align-items: center; gap: 0.75rem; }
         .btn {
@@ -50,9 +43,11 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-zip { background: #334155; color: white; }
+        .btn-primary:hover { background: #1c3274; }
+        .btn-success:hover { background: #1a9c4b; }
+        .btn-zip:hover { background: #1e293b; }
+        .btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
-        
         .generation-panel {
             background: var(--white);
             border: 1px solid var(--border);
@@ -60,21 +55,22 @@
             text-align: center;
         }
         .generation-panel h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; justify-content: center; }
-        .generation-panel p { color: var(--muted); margin-bottom: 1.5rem; max-width: 600px; margin: 0 auto 1.5rem; }
+        .generation-panel p { color: var(--muted); margin: 0 auto 1.5rem; max-width: 650px; }
         .button-group { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
         
         #reporte-container {
             display: none; /* Se muestra al generar el reporte */
             background: white; padding: 3rem; border-radius: 8px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.07); min-height: 600px;
-            font-family: 'Georgia', 'Times New Roman', serif;
+            font-family: 'Georgia', 'Times New Roman', serif; /* Estilo de manual */
         }
         
         /* Estilos de impresión para el reporte */
-        .reporte-portada { text-align: center; padding: 4rem 2rem; page-break-after: always; }
+        .reporte-portada { text-align: center; padding: 4rem 2rem; page-break-after: always; border: 1px solid #ccc; height: 90vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .reporte-portada h2 { font-size: 2.5rem; color: var(--primary); }
         .reporte-portada h3 { font-size: 1.5rem; color: var(--muted); margin-top: 1rem; }
-        .reporte-portada p { margin-top: 3rem; }
+        .reporte-portada h1 { font-size: 2rem; color: var(--text); margin-top: 2rem; }
+        .reporte-portada p { margin-top: 2rem; }
         
         .reporte-seccion { margin-top: 3rem; page-break-before: always; }
         .reporte-seccion h4 { font-size: 2rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
@@ -82,27 +78,26 @@
         .reporte-seccion p, .reporte-seccion li { margin-bottom: 0.75rem; }
         .reporte-seccion ul { padding-left: 2rem; }
         .reporte-seccion table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        .reporte-seccion th, .reporte-seccion td { border: 1px solid #ccc; padding: 0.75rem; }
+        .reporte-seccion th, .reporte-seccion td { border: 1px solid #ccc; padding: 0.75rem; font-size: 0.95rem; }
         .reporte-seccion th { background: #f1f1f1; }
         
-        .respuesta-correcta {
-            background-color: #F0FDF4 !important;
-            color: #15803D !important;
-            font-weight: 700 !important;
-            border: 1px solid var(--success) !important;
-        }
-        .instructor-note {
-            background: #FFFBEB; border-left: 4px solid #FBBF24; padding: 1rem;
-            margin: 1rem 0; border-radius: 8px;
-        }
+        .pregunta-item { border: 1px solid #e5e7eb; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: #F9FAFB; }
+        .respuesta-correcta { background-color: #F0FDF4 !important; color: #15803D !important; font-weight: 700 !important; border: 1px solid var(--success) !important; }
+        .instructor-note { background: #FFFBEB; border-left: 4px solid #FBBF24; padding: 1rem; margin: 1rem 0; border-radius: 8px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .req-card { background: #F9FAFB; border: 1px solid #eee; padding: 1rem; border-radius: 8px; }
 
         @media print {
             body { background: white; }
             .header, .no-print { display: none !important; }
             .container { margin: 0; padding: 0; }
-            #reporte-container {
-                display: block !important;
-                box-shadow: none; border: none; padding: 0;
+            #reporte-container { display: block !important; box-shadow: none; border: none; padding: 0; }
+            .reporte-portada { height: 95vh; border: none; }
+            .respuesta-correcta {
+                background-color: #F0FDF4 !important;
+                color: #15803D !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
             }
             @page {
                 size: letter;
@@ -114,7 +109,10 @@
 <body>
     <header class="header no-print">
         <div class="header-content">
-            <h1><i class="fa-solid fa-file-zipper" style="color: var(--accent);"></i> Exportar Portafolio</h1>
+            <h1>
+                <i class="fa-solid fa-file-zipper" style="color: var(--accent);"></i>
+                Exportar Portafolio EC0301
+            </h1>
             <div>
                 <a href="acceso.html" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
             </div>
@@ -124,51 +122,61 @@
     <main class="container">
         <div class="generation-panel no-print">
             <h3><i class="fa-solid fa-download"></i> Centro de Descargas del Portafolio EC0301</h3>
-            <p>Genera un solo documento HTML/PDF con todos tus productos para imprimir, o descarga un archivo .ZIP con los 10 productos requeridos por el estándar.</p>
+            <p>
+                Desde aquí puedes generar un solo documento HTML listo para impresión / PDF
+                con los 10 productos del Portafolio EC0301, o descargar cada producto por
+                separado en un archivo .ZIP.
+            </p>
             <div class="button-group">
-                <button class="btn btn-primary" onclick="generarReporteHTML()">
+                <button class="btn btn-primary" onclick="generarReporteHTML()" id="btn-html">
                     <i class="fa-solid fa-eye"></i> 1. Ver Reporte en Pantalla
                 </button>
-                <button class="btn btn-success" onclick="imprimirReporte()">
+                <button class="btn btn-success" onclick="imprimirReporte()" id="btn-pdf" disabled>
                     <i class="fa-solid fa-file-pdf"></i> 2. Guardar como PDF
                 </button>
-                <button class="btn btn-zip" onclick="generarZip()">
-                    <i class="fa-solid fa-file-zipper"></i> 3. Descargar .ZIP
+                <button class="btn btn-zip" onclick="generarZip()" id="btn-zip">
+                    <i class="fa-solid fa-file-zipper"></i> 3. Descargar ZIP (10 productos)
                 </button>
             </div>
         </div>
 
-        <div id="reporte-container" class="printable">
-            </div>
-
+        <div id="reporte-container" class="printable"></div>
     </main>
 
     <script>
     let EC0301Manager;
     let cartaData = {};
-    let evaluacionData = [];
+    let evaluacionSumativa = [];
     let manualesData = {};
-    let respuestasData = {}; // Para la hoja de respuestas
-    let logisticaData = {}; // Para la logística
+    let respuestasData = null; // No lo cargamos, lo generamos desde la sumativa
+
+    const $ = (id) => document.getElementById(id);
 
     document.addEventListener('DOMContentLoaded', () => {
-        // (AJUSTE) Verificar que los scripts globales estén cargados
-        if (typeof auth === 'undefined' || typeof EC0301Manager === 'undefined') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error Crítico',
-                text: 'No se pudieron cargar los módulos de sistema (auth.js, ec0301-data-manager.js). Revisa las rutas en el HTML.',
-                confirmButtonColor: '#EF4444'
-            }).then(() => window.location.href = 'index.html');
-            return;
-        }
-        
-        EC0301Manager = window.EC0301Manager;
+         // ===== Guardia de Seguridad Robusta =====
+        setTimeout(() => {
+            if (typeof auth === 'undefined' || typeof EC0301Manager === 'undefined') {
+                Swal.fire({
+                    icon: 'error', title: 'Error Crítico',
+                    text: 'No se pudieron cargar los módulos de sistema (auth.js, ec0301-data-manager.js).',
+                    confirmButtonColor: '#EF4444'
+                }).then(() => window.location.href = 'index.html');
+                return;
+            }
+            EC0301Manager = window.EC0301Manager;
+            if (!auth.isLoggedIn()) {
+                window.location.replace('index.html');
+            }
+            
+            // Validar datos al inicio para activar botones
+            if (!loadAllData(true)) { // true = silent
+                 $('btn-html').disabled = true;
+                 $('btn-zip').disabled = true;
+                 showMissingDataAlert('todos los productos');
+            }
+        }, 50); // 50ms de espera
     });
 
-    /**
-     * Muestra alerta si no se encuentran datos
-     */
     function showMissingDataAlert(missing) {
         Swal.fire({
             icon: 'warning',
@@ -184,69 +192,77 @@
     /**
      * Carga todos los datos desde el EC0301Manager
      */
-    function loadAllData() {
+    function loadAllData(silent = false) {
         try {
             cartaData = EC0301Manager.getData();
             if (!cartaData || !cartaData.nombre) {
-                showMissingDataAlert('Carta Descriptiva');
+                if (!silent) showMissingDataAlert('Carta Descriptiva');
                 return false;
             }
             
-            evaluacionData = EC0301Manager.loadProduct('evaluacion-sumativa') || [];
-            if (evaluacionData.length === 0) {
-                showMissingDataAlert('Evaluaciones');
+            evaluacionSumativa = EC0301Manager.loadProduct('evaluacion-sumativa') || [];
+            if (evaluacionSumativa.length === 0) {
+                if (!silent) showMissingDataAlert('Evaluación Sumativa');
                 return false;
             }
             
             manualesData = EC0301Manager.loadProduct('manuales') || {};
             if (!manualesData.participante || !manualesData.instructor) {
-                showMissingDataAlert('Manuales');
+                if (!silent) showMissingDataAlert('Manuales (Participante e Instructor)');
                 return false;
             }
-
-            // (Asumimos que logística y respuestas se basan en la carta)
-            return true; 
+            
+            return true; // Todo cargado
             
         } catch (error) {
             console.error('Error al cargar datos:', error);
-            showMissingDataAlert('los datos');
+            if (!silent) showMissingDataAlert('los datos');
             return false;
         }
     }
     
-    /**
-     * 1. VER REPORTE HTML
-     * Genera el HTML de todo el portafolio y lo muestra en pantalla
-     */
+    /* =========================
+       1. VER REPORTE PORTAFOLIO
+       ========================= */
     function generarReporteHTML() {
         if (!loadAllData()) return; // Carga los datos y valida
         
-        const container = document.getElementById('reporte-container');
+        const container = $('reporte-container');
         
         // Usar las funciones 'renderer' para construir el HTML
         container.innerHTML = `
             ${renderPortada(cartaData)}
             ${renderCartaDescriptiva(cartaData)}
-            ${renderEvaluaciones(cartaData, evaluacionData)}
-            ${renderRespuestas(cartaData, evaluacionData)}
+            ${renderEvaluacionDiagnostica(cartaData)}
+            ${renderEvaluacionFormativa(cartaData)}
+            ${renderEvaluacionesSumativas(cartaData, evaluacionSumativa)}
+            ${renderRespuestas(cartaData, evaluacionSumativa)}
+            ${renderEvaluacionSatisfaccion(cartaData)}
             ${renderManualParticipante(manualesData.participante)}
             ${renderManualInstructor(manualesData.instructor)}
             ${renderLogistica(cartaData)}
-            `;
+            ${renderAuditoriaResumen()}
+        `;
         
         container.style.display = 'block';
-        Swal.fire('Reporte Generado', 'El portafolio completo se muestra a continuación. Ahora puedes guardarlo como PDF.', 'success');
+        $('btn-pdf').disabled = false; // Activa el botón de PDF
+
+        Swal.fire(
+            'Reporte Generado',
+            'El portafolio completo se muestra a continuación. Ahora puedes guardarlo como PDF.',
+            'success'
+        );
         
         // Ir al inicio del reporte
         window.scrollTo(0, 0);
     }
     
-    /**
-     * 2. IMPRIMIR REPORTE (PDF)
-     */
+    /* =========================
+       2. IMPRIMIR / PDF
+       ========================= */
     function imprimirReporte() {
         // Primero, nos aseguramos de que el HTML esté generado
-        if (document.getElementById('reporte-container').style.display !== 'block') {
+        if ($('reporte-container').style.display !== 'block') {
             generarReporteHTML();
         }
         
@@ -256,48 +272,110 @@
         }, 500); 
     }
     
-    /**
-     * 3. DESCARGAR ZIP
-     */
+    /* =========================
+       3. ZIP CON 10 PRODUCTOS
+       ========================= */
     async function generarZip() {
-        if (!loadAllData()) return; // Carga los datos y valida
+        if (!loadAllData()) return;
 
         Swal.fire({
             title: 'Generando ZIP...',
-            text: 'Compilando todos los productos de tu portafolio...',
+            text: 'Compilando los 10 productos de tu portafolio EC0301...',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading()
         });
         
         try {
             const zip = new JSZip();
-            const nombreCurso = cartaData.nombre.replace(/ /g, '_') || 'EC0301';
+            const nombreCurso = (cartaData.nombre || 'EC0301').replace(/[^a-zA-Z0-9_\-]/g, '_');
 
-            // 1. Carta Descriptiva (como HTML)
-            zip.file("1_Carta_Descriptiva.html", renderCartaDescriptiva(cartaData));
-            
-            // 2. Instrumentos de Evaluación (como HTML)
-            zip.file("2_Instrumentos_Evaluacion.html", renderEvaluaciones(cartaData, evaluacionData));
-            
-            // 3. Hoja de Respuestas (como HTML)
-            zip.file("3_Hoja_Respuestas.html", renderRespuestas(cartaData, evaluacionData));
-            
-            // 4. Manual Participante (como HTML)
-            zip.file("4_Manual_Participante.html", renderManualParticipante(manualesData.participante));
-            
-            // 5. Manual Instructor (como HTML)
-            zip.file("5_Manual_Instructor.html", renderManualInstructor(manualesData.instructor));
+            const wrapHTML = (titulo, cuerpo) => (
+`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>${titulo}</title>
+<style>
+body { font-family: 'Georgia','Times New Roman',serif; line-height:1.6; margin:2rem; }
+h1,h2,h3,h4 { color:#1E3A8A; } h4 { font-size: 1.8rem; border-bottom: 2px solid #FF6B35; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+h5 { font-size: 1.5rem; margin-top: 1.5rem; margin-bottom: 1rem; }
+table { border-collapse:collapse; width:100%; margin-top:1rem; }
+th,td { border:1px solid #ccc; padding:0.5rem; font-size:0.9rem; }
+th { background:#f1f1f1; } ul { padding-left:1.5rem; }
+.pregunta-item { border:1px solid #e5e7eb; padding:0.75rem; border-radius:6px; margin-bottom:0.75rem; background:#F9FAFB; }
+.respuesta-correcta { background:#F0FDF4; color:#15803D; font-weight:bold; border:1px solid #22C55E; }
+.instructor-note { background:#FFFBEB; border-left:4px solid #FBBF24; padding:0.75rem; border-radius:6px; margin:0.75rem 0; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.req-card { background: #F9FAFB; border: 1px solid #eee; padding: 1rem; border-radius: 8px; }
+</style>
+</head>
+<body>
+${cuerpo}
+</body>
+</html>`
+            );
 
-            // 6. Lista de Verificación de Logística (como HTML)
-            zip.file("6_Logistica.html", renderLogistica(cartaData));
+            // 1. Carta Descriptiva
+            zip.file(
+                "01_Carta_Descriptiva.html",
+                wrapHTML("Carta Descriptiva", renderCartaDescriptiva(cartaData))
+            );
             
-            // ... (Faltarían 4 productos más: Diag, Form, Satisfacción, Auditoría)
-            // Por ahora, generamos un ZIP con los 6 productos principales que hemos construido.
+            // 2. Evaluación Diagnóstica
+            zip.file(
+                "02_Evaluacion_Diagnostica.html",
+                wrapHTML("Evaluación Diagnóstica", renderEvaluacionDiagnostica(cartaData))
+            );
             
-            // Generar el ZIP
+            // 3. Evaluación Formativa
+            zip.file(
+                "03_Evaluacion_Formativa.html",
+                wrapHTML("Evaluación Formativa", renderEvaluacionFormativa(cartaData))
+            );
+            
+            // 4. Evaluación Sumativa (Reactivos)
+            zip.file(
+                "04_Evaluacion_Sumativa.html",
+                wrapHTML("Evaluación Sumativa", renderEvaluacionesSumativas(cartaData, evaluacionSumativa))
+            );
+            
+            // 5. Hoja de Respuestas
+            zip.file(
+                "05_Hoja_Respuestas.html",
+                wrapHTML("Hoja de Respuestas", renderRespuestas(cartaData, evaluacionSumativa))
+            );
+            
+            // 6. Evaluación de Satisfacción
+            zip.file(
+                "06_Evaluacion_Satisfaccion.html",
+                wrapHTML("Evaluación de Satisfacción", renderEvaluacionSatisfaccion(cartaData))
+            );
+            
+            // 7. Manual Participante
+            zip.file(
+                "07_Manual_Participante.html",
+                wrapHTML("Manual del Participante", renderManualParticipante(manualesData.participante))
+            );
+            
+            // 8. Manual Instructor
+            zip.file(
+                "08_Manual_Instructor.html",
+                wrapHTML("Manual del Instructor", renderManualInstructor(manualesData.instructor))
+            );
+            
+            // 9. Logística (Lista de Asistencia, Contrato y Requerimientos)
+            zip.file(
+                "09_Logistica_Formatos.html",
+                wrapHTML("Logística / Formatos", renderLogistica(cartaData))
+            );
+
+            // 10. Resumen de Auditoría EC0301
+            zip.file(
+                "10_Resumen_Auditoria_EC0301.html",
+                wrapHTML("Resumen de Auditoría EC0301", renderAuditoriaResumen())
+            );
+            
             const content = await zip.generateAsync({ type: "blob" });
-            
-            // Descargar
             saveAs(content, `Portafolio_EC0301_${nombreCurso}.zip`);
             
             Swal.close();
@@ -308,101 +386,247 @@
         }
     }
     
-    // =============================================================
-    // FUNCIONES RENDERER (Ayudantes para generar el HTML)
-    // Estas funciones toman los datos y devuelven strings de HTML
-    // =============================================================
+    /* =============================================================
+       FUNCIONES RENDERER (Ayudantes para generar el HTML)
+       ============================================================= */
+
+    function formatContent(content) {
+        if (!content) return '';
+        return content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+    }
 
     function renderPortada(data) {
         return `
             <div class="reporte-portada">
                 <h2>Portafolio de Evidencias</h2>
-                <h3>Estándar de Competencia EC0301</h3>
-                <br><br>
-                <h1>${data.nombre || 'Curso No Definido'}</h1>
-                <br><br><br>
-                <p><strong>Diseñador:</strong> ${data.diseñador || 'No Definido'}</p>
-                <p><strong>Facilitador:</strong> ${data.facilitador || 'No Definido'}</p>
+                <h3>Estándar de Competencia EC0301 / EC0217.01</h3>
+                <h1 style="font-size: 2.5rem; margin-top: 3rem;">${data.nombre || 'Curso no definido'}</h1>
+                <p style="margin-top: 4rem;"><strong>Diseñador:</strong> ${data.diseñador || 'No definido'}</p>
+                <p><strong>Facilitador:</strong> ${data.facilitador || 'No definido'}</p>
                 <p><strong>Fecha de Generación:</strong> ${new Date().toLocaleDateString('es-MX')}</p>
             </div>
         `;
     }
 
+    // Producto 1: Carta Descriptiva
     function renderCartaDescriptiva(data) {
-        // Esta es una versión simplificada. Para la real, copiaríamos la lógica de exportación de 'carta_descriptiva.html'
+        const temasHTML = (data.temas || [])
+            .map(t => `<li><strong>${t.nombre || ''}</strong> (${t.duracion || '0'} min): ${t.desc || ''}</li>`)
+            .join('');
+
+        const reqHTML = `
+            <li><strong>Instalaciones:</strong> ${data.rq?.instalaciones || ''}</li>
+            <li><strong>Equipo:</strong> ${data.rq?.equipo || ''}</li>
+            <li><strong>Materiales:</strong> ${data.rq?.materiales || ''}</li>
+            <li><strong>Humanos:</strong> ${data.rq?.humanos || ''}</li>
+            <li><strong>Seguridad:</strong> ${data.rq?.seguridad || ''}</li>
+        `;
+        
+        const devHTML = `
+            <p><strong>Comprobación (${data.dev?.comprobacion_t || 0} min):</strong> ${data.dev?.comprobacion_desc || ''}</p>
+            <h5>Encuadre (${(parseInt(data.dev?.enc_1_t || 0) + parseInt(data.dev?.enc_2_t || 0) + parseInt(data.dev?.enc_3_t || 0) + parseInt(data.dev?.enc_4_t || 0) + parseInt(data.dev?.enc_5_t || 0))} min)</h5>
+            <ul>
+                <li><strong>Presentación:</strong> ${data.dev?.enc_1_desc || ''}</li>
+                <li><strong>Objetivos y Temario:</strong> ${data.dev?.enc_2_desc || ''}</li>
+                <li><strong>Evaluación:</strong> ${data.dev?.enc_3_desc || ''}</li>
+                <li><strong>Acuerdos:</strong> ${data.dev?.enc_4_desc || ''}</li>
+                <li><strong>Diagnóstica:</strong> ${data.dev?.enc_5_desc || ''}</li>
+            </ul>
+            <h5>Desarrollo</h5>
+            <ul>${temasHTML}</ul>
+            <h5>Cierre (${(parseInt(data.dev?.cierre_1_t || 0) + parseInt(data.dev?.cierre_2_t || 0) + parseInt(data.dev?.cierre_3_t || 0) + parseInt(data.dev?.cierre_4_t || 0) + parseInt(data.dev?.cierre_5_t || 0))} min)</h5>
+            <ul>
+                <li><strong>Resumen:</strong> ${data.dev?.cierre_1_desc || ''}</li>
+                <li><strong>Expectativas:</strong> ${data.dev?.cierre_2_desc || ''}</li>
+                <li><strong>Continuidad:</strong> ${data.dev?.cierre_3_desc || ''}</li>
+                <li><strong>Satisfacción:</strong> ${data.dev?.cierre_4_desc || ''}</li>
+                <li><strong>Despedida:</strong> ${data.dev?.cierre_5_desc || ''}</li>
+            </ul>
+        `;
+
         return `
             <div class="reporte-seccion">
                 <h4>Producto 1: Carta Descriptiva</h4>
+                
                 <h5>Información General</h5>
-                <p><strong>Nombre:</strong> ${data.nombre || ''}</p>
-                <p><strong>Duración:</strong> ${data.duracion || ''} horas</p>
+                <div class="grid-2">
+                    <p><strong>Nombre:</strong> ${data.nombre || ''}</p>
+                    <p><strong>Duración:</strong> ${data.duracion || ''} horas</p>
+                    <p><strong>Facilitador:</strong> ${data.facilitador || ''}</p>
+                    <p><strong>Lugar:</strong> ${data.lugar || ''}</p>
+                </div>
                 <p><strong>Propósito:</strong> ${data.proposito || ''}</p>
-                
+
+                <h5>Perfil del Participante</h5>
+                <p>${data.perfil || ''}</p>
+                <p><strong>Conocimientos Previos:</strong> ${data.conoc || ''}</p>
+                <p><strong>No. de Participantes:</strong> ${data.num || ''}</p>
+
                 <h5>Objetivo General</h5>
-                <p>Al finalizar el curso, el participante ${data.og?.accion || '...'} ${data.og?.cond || '...'}, ${data.og?.criterio || '...'}.</p>
+                <p>Al finalizar el curso, el participante <strong>${data.og?.accion || '...'}</strong> <em>${data.og?.cond || '...'}</em>, ${data.og?.criterio || '...'}.</p>
                 
-                <h5>Temario</h5>
+                <h5>Objetivos Particulares</h5>
                 <ul>
-                    ${(data.temas || []).map(t => `<li>${t.nombre} (${t.duracion} min)</li>`).join('')}
+                    <li><strong>Cognitivo:</strong> ${data.objetivos[0]?.accion || ''}, ${data.objetivos[0]?.cond || ''}.</li>
+                    <li><strong>Psicomotor:</strong> ${data.objetivos[1]?.accion || ''}, ${data.objetivos[1]?.cond || ''}.</li>
+                    <li><strong>Afectivo:</strong> ${data.objetivos[2]?.accion || ''}, ${data.objetivos[2]?.cond || ''}.</li>
+                    <li><strong>Relacional:</strong> ${data.objetivos[3]?.accion || ''}, ${data.objetivos[3]?.cond || ''}.</li>
                 </ul>
+
+                <h5>Requerimientos</h5>
+                <ul>${reqHTML}</ul>
                 
                 <h5>Evaluación</h5>
-                <ul>
-                    <li><strong>Diagnóstica:</strong> ${data.ev?.diag?.ins || ''}</li>
-                    <li><strong>Formativa:</strong> ${data.ev?.form?.ins || ''} (${data.ev?.form?.pct || ''}%)</li>
-                    <li><strong>Sumativa:</strong> ${data.ev?.sum?.ins || ''} (${data.ev?.sum?.pct || ''}%)</li>
-                </ul>
+                <table>
+                    <thead><tr><th>Tipo</th><th>Instrumento</th><th>Momento</th><th>Ponderación</th></tr></thead>
+                    <tbody>
+                        <tr><td>Diagnóstica</td><td>${data.ev?.diag_ins || ''}</td><td>${data.ev?.diag_mom || ''}</td><td>0%</td></tr>
+                        <tr><td>Formativa</td><td>${data.ev?.form_ins || ''}</td><td>${data.ev?.form_mom || ''}</td><td>${data.ev?.form_pct || ''}%</td></tr>
+                        <tr><td>Sumativa</td><td>${data.ev?.sum_ins || ''}</td><td>${data.ev?.sum_mom || ''}</td><td>${data.ev?.sum_pct || ''}%</td></tr>
+                        <tr><td>Satisfacción</td><td>${data.ev?.sat_ins || ''}</td><td>${data.ev?.sat_mom || ''}</td><td>${data.ev?.sat_pct || ''}%</td></tr>
+                    </tbody>
+                </table>
+                
+                <h5>Desarrollo Cronológico</h5>
+                ${devHTML}
             </div>
         `;
     }
 
-    function renderEvaluaciones(carta, preguntas) {
+    // Producto 2: Evaluación Diagnóstica
+    function renderEvaluacionDiagnostica(data) {
+        // (Re-usamos la lógica de generación de respuestas.html)
+        const temas = (data.temas || []).map(t => t.nombre).join(', ');
+        const fakeQuestions = [
+            { tipo: 'tf', pregunta: `¿Tiene usted experiencia previa en ${temas.split(',')[0] || 'este tema'}?`, opciones: ['Verdadero', 'Falso'], correcta: 0 },
+            { tipo: 'mc', pregunta: `¿Qué es un ${data.nombre || 'tema principal'}?`, opciones: ['Definición A', 'Definición B', 'Definición C', 'No lo sé'], correcta: 3 }
+        ];
+        
+        let questionsHTML = '';
+        fakeQuestions.forEach((q, index) => {
+            let opcionesHtml = '<ul>';
+            let inciso = 'a';
+            q.opciones.forEach((opt) => {
+                opcionesHtml += `<li>${inciso}) ${opt}</li>`;
+                inciso = String.fromCharCode(inciso.charCodeAt(0) + 1);
+            });
+            opcionesHtml += '</ul>';
+            questionsHTML += `<div class="pregunta-item"><strong>${index + 1}. ${q.pregunta}</strong>${opcionesHtml}</div>`;
+        });
+        
+        return `
+            <div class="reporte-seccion">
+                <h4>Producto 2: Evaluación Diagnóstica</h4>
+                <div class="document-instructions">
+                    <h5>Instrucciones para el Participante:</h5>
+                    <p>Lea con atención y marque la opción que considere correcta. Esta evaluación no afecta su calificación.</p>
+                </div>
+                ${questionsHTML}
+            </div>
+        `;
+    }
+
+    // Producto 3: Evaluación Formativa
+    function renderEvaluacionFormativa(data) {
+        const tipo = data.ev?.form_ins?.toLowerCase().includes('guía') ? 'guia' : 'lista';
+        let formativaHTML = '';
+
+        if (tipo === 'guia') {
+            formativaHTML = `
+                <p><strong>Instrumento:</strong> Guía de Observación</p>
+                <div class="table-responsive mt-1">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Reactivo (Desempeño Esperado)</th>
+                                <th class="text-center">0 (No Logrado)</th>
+                                <th class="text-center">1 (Con Ayuda)</th>
+                                <th class="text-center">2 (Logrado)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>${data.objetivos[1]?.accion || 'Aplica el procedimiento...'}</td>
+                                <td></td><td></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>${data.objetivos[2]?.accion || 'Muestra actitud proactiva...'}</td>
+                                <td></td><td></td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`;
+        } else {
+             formativaHTML = `
+                <p><strong>Instrumento:</strong> Lista de Cotejo</p>
+                <div class="table-responsive mt-1">
+                    <table>
+                        <thead><tr><th>Reactivo (Producto Esperado)</th><th class="text-center">Sí</th><th class="text-center">No</th></tr></thead>
+                        <tbody>
+                            <tr><td>El producto entregable cumple con el criterio 1...</td><td></td><td></td></tr>
+                            <tr><td>El producto entregable cumple con el criterio 2...</td><td></td><td></td></tr>
+                        </tbody>
+                    </table>
+                </div>`;
+        }
+        
+        return `
+            <div class="reporte-seccion">
+                <h4>Producto 3: Evaluación Formativa</h4>
+                <div class="document-instructions">
+                    <h5>Instrucciones de Aplicación:</h5>
+                    <p>Aplicar durante el desarrollo del curso para observar desempeños o revisar productos, según los objetivos formativos.</p>
+                </div>
+                ${formativaHTML}
+            </div>
+        `;
+    }
+
+    // Producto 4: Evaluación Sumativa (Reactivos)
+    function renderEvaluacionesSumativas(carta, preguntas) {
         let html = `
             <div class="reporte-seccion">
-                <h4>Producto 2: Instrumentos de Evaluación</h4>
-                
-                <h5>Evaluación Diagnóstica</h5>
-                <p><strong>Instrumento:</strong> ${carta.ev?.diag?.ins || 'No definido'}</p>
-                <p><strong>Propósito:</strong> ${carta.ev?.diag?.prop || 'No definido'}</p>
-                
-                <h5>Evaluación Formativa</h5>
-                <p><strong>Instrumento(s):</strong> ${carta.ev?.form?.ins || 'No definido'}</p>
-                <p><strong>Ponderación:</strong> ${carta.ev?.form?.pct || 'N/A'}%</p>
-                
-                <h5>Evaluación Sumativa (Reactivos)</h5>
+                <h4>Producto 4: Evaluación Sumativa (Banco de Reactivos)</h4>
+                <p><strong>Instrumento:</strong> ${carta.ev?.sum_ins || 'Cuestionario'}</p>
+                <div class="document-instructions">
+                    <h5>Instrucciones para el Participante:</h5>
+                    <p>Lea con atención y seleccione la respuesta correcta para cada reactivo.</p>
+                </div>
         `;
-        
         preguntas.forEach((pregunta, index) => {
-            html += `<div class="pregunta-item" style="border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem;">
-                <strong>${index + 1}. ${pregunta.pregunta}</strong>
-                <ul>`;
+            html += `
+                <div class="pregunta-item">
+                    <strong>${index + 1}. ${pregunta.pregunta}</strong>
+                    <ul>`;
             let inciso = 'a';
-            pregunta.opciones.forEach(opcion => {
+            (pregunta.opciones || []).forEach(opcion => {
                 html += `<li>${inciso}) ${opcion.texto}</li>`;
                 inciso = String.fromCharCode(inciso.charCodeAt(0) + 1);
             });
             html += `</ul></div>`;
         });
-        
         html += `</div>`;
         return html;
     }
-    
+
+    // Producto 5: Hoja de Respuestas
     function renderRespuestas(carta, preguntas) {
         let html = `
             <div class="reporte-seccion">
-                <h4>Producto 3: Hoja de Respuestas (Evaluación Sumativa)</h4>
+                <h4>Producto 5: Hoja de Respuestas (Clave del Instructor)</h4>
                 <p>Este documento sirve como clave de respuestas para el instructor/evaluador.</p>
         `;
-        
         preguntas.forEach((pregunta, index) => {
-            html += `<div class="pregunta-item">
-                <strong>${index + 1}. ${pregunta.pregunta}</strong>
-                <ul>`;
+            html += `
+                <div class="pregunta-item">
+                    <strong>${index + 1}. ${pregunta.pregunta}</strong>
+                    <ul>`;
             let inciso = 'a';
-            pregunta.opciones.forEach(opcion => {
+            (pregunta.opciones || []).forEach(opcion => {
                 if (opcion.correcta) {
-                    html += `<li class="respuesta-correcta">${inciso}) ${opcion.texto} <strong>(Respuesta Correcta)</strong></li>`;
+                    html += `<li class="respuesta-correcta">${inciso}) ${opcion.texto}</li>`;
                 } else {
                     html += `<li>${inciso}) ${opcion.texto}</li>`;
                 }
@@ -410,75 +634,156 @@
             });
             html += `</ul></div>`;
         });
-        
         html += `</div>`;
         return html;
     }
 
-    function renderManualParticipante(manual) {
-        if (!manual) return '<div class="reporte-seccion"><h4>Producto 4: Manual del Participante</h4><p>No generado.</p></div>';
-        let html = `
-            <div class="reporte-seccion">
-                <h4>Producto 4: Manual del Participante</h4>
-                <div class="manual-cover">
-                    <h2>${manual.cover.title}</h2>
-                    <h3>${manual.cover.subtitle}</h3>
-                    <p><strong>${manual.cover.author}</strong></p>
-                </div>
-        `;
-        manual.sections.forEach(sec => {
-            html += `<div class="manual-section"><h5>${sec.title}</h5><div>${formatContent(sec.content)}</div></div>`;
-        });
-        html += `</div>`;
-        return html;
-    }
-
-    function renderManualInstructor(manual) {
-        if (!manual) return '<div class="reporte-seccion"><h4>Producto 5: Manual del Instructor</h4><p>No generado.</p></div>';
-        let html = `
-            <div class="reporte-seccion">
-                <h4>Producto 5: Manual del Instructor</h4>
-                <div class="manual-cover">
-                    <h2>${manual.cover.title}</h2>
-                    <h3>${manual.cover.subtitle}</h3>
-                    <p><strong>${manual.cover.author}</strong></p>
-                </div>
-        `;
-        manual.sections.forEach(sec => {
-            html += `<div class="manual-section"><h5>${sec.title}</h5><div>${formatContent(sec.content)}</div></div>`;
-        });
-        html += `</div>`;
-        return html;
-    }
-
-    function renderLogistica(data) {
-        const numFilas = (parseInt(data.num) || 15) + 5;
-        let filasTabla = '';
-        for (let i = 1; i <= numFilas; i++) {
-            filasTabla += `<tr><td>${i}</td><td></td><td></td></tr>`;
-        }
-
+    // Producto 6: Evaluación de Satisfacción
+    function renderEvaluacionSatisfaccion(data) {
         return `
             <div class="reporte-seccion">
-                <h4>Producto 6: Logística (Ejemplo de Lista de Asistencia)</h4>
-                <p><strong>Curso:</strong> ${data.nombre || ''}</p>
-                <p><strong>Facilitador:</strong> ${data.facilitador || ''}</p>
+                <h4>Producto 6: Evaluación de Satisfacción del Participante</h4>
+                <p>Instrumento tipo encuesta de reacción para valorar la satisfacción del participante.</p>
                 <table>
-                    <thead><tr><th>No.</th><th>Nombre</th><th>Firma</th></tr></thead>
-                    <tbody>${filasTabla}</tbody>
+                    <thead>
+                        <tr>
+                            <th>Reactivo</th>
+                            <th>Excelente</th><th>Bueno</th><th>Regular</th><th>Deficiente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Se cumplieron los objetivos del curso</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>Los temas fueron pertinentes para mi trabajo</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>El instructor demostró dominio del tema</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>El lugar y mobiliario fueron adecuados</td><td></td><td></td><td></td><td></td></tr>
+                    </tbody>
                 </table>
+                <h5 style="font-size: 1.2rem;">Preguntas Abiertas</h5>
+                <p><strong>¿Qué fue lo que más le gustó del curso?</strong></p>
+                <p style="min-height:2.5rem;border-bottom:1px solid #ddd;"></p>
+                <p><strong>¿Qué aspectos se podrían mejorar?</strong></p>
+                <p style="min-height:2.5rem;border-bottom:1px solid #ddd;"></p>
             </div>
         `;
     }
     
-    function formatContent(content) {
-        if (!content) return '';
-        return content
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n/g, '<br>');
+    // Producto 7: Manual del Participante
+    function renderManualParticipante(manual) {
+        if (!manual) return '<div class="reporte-seccion"><h4>Producto 7: Manual del Participante</h4><p>No generado.</p></div>';
+        let html = `
+            <div class="reporte-seccion">
+                <h4>Producto 7: Manual del Participante</h4>
+                <div class="reporte-portada" style="height: auto; border:none; padding:0; page-break-after: auto; margin-bottom: 2rem;">
+                    <h2>${manual.cover?.title || ''}</h2>
+                    <h3>${manual.cover?.subtitle || ''}</h3>
+                    <p><strong>${manual.cover?.author || ''}</strong></p>
+                </div>
+        `;
+        (manual.sections || []).forEach(sec => {
+            html += `<div class="manual-section" style="page-break-before: auto; margin-top: 1.5rem;"><h5>${sec.title || ''}</h5><div>${formatContent(sec.content)}</div></div>`;
+        });
+        html += `</div>`;
+        return html;
+    }
+
+    // Producto 8: Manual del Instructor
+    function renderManualInstructor(manual) {
+        if (!manual) return '<div class="reporte-seccion"><h4>Producto 8: Manual del Instructor</h4><p>No generado.</p></div>';
+        let html = `
+            <div class="reporte-seccion">
+                <h4>Producto 8: Manual del Instructor</h4>
+                <div class="reporte-portada" style="height: auto; border:none; padding:0; page-break-after: auto; margin-bottom: 2rem;">
+                    <h2>${manual.cover?.title || ''}</h2>
+                    <h3>${manual.cover?.subtitle || ''}</h3>
+                    <p><strong>${manual.cover?.author || ''}</strong></p>
+                </div>
+        `;
+        (manual.sections || []).forEach(sec => {
+            html += `<div class="manual-section" style="page-break-before: auto; margin-top: 1.5rem;"><h5>${sec.title || ''}</h5><div>${formatContent(sec.content)}</div></div>`;
+        });
+        html += `</div>`;
+        return html;
     }
     
-    const $ = id => document.getElementById(id);
+    // Producto 9: Logística (Formatos)
+    function renderLogistica(data) {
+        const numFilas = (parseInt(data.num) || 10) + 5;
+        let filasAsistencia = '';
+        let filasContrato = '';
+        for (let i = 1; i <= numFilas; i++) {
+            filasAsistencia += `<tr><td>${i}</td><td></td><td></td></tr>`;
+            filasContrato += `<tr><td>${i}</td><td></td><td></td></tr>`;
+        }
+
+        return `
+            <div class="reporte-seccion">
+                <h4>Producto 9: Formatos de Logística</h4>
+                
+                <h5>Lista de Asistencia</h5>
+                <p><strong>Curso:</strong> ${data.nombre || ''} | <strong>Facilitador:</strong> ${data.facilitador || ''}</p>
+                <table>
+                    <thead><tr><th>No.</th><th>Nombre</th><th>Firma</th></tr></thead>
+                    <tbody>${filasAsistencia}</tbody>
+                </table>
+
+                <h5 style="margin-top: 3rem;">Contrato de Aprendizaje</h5>
+                <p>Yo, (participante) me comprometo a...</p>
+                <p>El facilitador, (${data.facilitador || ''}) se compromete a...</p>
+                <table>
+                    <thead><tr><th>No.</th><th>Nombre</th><th>Firma de Conformidad</th></tr></thead>
+                    <tbody>${filasContrato}</tbody>
+                </table>
+                
+                <h5 style="margin-top: 3rem;">Lista de Requerimientos</h5>
+                <div class="grid-2">
+                    <div class="req-card">
+                        <strong>Instalaciones:</strong>
+                        <ul>${(data.rq?.instalaciones || 'N/A').split('\n').map(i => `<li>${i}</li>`).join('')}</ul>
+                    </div>
+                    <div class="req-card">
+                        <strong>Equipo de Apoyo:</strong>
+                        <ul>${(data.rq?.equipo || 'N/A').split('\n').map(i => `<li>${i}</li>`).join('')}</ul>
+                    </div>
+                    <div class="req-card">
+                        <strong>Materiales de Apoyo:</strong>
+                        <ul>${(data.rq?.materiales || 'N/A').split('\n').map(i => `<li>${i}</li>`).join('')}</ul>
+                    </div>
+                     <div class="req-card">
+                        <strong>Humanos:</strong>
+                        <ul>${(data.rq?.humanos || 'N/A').split('\n').map(i => `<li>${i}</li>`).join('')}</ul>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Producto 10: Auditoría
+    function renderAuditoriaResumen() {
+        return `
+            <div class="reporte-seccion">
+                <h4>Producto 10: Auditoría de Cumplimiento (Resumen)</h4>
+                <p>
+                    Este documento resume la verificación del portafolio de productos contra los elementos del
+                    Estándar de Competencia EC0301.
+                </p>
+                <ul>
+                    <li><strong>Elemento 1:</strong> Diseño de cursos de formación del capital humano (Carta Descriptiva).</li>
+                    <li><strong>Elemento 2:</strong> Diseño de instrumentos de evaluación de los cursos de formación.</li>
+                    <li><strong>Elemento 3:</strong> Diseño de manuales del curso de formación.</li>
+                </ul>
+                <div class="instructor-note">
+                    <strong>Nota:</strong> El dictamen detallado con porcentajes y recomendaciones se encuentra en el 
+                    <strong>Módulo de Auditoría</strong> dentro del sistema. Este documento solo certifica
+                    que los 10 productos han sido generados.
+                </div>
+            </div>
+        `;
+    }
+
+    function printDocument() {
+        window.print();
+    }
+    
     </script>
 </body>
 </html>
