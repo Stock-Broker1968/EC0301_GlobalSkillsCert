@@ -8,60 +8,110 @@
     <script src="sistema_central/auth.js" defer></script>
     <script src="sistema_central/ec0301-data-manager.js" defer></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof auth !== 'undefined' && !auth.isLoggedIn()) {
-                window.location.replace('index.html');
-            }
-        });
-    </script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         :root {
-            --primary: #1E3A8A; --accent: #FF6B35; --success: #22C55E; --warning: #F59E0B;
-            --danger: #EF4444; --light: #F8FAFC; --border: #E5E7EB; --text: #1F2937; --muted: #6B7280;
+            --primary: #1E3A8A;
+            --accent: #FF6B35;
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --light: #F8FAFC;
+            --border: #E5E7EB;
+            --text: #1F2937;
+            --muted: #6B7280;
+            --white: #FFFFFF;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: #F1F5F9; color: var(--text); line-height: 1.7;
+            background: #F1F5F9;
+            color: var(--text);
+            line-height: 1.7;
         }
         .header {
-            background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky; top: 0; z-index: 1000; border-bottom: 3px solid var(--accent);
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 3px solid var(--accent);
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
         .header-content {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 1rem; max-width: 1200px; margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        h1 { font-size: 1.75rem; color: var(--primary); display: flex; align-items: center; gap: 0.75rem; }
+        h1 {
+            font-size: 1.75rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
         .btn {
-            padding: 0.6rem 1.2rem; border: none; border-radius: 8px; font-weight: 600;
-            cursor: pointer; transition: all 0.3s ease; display: inline-flex;
-            align-items: center; gap: 0.5rem; text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
         }
-        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-ai { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-ai:hover { background: linear-gradient(135deg, #5a6fde 0%, #684094 100%); }
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-ai {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-ai:hover {
+            background: linear-gradient(135deg, #5a6fde 0%, #684094 100%);
+        }
 
         /* --- Estilos de Auditoría --- */
         .generation-panel {
             background: var(--white);
-            color: var(--dark);
+            color: var(--text);
             border: 1px solid var(--border);
-            padding: 2rem; border-radius: 16px; margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
             text-align: center;
         }
-        .generation-panel h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; justify-content: center; }
-        .generation-panel p { color: var(--muted); margin-bottom: 1.5rem; }
+        .generation-panel h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        .generation-panel p {
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
         
-        .audit-results { display: none; } /* Oculto hasta ejecutar */
+        .audit-results { display: none; }
 
         .dictamen-box {
             padding: 2rem;
@@ -89,14 +139,24 @@
         .dictamen-box p { color: var(--muted); }
         
         .progress-bar {
-            width: 100%; background: var(--border); border-radius: 8px;
-            height: 2.5rem; padding: 0.5rem; margin-bottom: 1rem;
+            width: 100%;
+            background: var(--border);
+            border-radius: 8px;
+            height: 2.5rem;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
         }
         .progress-fill {
-            height: 100%; background: var(--success); border-radius: 4px;
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
             transition: width 0.5s ease-out;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 700; font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
         }
 
         .checklist-container {
@@ -105,9 +165,13 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.07);
         }
         .checklist-header {
-            font-size: 1.25rem; font-weight: 700;
-            padding: 1.5rem 2rem; border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
         .checklist-body { padding: 2rem; }
         .checklist-item {
@@ -118,9 +182,15 @@
             border-bottom: 1px solid var(--border);
         }
         .checklist-item:last-child { border-bottom: none; }
-        .checklist-item .icon { font-size: 1.5rem; }
-        .checklist-item .icon .fa-check-circle { color: var(--success); }
-        .checklist-item .icon .fa-times-circle { color: var(--danger); }
+        .checklist-item .icon {
+            font-size: 1.5rem;
+        }
+        .checklist-item .icon .fa-check-circle {
+            color: var(--success);
+        }
+        .checklist-item .icon .fa-times-circle {
+            color: var(--danger);
+        }
         .checklist-item .text strong {
             display: block;
             font-size: 1.1rem;
@@ -132,26 +202,52 @@
         }
         
         .spinner {
-            width: 40px; height: 40px; border: 4px solid var(--primary);
-            border-top: 4px solid var(--light); border-radius: 50%;
-            animation: spin 1s linear infinite; margin: 0 auto 1rem;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--primary);
+            border-top: 4px solid var(--light);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
         /* Estilos para impresión */
         @media print {
-            body { background: white; font-family: 'Georgia', 'Times New Roman', serif; }
-            .header, .no-print { display: none !important; }
-            .container { margin: 0; padding: 0; }
+            body {
+                background: white;
+                font-family: 'Georgia', 'Times New Roman', serif;
+            }
+            .header,
+            .btn,
+            .generation-panel,
+            .no-print {
+                display: none !important;
+            }
+            .container {
+                margin: 0;
+                padding: 0;
+            }
             .dictamen-box {
                 background: var(--light) !important;
                 border: 2px solid var(--border) !important;
             }
-            .dictamen-box h2 { color: black !important; }
-            .progress-bar { border: 2px solid var(--border); }
-            .progress-fill { background: var(--muted) !important; }
-            .checklist-item .icon .fa-check-circle { color: #333 !important; }
-            .checklist-item .icon .fa-times-circle { color: #333 !important; }
+            .dictamen-box h2 {
+                color: black !important;
+            }
+            .progress-bar {
+                border: 2px solid var(--border);
+            }
+            .progress-fill {
+                background: var(--muted) !important;
+            }
+            .checklist-item .icon .fa-check-circle,
+            .checklist-item .icon .fa-times-circle {
+                color: #333 !important;
+            }
             @page {
                 size: letter;
                 margin: 2cm;
@@ -174,8 +270,8 @@
 
     <main class="container">
         <div class="generation-panel">
-            <h3><i class="fa-solid fa-robot"></i> Auditoría de Cumplimiento EC0301</h3>
-            <p>Este módulo leerá todos tus productos (Carta Descriptiva, Evaluaciones, Manuales) y los validará contra los criterios del Estándar de Competencia EC0301.</p>
+            <h3><i class="fa-solid fa-robot"></i> Auditoría de Cumplimiento EC0301/EC0217.01</h3>
+            <p>Este módulo leerá todos tus productos (Carta Descriptiva, Evaluaciones, Manuales, Clave de Respuestas) y los validará contra los criterios del Estándar de Competencia.</p>
             <button class="btn btn-ai" onclick="runAudit()" id="audit-button">
                 <i class="fa-solid fa-play"></i> Ejecutar Auditoría con IA
             </button>
@@ -193,7 +289,7 @@
                 <div class="progress-bar">
                     <div class="progress-fill" id="audit-progress-bar" style="width: 0%;">0%</div>
                 </div>
-                <p>A continuación se presenta el desglose de cumplimiento por producto.</p>
+                <p>A continuación se presenta el desglose de cumplimiento por Elemento y por criterio evaluado.</p>
             </div>
 
             <div class="checklist-container">
@@ -204,38 +300,48 @@
                     </div>
             </div>
         </div>
-
     </main>
 
     <script>
     let EC0301Manager;
     let cartaData = {};
-    let evaluacionData = {};
+    let evaluacionSumativa = [];
     let manualesData = {};
+    let respuestasData = null;
 
+    const $ = id => document.getElementById(id);
+
+    // ===== CORRECCIÓN: Guardia de Seguridad Robusta =====
     document.addEventListener('DOMContentLoaded', () => {
-        // (AJUSTE) Verificar que los scripts globales estén cargados
-        if (typeof auth === 'undefined' || typeof EC0301Manager === 'undefined') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error Crítico',
-                text: 'No se pudieron cargar los módulos de sistema (auth.js, ec0301-data-manager.js). Revisa las rutas en el HTML.',
-                confirmButtonColor: '#EF4444'
-            }).then(() => window.location.href = 'index.html');
-            return;
-        }
-        
-        EC0301Manager = window.EC0301Manager;
+        setTimeout(() => { 
+            if (typeof auth === 'undefined' || typeof EC0301Manager === 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Crítico',
+                    text: 'No se pudieron cargar los módulos de sistema (auth.js, ec0301-data-manager.js).',
+                    confirmButtonColor: '#EF4444'
+                }).then(() => window.location.href = 'index.html');
+                return;
+            }
+
+            EC0301Manager = window.EC0301Manager;
+
+            if (!auth.isLoggedIn()) {
+                window.location.replace('index.html');
+            }
+        }, 50); // 50ms de espera
     });
 
-    /**
-     * Muestra alerta si no se encuentran datos de la Carta Descriptiva
-     */
     function showMissingDataAlert() {
         Swal.fire({
             icon: 'warning',
-            title: 'Datos Incompletos',
-            html: 'No se encontraron datos. Por favor, completa y <strong>guarda</strong> todos los módulos (Carta Descriptiva, Evaluaciones, Manuales) antes de ejecutar la auditoría.',
+            title: 'Datos incompletos',
+            html: 'No se encontraron todos los datos necesarios.<br><br>' +
+                  'Antes de ejecutar la auditoría asegúrate de:<br>' +
+                  '• Guardar la <strong>Carta Descriptiva</strong>.<br>' +
+                  '• Generar y guardar las <strong>Evaluaciones</strong>.<br>' +
+                  '• Generar los <strong>Manuales del participante e instructor</strong>.<br>' +
+                  '• Generar la <strong>clave de respuestas</strong> de las evaluaciones.',
             confirmButtonText: 'Ir a Carta Descriptiva',
             confirmButtonColor: '#1E3A8A'
         }).then(() => {
@@ -243,165 +349,352 @@
         });
     }
 
-    /**
-     * Punto de entrada para ejecutar la auditoría
-     */
     async function runAudit() {
         try {
-            // 1. Cargar todos los datos
-            cartaData = EC0301Manager.getData();
-            evaluacionData = EC0301Manager.loadProduct('evaluacion-sumativa') || [];
-            manualesData = EC0301Manager.loadProduct('manuales') || {};
-            
+            cartaData           = EC0301Manager.getData() || {};
+            evaluacionSumativa  = EC0301Manager.loadProduct('evaluacion-sumativa') || [];
+            manualesData        = EC0301Manager.loadProduct('manuales') || {};
+            respuestasData      = EC0301Manager.loadProduct('respuestas') || null;
+
             if (!cartaData || !cartaData.nombre) {
                 showMissingDataAlert();
                 return;
             }
         } catch (error) {
+            console.error('Error al cargar datos para auditoría:', error);
             showMissingDataAlert();
             return;
         }
 
-        // 2. Mostrar Spinner
         $('audit-button').disabled = true;
         $('loading-spinner').style.display = 'block';
         $('audit-results-container').style.display = 'none';
 
-        // 3. Simular procesamiento de IA
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 2500));
 
-        // 4. Ejecutar la lógica de auditoría
-        const auditResults = runECAudit();
-        
-        // 5. Ocultar Spinner
+        // ===== CORRECCIÓN: Llamada a la función actualizada =====
+        const auditResults = runECAudit_EC0217();
+
         $('loading-spinner').style.display = 'none';
         $('audit-results-container').style.display = 'block';
-
-        // 6. Mostrar resultados
         renderAuditResults(auditResults);
+
+        $('audit-button').disabled = false;
     }
-    
+
     /**
-     * El motor de auditoría "Inteligente"
-     * Compara los datos guardados contra los criterios del EC0301
+     * ===== FUNCIÓN DE AUDITORÍA ACTUALIZADA =====
+     * Motor de auditoría EC0301/EC0217:
+     * Valida contra los campos de la Carta Descriptiva "inteligente" (presencial).
      */
-    function runECAudit() {
-        let checklist = [];
+    function runECAudit_EC0217() {
+        const checklist = [];
         let totalCriteria = 0;
         let passedCriteria = 0;
 
-        // Función helper para validar y contar
-        const check = (condition, passMsg, failMsg) => {
-            totalCriteria++;
-            let isPass = !!condition; // Checa si es truthy (no vacío, no nulo, no cero)
-            if (isPass) {
-                passedCriteria++;
-                checklist.push({ pass: true, message: passMsg });
-            } else {
-                checklist.push({ pass: false, message: failMsg });
-            }
+        const byElement = {
+            1: { total: 0, passed: 0, nombre: 'Elemento 1: Carta Descriptiva' },
+            2: { total: 0, passed: 0, nombre: 'Elemento 2: Instrumentos de Evaluación' },
+            3: { total: 0, passed: 0, nombre: 'Elemento 3: Manuales del Curso' }
         };
 
-        // --- ELEMENTO 1: CARTA DESCRIPTIVA ---
-        check(true, "Elemento 1: Diseñar cursos...", "Elemento 1: Diseñar cursos..."); // Título de sección
-        check(cartaData.nombre, "Nombre del curso: Definido.", "Nombre del curso: No definido.");
-        check(cartaData.diseñador, "Nombre del diseñador: Definido.", "Nombre del diseñador: No definido.");
-        check(cartaData.psico, "Perfil del participante: Describe requisitos de ingreso (psicográficos).", "Perfil del participante: Faltan requisitos de ingreso (psicográficos).");
-        check(cartaData.num, "Perfil del participante: Indica número de participantes.", "Perfil del participante: No indica número de participantes.");
-        check(cartaData.og?.accion, "Objetivo General: Contiene Acción/Comportamiento.", "Objetivo General: Falta la Acción/Comportamiento.");
-        check(cartaData.og?.cond, "Objetivo General: Contiene Condición de Operación.", "Objetivo General: Falta la Condición de Operación.");
-        check(cartaData.og?.criterio, "Objetivo General: Contiene Criterio de Evaluación.", "Objetivo General: Falta el Criterio de Evaluación.");
-        check(cartaData.objetivos?.length > 0, "Objetivos Particulares: Existen objetivos particulares.", "Objetivos Particulares: No se han definido.");
-        check(cartaData.temas?.length > 0, "Contenido: Existen temas definidos.", "Contenido: No se ha definido el temario.");
-        check(cartaData.dc?.integracion, "Momentos de Capacitación: Se define el Encuadre (integración).", "Momentos de Capacitación: Falta definir el Encuadre.");
-        check(cartaData.dc?.cierre, "Momentos de Capacitación: Se define el Cierre.", "Momentos de Capacitación: Falta definir el Cierre.");
-        check(cartaData.temas?.every(t => t.actividades), "Técnicas/Actividades: Todas los temas tienen actividades.", "Técnicas/Actividades: Faltan actividades en uno o más temas.");
-        check(cartaData.ev?.diag?.ins && cartaData.ev?.form?.ins && cartaData.ev?.sum?.ins, "Estrategias de Evaluación: Se definen las 3 evaluaciones (Diag, Form, Sum).", "Estrategias de Evaluación: Falta definir una o más evaluaciones (Diag, Form, Sum).");
-        check(cartaData.rq?.recursos, "Materiales Didácticos: Se especifican los recursos didácticos.", "Materiales Didácticos: No se especifican los recursos didácticos.");
-        check(cartaData.dc?.encuadre_t && cartaData.dc?.cierre_t, "Tiempos: Se especifican tiempos para Encuadre y Cierre.", "Tiempos: Faltan tiempos de Encuadre o Cierre.");
+        const check = (elemento, condition, titulo, okDetail, failDetail, recomendacion) => {
+            const pass = !!condition;
+            totalCriteria++;
+            if (byElement[elemento]) {
+                byElement[elemento].total++;
+                if (pass) byElement[elemento].passed++;
+            }
+            if (pass) {
+                passedCriteria++;
+            }
+            checklist.push({
+                elemento, pass, titulo, okDetail, failDetail, recomendacion
+            });
+        };
 
-        // --- ELEMENTO 2: INSTRUMENTOS DE EVALUACIÓN ---
-        check(true, "Elemento 2: Diseñar instrumentos...", "Elemento 2: Diseñar instrumentos..."); // Título
-        check(evaluacionData.length > 0, "Instrumento Sumativo: Se generó el banco de reactivos.", "Instrumento Sumativo: No se ha generado el banco de reactivos.");
-        check(evaluacionData.every(p => p.pregunta && p.opciones?.length > 1), "Reactivos: Todos los reactivos tienen pregunta y opciones.", "Reactivos: Uno o más reactivos están incompletos.");
-        check(EC0301Manager.loadProduct('respuestas'), "Clave de Respuestas: Se ha generado la Hoja de Respuestas.", "Clave de Respuestas: No se ha generado la Hoja de Respuestas.");
-        check(cartaData.ev?.satisfaccion?.instrumento, "Instrumento de Satisfacción: Definido en la Carta Descriptiva.", "Instrumento de Satisfacción: No se ha definido (Revisar Sección 5 de Carta Descriptiva).");
+        // =====================================================
+        // ELEMENTO 1 – CARTA DESCRIPTIVA (EC0217.01)
+        // =====================================================
 
-        // --- ELEMENTO 3: MANUALES ---
-        check(true, "Elemento 3: Diseñar manuales...", "Elemento 3: Diseñar manuales..."); // Título
-        check(manualesData.participante, "Manual del Participante: El manual ha sido generado.", "Manual del Participante: No se ha generado.");
-        check(manualesData.instructor, "Manual del Instructor: El manual ha sido generado.", "Manual del Instructor: No se ha generado.");
-        check(manualesData.participante?.cover?.title, "Manual Participante: Incluye Portada.", "Manual Participante: Falta Portada.");
-        check(manualesData.participante?.sections.find(s => s.id === 'introduccion'), "Manual Participante: Incluye Introducción.", "Manual Participante: Falta Introducción.");
-        check(manualesData.participante?.sections.find(s => s.id === 'objetivo'), "Manual Participante: Incluye Objetivo General.", "Manual Participante: Falta Objetivo General.");
-        check(manualesData.participante?.sections.find(s => s.id === 'evaluacion'), "Manual Participante: Incluye Sistema de Evaluación.", "Manual Participante: Falta Sistema de Evaluación.");
-        check(manualesData.instructor?.cover?.title, "Manual Instructor: Incluye Portada.", "Manual Instructor: Falta Portada.");
-        check(manualesData.instructor?.sections.find(s => s.id === 'cronograma_instructor'), "Manual Instructor: Incluye Carta Descriptiva/Cronograma.", "Manual Instructor: Falta Carta Descriptiva/Cronograma.");
-        check(manualesData.instructor?.sections.find(s => s.id === 'evaluacion_instructor'), "Manual Instructor: Incluye Guía de Evaluación (Instrumentos).", "Manual Instructor: Falta Guía de Evaluación (Instrumentos).");
+        check(1,
+            !!cartaData.nombre, 'Nombre del curso',
+            'El curso tiene un nombre definido.',
+            'No se ha definido el nombre del curso.',
+            'Define un nombre claro para tu curso en la Sección 1.'
+        );
+        check(1,
+            !!cartaData.facilitador, 'Nombre del facilitador',
+            'Se identifica al facilitador del curso.',
+            'No se ha capturado el nombre del facilitador.',
+            'Registra el nombre del facilitador en la Sección 1.'
+        );
+        check(1,
+            !!cartaData.perfil, 'Perfil del participante',
+            'El perfil del participante describe las características del grupo.',
+            'No se describe claramente el perfil del participante.',
+            'Define el perfil de los participantes en la Sección 2.'
+        );
+        check(1,
+            !!cartaData.num, 'Número de participantes',
+            'Se especifica el número de participantes.',
+            'No se ha indicado el número de participantes.',
+            'Establece el número de participantes en la Sección 2.'
+        );
+        check(1,
+            cartaData.og && cartaData.og.accion && cartaData.og.cond && cartaData.og.criterio,
+            'Objetivo general estructurado',
+            'El objetivo general integra Acción, Condición y Criterio.',
+            'El objetivo general no está completo (falta Acción, Condición o Criterio).',
+            'Revisa la Sección 3 y completa todos los campos del Objetivo General.'
+        );
+        check(1,
+            Array.isArray(cartaData.objetivos) && cartaData.objetivos.length === 4 &&
+            cartaData.objetivos.every(o => o.accion && o.cond),
+            'Objetivos particulares (4 dominios)',
+            'Se definen los 4 objetivos particulares (Cognitivo, Psicomotor, Afectivo, Relacional).',
+            'Falta definir o completar uno o más de los 4 objetivos particulares.',
+            'Revisa la Sección 3 y completa la "Acción" y "Condición" para los 4 objetivos.'
+        );
+        check(1,
+            Array.isArray(cartaData.temas) && cartaData.temas.length > 0 &&
+            cartaData.temas.every(t => t.nombre && t.duracion),
+            'Temario del curso (Desarrollo)',
+            'El curso cuenta con un temario estructurado por temas, cada uno con nombre y duración.',
+            'No se ha capturado el temario o a un tema le falta nombre o duración.',
+            'Ve a la Sección 6 (Desarrollo) y añade al menos un tema con nombre y duración.'
+        );
+        check(1,
+            cartaData.ev && cartaData.ev.diag_ins && cartaData.ev.form_ins && cartaData.ev.sum_ins && cartaData.ev.sat_ins,
+            'Estrategia de evaluación (4 instrumentos)',
+            'Se describen los 4 instrumentos de evaluación (Diag, Form, Sum, Sat).',
+            'Falta describir uno o más instrumentos en la Sección 5.',
+            'Revisa la Sección 5 y asegúrate de que los 4 tipos de evaluación tengan instrumentos definidos.'
+        );
+        check(1,
+            cartaData.rq && cartaData.rq.instalaciones && cartaData.rq.equipo && cartaData.rq.materiales && cartaData.rq.humanos && cartaData.rq.seguridad,
+            'Lista de Requerimientos Completa',
+            'Se listan todos los requerimientos (Instalaciones, Equipo, Materiales, Humanos, Seguridad).',
+            'Falta definir uno o más tipos de requerimientos en la Sección 4.',
+            'Completa todas las cajas de texto de la Sección 4 de Requerimientos.'
+        );
+        check(1,
+            cartaData.dev && cartaData.dev.comprobacion_t && cartaData.dev.enc_1_t && cartaData.dev.cierre_1_t,
+            'Desarrollo Cronológico (Tiempos)',
+            'Se asignan tiempos a las etapas de Comprobación, Encuadre y Cierre.',
+            'No se han definido los tiempos en la Sección 6.',
+            'Revisa la Sección 6 y asigna tiempos (en minutos) a las etapas de Comprobación, Encuadre y Cierre.'
+        );
 
-        // --- HÁBITOS/VALORES ---
-        check(true, "Actitudes/Hábitos/Valores...", "Actitudes/Hábitos/Valores..."); // Título
-        check(cartaData.objetivos?.every(o => o.accion && o.cond), "Orden: Todos los objetivos particulares están estructurados.", "Orden: Falta estructurar uno o más objetivos particulares.");
+        // =====================================================
+        // ELEMENTO 2 – INSTRUMENTOS DE EVALUACIÓN
+        // =====================================================
 
-        const percentage = Math.round((passedCriteria / totalCriteria) * 100);
-        return { checklist, percentage };
+        check(2,
+            evaluacionSumativa && evaluacionSumativa.length > 0,
+            'Banco de reactivos (Sumativa)',
+            'Se ha generado el banco de reactivos de la Evaluación Sumativa.',
+            'No se ha generado el banco de reactivos para la Evaluación Sumativa.',
+            'Ve al Módulo "Evaluaciones", pestaña "Sumativa", y genera o agrega al menos un reactivo.'
+        );
+        check(2,
+            evaluacionSumativa.every(p => p.pregunta && Array.isArray(p.opciones) && p.opciones.length >= 4),
+            'Reactivos sumativos completos',
+            'Todos los reactivos sumativos tienen pregunta y 4 opciones de respuesta.',
+            'Hay reactivos incompletos (sin pregunta o sin las 4 opciones).',
+            'Revisa el "Banco de Reactivos" y completa los textos de pregunta y las 4 opciones en cada reactivo.'
+        );
+        check(2,
+            evaluacionSumativa.every(p => p.opciones && p.opciones.some(o => o.correcta)),
+            'Clave interna de reactivos (Sumativa)',
+            'Cada reactivo sumativo tiene marcada una opción como "correcta".',
+            'Hay reactivos sumativos sin opción correcta marcada.',
+            'Marca la opción correcta en cada reactivo (clic en el radio button) antes de guardar.'
+        );
+        check(2,
+            !!respuestasData,
+            'Clave de respuestas consolidada (Producto)',
+            'Se ha generado el producto "Clave de Respuestas".',
+            'No se ha generado el producto de "Clave de Respuestas".',
+            'Ve al módulo "Hoja de Respuestas" y verifica que los datos se carguen. El sistema lo guardará automáticamente.'
+        );
+        check(2,
+            !!cartaData.ev?.sat_ins,
+            'Instrumento de satisfacción definido',
+            'La Carta Descriptiva define el instrumento de satisfacción/reacción.',
+            'No se ha definido el instrumento de satisfacción en la Carta Descriptiva.',
+            'Revisa la Sección 5 de la Carta Descriptiva y define el instrumento de satisfacción.'
+        );
+
+        // =====================================================
+        // ELEMENTO 3 – MANUALES DEL CURSO
+        // =====================================================
+
+        const manualParticipante = manualesData.participante || null;
+        const manualInstructor = manualesData.instructor || null;
+
+        check(3,
+            !!manualParticipante,
+            'Manual del participante generado',
+            'Existe un manual del participante en el sistema.',
+            'No se ha generado el manual del participante.',
+            'Ve al Módulo "Manuales", pestaña "Participante", y genera el manual con IA.'
+        );
+        check(3,
+            !!manualInstructor,
+            'Manual del instructor generado',
+            'Existe un manual del instructor en el sistema.',
+            'No se ha generado el manual del instructor.',
+            'Ve al Módulo "Manuales", pestaña "Instructor", y genera el manual con IA.'
+        );
+        check(3,
+            manualParticipante && manualParticipante.cover && manualParticipante.cover.title,
+            'Portada (Manual Participante)',
+            'El manual del participante incluye una portada con título.',
+            'La portada del manual del participante no está completa.',
+            'Asegúrate de que el Manual del Participante tenga una portada con título.'
+        );
+        check(3,
+            manualParticipante && Array.isArray(manualParticipante.sections) &&
+            manualParticipante.sections.some(s => s.id === 'bienvenida'),
+            'Introducción (Manual Participante)',
+            'El manual del participante incluye una sección de Bienvenida/Introducción.',
+            'Falta la sección de Introducción en el manual del participante.',
+            'Asegúrate de que el manual generado incluya una introducción.'
+        );
+        check(3,
+            manualParticipante && manualParticipante.sections.some(s => s.id === 'cierre'),
+            'Sistema de evaluación (Manual Participante)',
+            'El manual del participante explica cómo será evaluado el participante (en la sección de Cierre).',
+            'No se describe el sistema de evaluación en el manual del participante.',
+            'Asegúrate de que el manual generado incluya una sección de Cierre/EvaluACIÓN.'
+        );
+        check(3,
+            manualInstructor && manualInstructor.cover && manualInstructor.cover.title,
+            'Portada (Manual Instructor)',
+            'El manual del instructor incluye portada con título.',
+            'La portada del manual del instructor no está completa.',
+            'Asegúrate de que el Manual del Instructor tenga una portada con título.'
+        );
+        check(3,
+            manualInstructor && manualInstructor.sections.some(s => s.content.includes('instructor-note')),
+            'Notas del instructor (Manual Instructor)',
+            'El manual del instructor integra notas, sugerencias didácticas y estrategias de facilitación.',
+            'No se han encontrado "Notas del Instructor" en el manual.',
+            'Asegúrate de que el manual del instructor se genere correctamente, incluyendo las notas didácticas.'
+        );
+        check(3,
+            manualInstructor && manualInstructor.sections.some(s => s.title.includes(cartaData.temas[0]?.nombre || 'Tema 1')),
+            'Desarrollo de Temas (Manual Instructor)',
+            'El manual del instructor desarrolla los temas de la Carta Descriptiva.',
+            'El temario del manual del instructor no coincide con la Carta Descriptiva.',
+            'Vuelve a generar el Manual del Instructor después de guardar la versión final de tu temario.'
+        );
+
+        // =====================================================
+        // Cálculo del porcentaje global
+        // =====================================================
+        const percentage = totalCriteria > 0
+            ? Math.round((passedCriteria / totalCriteria) * 100)
+            : 0;
+
+        Object.keys(byElement).forEach(key => {
+            const el = byElement[key];
+            el.porcentaje = el.total > 0
+                ? Math.round((el.passed / el.total) * 100)
+                : 0;
+        });
+
+        return { checklist, percentage, byElement };
     }
 
-    /**
-     * Dibuja los resultados de la auditoría en el DOM
-     */
-    function renderAuditResults({ checklist, percentage }) {
-        // 1. Dictamen y Barra de Progreso
-        const dictamenBox = $('dictamen-box');
-        const dictamenTitle = $('dictamen-title');
+
+    function renderAuditResults({ checklist, percentage, byElement }) {
+        const dictamenBox     = $('dictamen-box');
+        const dictamenTitle   = $('dictamen-title');
         const dictamenSubtitle = $('dictamen-subtitle');
-        const progressBar = $('audit-progress-bar');
-        
-        progressBar.style.width = `${percentage}%`;
-        progressBar.textContent = `${percentage}%`;
-        
+        const progressBar     = $('audit-progress-bar');
+
+        progressBar.style.width = percentage + '%';
+        progressBar.textContent = percentage + '%';
+
         if (percentage === 100) {
             dictamenBox.className = 'dictamen-box aprobado';
             dictamenTitle.innerHTML = '<i class="fa-solid fa-check-circle"></i> APROBADO';
-            dictamenSubtitle.textContent = '¡Felicidades! Tu portafolio de productos cumple con todos los criterios del EC0301.';
+            dictamenSubtitle.textContent =
+                '¡Felicidades! Tu portafolio de productos cumple al 100% con los criterios revisados del EC0301.';
             progressBar.style.backgroundColor = 'var(--success)';
         } else {
             dictamenBox.className = 'dictamen-box no-cumple';
-            dictamenTitle.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> NO CUMPLE';
-            dictamenSubtitle.textContent = `Tu portafolio tiene un ${percentage}% de cumplimiento. Revisa los puntos faltantes a continuación.`;
-            progressBar.style.backgroundColor = (percentage > 50 ? 'var(--warning)' : 'var(--danger)');
+            dictamenTitle.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> NO CUMPLE AL 100%';
+            dictamenSubtitle.textContent =
+                `Tu portafolio tiene un ${percentage}% de cumplimiento. Revisa las áreas de mejora listadas abajo.`;
+            progressBar.style.backgroundColor = (percentage >= 70 ? 'var(--warning)' : 'var(--danger)');
         }
 
-        // 2. Checklist Detallado
         const checklistBody = $('checklist-body');
-        checklistBody.innerHTML = ''; // Limpiar resultados anteriores
-        
+        checklistBody.innerHTML = '';
+
+        const resumenWrapper = document.createElement('div');
+        resumenWrapper.style.display = 'grid';
+        resumenWrapper.style.gridTemplateColumns = 'repeat(auto-fit, minmax(220px, 1fr))';
+        resumenWrapper.style.gap = '1rem';
+        resumenWrapper.style.marginBottom = '1.5rem';
+
+        [1, 2, 3].forEach(num => {
+            const el = byElement[num];
+            const card = document.createElement('div');
+            card.style.border = '1px solid var(--border)';
+            card.style.borderRadius = '10px';
+            card.style.padding = '1rem 1.25rem';
+            card.style.background = '#F9FAFB';
+
+            const color = el.porcentaje === 100
+                ? '#16A34A'
+                : (el.porcentaje >= 70 ? '#F59E0B' : '#DC2626');
+
+            card.innerHTML = `
+                <strong style="display:block; margin-bottom:0.25rem;">${el.nombre}</strong>
+                <span style="font-size:0.9rem; color:var(--muted);">
+                    Criterios cumplidos: ${el.passed}/${el.total}
+                </span>
+                <div style="margin-top:0.5rem; font-weight:700; color:${color};">
+                    ${el.porcentaje}% de cumplimiento
+                </div>
+            `;
+            resumenWrapper.appendChild(card);
+        });
+
+        checklistBody.appendChild(resumenWrapper);
+
         checklist.forEach(item => {
-            const itemEl = document.createElement('div');
-            itemEl.className = 'checklist-item';
-            
-            if (item.pass && item.message.startsWith('Elemento')) {
-                // Es un título de sección, no un ítem
-                itemEl.innerHTML = `<h4 style="color: var(--primary); margin-top: 1.5rem;">${item.message}</h4>`;
-            } else {
-                const icon = item.pass 
-                    ? '<i class="fa-solid fa-check-circle"></i>' 
-                    : '<i class="fa-solid fa-times-circle"></i>';
-                const message = item.pass 
-                    ? `<strong>${item.message.split(': ')[0]}</strong> <span>${item.message.split(': ')[1]}</span>`
-                    : `<strong>${item.message.split(': ')[0]}</strong> <span style="color: var(--danger); font-weight: 600;">${item.message.split(': ')[1]}</span>`;
-                
-                itemEl.innerHTML = `
-                    <div class="icon">${icon}</div>
-                    <div class="text">${message}</div>
-                `;
-            }
-            checklistBody.appendChild(itemEl);
+            const row = document.createElement('div');
+            row.className = 'checklist-item';
+
+            const icon = item.pass
+                ? '<i class="fa-solid fa-check-circle"></i>'
+                : '<i class="fa-solid fa-times-circle"></i>';
+
+            const colorDetalle = item.pass ? 'var(--muted)' : 'var(--danger)';
+            const detalle = item.pass ? item.okDetail : item.failDetail;
+
+            row.innerHTML = `
+                <div class="icon">${icon}</div>
+                <div class="text">
+                    <strong>Elemento ${item.elemento} – ${item.titulo}</strong>
+                    <span style="display:block; margin-top:0.15rem; color:${colorDetalle};">
+                        ${detalle}
+                    </span>
+                    ${!item.pass && item.recomendacion ? `
+                        <span style="display:block; margin-top:0.3rem; font-size:0.85rem; color:#374151;">
+                            <strong>Recomendación:</strong> ${item.recomendacion}
+                        </span>
+                    ` : ''}
+                </div>
+            `;
+            checklistBody.appendChild(row);
         });
     }
-    
-    // ========== UTILIDADES ==========
-    const $ = id => document.getElementById(id);
 
     function printDocument() {
         window.print();
