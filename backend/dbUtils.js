@@ -1,8 +1,8 @@
-// dbFunctions.js - Funciones completas
+// dbFunctions.js - Funciones para interactuar con la base de datos
 
 const pool = require('./db');
 
-// Guardar Código de Acceso
+// 1. Guardar Código de Acceso
 async function guardarCodigoAccesso(email, code) {
   try {
     await pool.execute(
@@ -15,21 +15,21 @@ async function guardarCodigoAccesso(email, code) {
   }
 }
 
-// Verificar Código de Acceso
+// 2. Verificar Código de Acceso
 async function verificarCodigoAccesso(email, accessCode) {
   try {
     const [rows] = await pool.execute(
       "SELECT * FROM access_codes WHERE email=? AND code=? AND status=1 AND expires_at>NOW() LIMIT 1",
       [email, accessCode]
     );
-    return rows.length > 0;
+    return rows.length > 0; // Si se encontró el código, retorna true
   } catch (error) {
     console.error('Error al verificar el código de acceso:', error.message);
     return false;
   }
 }
 
-// Registrar Transacción de Stripe
+// 3. Registrar Transacción de Stripe
 async function registrarTransaccion(email, amount, referencia) {
   try {
     await pool.execute(
@@ -42,7 +42,7 @@ async function registrarTransaccion(email, amount, referencia) {
   }
 }
 
-// Registrar Módulos Completados
+// 4. Registrar Módulos Completados
 async function registrarModulo(email, modulo, avance) {
   try {
     await pool.execute(
@@ -55,7 +55,7 @@ async function registrarModulo(email, modulo, avance) {
   }
 }
 
-// Log de Actividad
+// 5. Log de Actividad
 async function logActividad(email, accion, info) {
   try {
     await pool.execute(
