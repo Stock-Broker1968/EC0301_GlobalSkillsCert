@@ -1,4 +1,5 @@
-// Verificar configuración de Webhook de Stripe
+// checkWebhookConfig.js - Verificar configuración de webhooks de Stripe
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 async function checkWebhookConfig() {
