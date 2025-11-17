@@ -1,96 +1,101 @@
-// === CÓDIGO PARA TU FRONTEND (ej: en un archivo script.js o dentro de <script> en tu HTML) ===
+// Interfaz/js/script.js
+(function () {
+  'use strict';
 
-// 1. Reemplaza esto con tu Clave Publicable real de Stripe (modo prueba primero)
-const stripePublicKey = 'pk_test_51SJ0gXFupe2fTa5zdrZlQfwpB1Y3esGAdUBw1r4Hc9vIerMj90cm0w4t6tJUJmVV7bEqZ3v5d11cqvPrFps4P31600xqM9IUsj'; // ¡Pega tu clave publicable aquí!
-const backendUrl = "https://ec0301-globalskillscert-backend.onrender.com";
+  // 1. Clave publicable de Stripe (usa la de prueba o la live según estés)
+  const stripePublicKey = 'pk_test_51SJ0gXFupe2fTa5zdrZlQfwpB1Y3esGAdUBw1r4Hc9vIerMj90cm0w4t6tJUJmVV7bEqZ3v5d11cqvPrFps4P31600xqM9IUsj';
 
-// 2. Inicializa Stripe.js
-const stripe = Stripe(stripePublicKey);
+  // 2. URL pública del backend en Render (servicio Node)
+  const backendUrl = 'https://ec0301-globalskillscert-backend.onrender.com';
 
-// 3. Busca el botón de pago en tu HTML
-//    (Asegúrate de que tu botón tenga el id="checkout-button")
-const checkoutButton = document.getElementById('checkout-button');
+  // 3. Inicializa Stripe.js (asegúrate de tener <script src="https://js.stripe.com/v3"></script> EN EL HTML)
+  const stripe = Stripe(stripePublicKey);
 
-// 4. Añade el Event Listener (solo si el botón existe)
-if (checkoutButton) {
-  checkoutButton.addEventListener('click', async () => {
-    // Deshabilitar botón para evitar clics múltiples
-    checkoutButton.disabled = true;
-    const originalButtonText = checkoutButton.textContent;
-    checkoutButton.textContent = 'Procesando...';
+  window.addEventListener('DOMContentLoaded', () => {
+    // 4. Botón de pago
+    const checkoutButton = document.getElementById('checkout-button');
 
-    try {
-      // 5. Llama a tu backend para crear la sesión de Checkout
-      console.log('Solicitando sesión de Checkout al backend...');
-      const response = await fetch(`${backendUrl}/create-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Puedes añadir otros encabezados si tu backend los requiere (ej: autenticación)
-        },
-        // Si necesitas enviar datos (ej: ID de usuario o curso) al backend:
-        // body: JSON.stringify({ userId: 'USER123', cursoId: 'EC0217' })
-      });
+    if (!checkoutButton) {
+      console.error('No se encontró el botón con id="checkout-button"');
+      return;
+    }
 
-      // 6. Verifica si la respuesta del backend fue exitosa
-      if (!response.ok) {
-        let errorMsg = 'No se pudo iniciar el proceso de pago.';
-        try {
-            // Intenta obtener un mensaje de error más específico del backend
+    checkoutButton.addEventListener('click', async (event) => {
+      event.preventDefault();
+
+      // 5. Leer datos del formulario
+      const email  = document.getElementById('pago-email')?.value.trim();
+      const name   = document.getElementById('pago-nombre')?.value.trim();
+      const phone  = document.getElementById('pago-telefono')?.value.trim();
+
+      if (!email) {
+        alert('Por favor escribe tu correo electrónico. Ahí te enviaremos tu acceso.');
+        return;
+      }
+
+      // Deshabilitar botón mientras se procesa
+      checkoutButton.disabled = true;
+      const originalText = checkoutButton.textContent;
+      checkoutButton.textContent = 'Procesando...';
+
+      try {
+        // 6. Llamar a tu backend para crear la sesión de pago
+        console.log('Solicitando sesión de Checkout al backend...');
+        const response = await fetch(`${backendUrl}/create-checkout-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, name, phone })
+        });
+
+        if (!response.ok) {
+          let errorMsg = `Error del servidor (${response.status})`;
+          try {
             const errorData = await response.json();
-            errorMsg = `Error del servidor (${response.status}): ${errorData.error || response.statusText}`;
-        } catch (parseError) {
-             // Si el backend no envió JSON, usa el estado HTTP
-             errorMsg = `Error del servidor (${response.status}): ${response.statusText}`;
+            if (errorData.error) {
+              errorMsg += `: ${errorData.error}`;
+            }
+          } catch (_) {
+            // si no hay JSON, dejamos el mensaje base
+          }
+          console.error('Error del backend:', errorMsg);
+          throw new Error(errorMsg);
         }
-        console.error('Error del backend:', errorMsg);
-        throw new Error(errorMsg);
-      }
 
-      // 7. Obtiene la sesión (esperando { url: '...' } o { id: '...' })
-      const session = await response.json();
-      console.log('Sesión de Checkout recibida:', session);
+        const session = await response.json();
+        console.log('Sesión de Checkout recibida:', session);
 
-      // 8. Verifica si se recibió el ID de la sesión (preferido) o la URL
-      if (!session.id && !session.url) {
-        console.error('Respuesta inesperada del backend. Falta id o url de sesión.');
-        throw new Error('Respuesta inválida del servidor de pagos.');
-      }
+        // 7. Validar respuesta
+        if (!session.id && !session.url) {
+          console.error('Respuesta inesperada del backend. Falta id o url de sesión.');
+          throw new Error('Respuesta inválida del servidor de pagos.');
+        }
 
-      // 9. Redirige al usuario a la página de pago de Stripe
-      console.log('Redirigiendo a Stripe Checkout...');
-      if (session.id) {
-          // Método preferido usando Session ID
+        // 8. Redirigir a Stripe Checkout
+        console.log('Redirigiendo a Stripe Checkout...');
+        if (session.id) {
           const result = await stripe.redirectToCheckout({
             sessionId: session.id
           });
-
-          // Si redirectToCheckout falla por un error del navegador/red (raro)
           if (result.error) {
             console.error('Error al redirigir a Stripe:', result.error);
             throw new Error(result.error.message);
           }
-      } else {
-          // Fallback si el backend solo devolvió la URL completa
+        } else {
           window.location.href = session.url;
+        }
+
+        // Si la redirección funciona, el usuario se va de la página aquí mismo
+
+      } catch (error) {
+        console.error('Error en el proceso de pago:', error);
+        alert(`Hubo un problema al iniciar el pago: ${error.message}`);
+        checkoutButton.disabled = false;
+        checkoutButton.textContent = originalText;
       }
+    });
 
-
-    } catch (error) {
-      // 10. Manejo de errores (fetch, backend, Stripe)
-      console.error('Error en el proceso de pago:', error);
-      alert(`Hubo un problema al iniciar el pago: ${error.message}\nRevisa la consola para más detalles.`);
-      // Volver a habilitar el botón si hubo un error
-      checkoutButton.disabled = false;
-      checkoutButton.textContent = originalButtonText; // Restaura texto original
-    }
-    // Nota: No se vuelve a habilitar el botón aquí si la redirección es exitosa,
-    // porque el usuario ya habrá navegado fuera de la página.
+    console.log('Listener de pago añadido al botón #checkout-button.');
   });
-
-  console.log('Listener de pago añadido al botón #checkout-button.');
-
-} else {
-  console.error('¡Error! No se encontró el botón con id="checkout-button" en la página.');
-  alert('Error de configuración: El botón de pago no está presente.');
-}
+})();
