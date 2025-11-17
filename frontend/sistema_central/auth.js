@@ -6,10 +6,12 @@ const auth = (function() {
     'use strict';
 
     const TOKEN_KEY = 'authToken';
+    const EXPIRATION_KEY = 'authTokenExpiration'; // Añadimos un control de expiración
 
-    function login(token) {
+    function login(token, expirationTime) {
         try {
             localStorage.setItem(TOKEN_KEY, token);
+            localStorage.setItem(EXPIRATION_KEY, expirationTime); // Guardamos la fecha de expiración
             console.log('Auth: Sesión iniciada.');
         } catch (e) {
             console.error('Auth: Error al guardar el token.', e);
@@ -19,12 +21,7 @@ const auth = (function() {
     function logout() {
         try {
             localStorage.removeItem(TOKEN_KEY);
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('accessCode');
-            
-            if (typeof EC0301Manager !== 'undefined') {
-                EC0301Manager.clearData();
-            }
+            localStorage.removeItem(EXPIRATION_KEY);
             console.log('Auth: Sesión cerrada.');
             window.location.href = 'index.html';
         } catch (e) {
@@ -35,7 +32,13 @@ const auth = (function() {
     function isLoggedIn() {
         try {
             const token = localStorage.getItem(TOKEN_KEY);
-            return !!token; 
+            const expirationTime = localStorage.getItem(EXPIRATION_KEY);
+            const currentTime = Date.now();
+            if (token && expirationTime && currentTime < expirationTime) {
+                return true; // Si el token existe y no ha expirado
+            }
+            logout(); // Si el token ha expirado, cerramos sesión
+            return false;
         } catch (e) {
             console.error('Auth: Error al verificar token.', e);
             return false;
@@ -49,8 +52,7 @@ const auth = (function() {
             return null;
         }
     }
-    
-    // API Pública
+
     return {
         login,
         logout,
@@ -59,5 +61,3 @@ const auth = (function() {
     };
 
 })();
-
-window.auth = auth;
