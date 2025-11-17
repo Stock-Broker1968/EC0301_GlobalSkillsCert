@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 // CORS
 // ============================================
 
-// dominio del FRONT (landing / dashboard)
+// 👉 dominio del FRONT estático
 const allowedOrigin = 'https://ec0301-globalskillscert.onrender.com';
 
 app.use(cors({
@@ -52,7 +52,7 @@ async function checkDatabaseConnection() {
 }
 
 // ============================================
-// WEBHOOK STRIPE (antes de JSON parser)
+// WEBHOOK STRIPE (antes del JSON parser)
 // ============================================
 app.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -67,7 +67,7 @@ app.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (re
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Log de evento
+  // Log simple en BD
   try {
     const conn = await pool.getConnection();
     await conn.execute(
@@ -333,7 +333,7 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-// Verificar pago desde el frontend
+// Verificar pago
 app.post('/verify-payment', async (req, res) => {
   console.log('\n=== POST /verify-payment ===');
   const { sessionId } = req.body;
@@ -398,4 +398,97 @@ app.post('/login', async (req, res) => {
 
     if (user.bloqueado) {
       conn.release();
-      return res.status(401).json({ succ
+      return res.status(401).json({ success: false, error: 'Usuario bloqueado. Contacta a soporte.' });
+    }
+
+    if (user.codigo_acceso !== accessCode.toUpperCase()) {
+      await conn.execute(
+        'UPDATE usuarios SET intentos_login_fallidos = intentos_login_fallidos + 1, bloqueado = IF(intentos_login_fallidos >= 4, 1, 0) WHERE id = ?',
+        [user.id]
+      );
+      conn.release();
+      await logActividad(user.id, email, 'login_fallido', 'Código incorrecto', req.ip);
+      return res.status(401).json({ success: false, error: 'Código incorrecto' });
+    }
+
+    if (user.fecha_expiracion && new Date(user.fecha_expiracion) < new Date()) {
+      conn.release();
+      return res.status(401).json({ success: false, error: 'Acceso expirado' });
+    }
+
+    await conn.execute(
+      'UPDATE usuarios SET intentos_login_fallidos = 0, ultimo_acceso = NOW(), ip_ultimo_acceso = ? WHERE id = ?',
+      [req.ip, user.id]
+    );
+
+    await conn.execute(
+      'UPDATE codigos_acceso_historico SET fecha_ultimo_uso = NOW(), total_usos = total_usos + 1 WHERE usuario_id = ? AND codigo = ?',
+      [user.id, accessCode.toUpperCase()]
+    );
+
+    conn.release();
+
+    await logActividad(user.id, email, 'login_exitoso', `Login desde ${req.ip}`, req.ip);
+
+    const tokenPayload = {
+      userId: user.id,
+      email: user.email,
+      exp: Date.now() + (7 * 24 * 60 * 60 * 1000)
+    };
+    const token = Buffer.from(JSON.stringify(tokenPayload)).toString('base64');
+
+    console.log('✅ Login exitoso:', email);
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        nombre: user.nombre,
+        expirationDate: user.fecha_expiracion
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error /login:', error);
+    res.status(500).json({ success: false, error: 'Error del servidor' });
+  }
+});
+
+// 404 JSON
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Endpoint no encontrado',
+    availableEndpoints: [
+      'GET /health',
+      'POST /create-checkout-session',
+      'POST /verify-payment',
+      'POST /login',
+      'POST /webhook/stripe'
+    ]
+  });
+});
+
+// ============================================
+// INICIAR SERVIDOR
+// ============================================
+app.listen(PORT, '0.0.0.0', async () => {
+  console.log('\n================================================');
+  console.log('🚀 API EC0301 v2.0 INICIADA');
+  console.log('================================================');
+  console.log(`📡 Puerto: ${PORT}`);
+  console.log(`💾 MySQL: ${await checkDatabaseConnection() ? '✅' : '❌'}`);
+  console.log(`💳 Stripe: ${process.env.STRIPE_SECRET_KEY ? '✅' : '❌'}`);
+  console.log('================================================\n');
+});
+
+process.on('SIGTERM', async () => {
+  console.log('Cerrando API...');
+  await pool.end();
+  process.exit(0);
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('❌ Unhandled Rejection:', error);
+});
