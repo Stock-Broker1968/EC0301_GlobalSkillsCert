@@ -1,5 +1,5 @@
 // ============================================
-// SERVER.JS COMPLETO - PRODUCCIÓN
+// SERVER.JS - API EC0301 PRODUCCIÓN
 // ============================================
 require('dotenv').config();
 const express = require('express');
@@ -11,13 +11,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================
-// MIDDLEWARE CRÍTICO
+// CORS
 // ============================================
 
-// El dominio exacto de tu frontend
+// dominio del FRONT (landing / dashboard)
 const allowedOrigin = 'https://ec0301-globalskillscert.onrender.com';
 
-// CORS - Debe ir ANTES de body parsers
 app.use(cors({
   origin: allowedOrigin,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -25,55 +24,8 @@ app.use(cors({
   credentials: true
 }));
 
-// Webhook de Stripe - DEBE usar express.raw()
-app.post('/webhook/stripe', express.raw({type: 'application/json'}), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  let event;
-
-  try {
-    // Verificación del webhook
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-    console.log('✅ Webhook verificado:', event.type);
-  } catch (err) {
-    console.error('❌ Error verificando webhook:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  // Log del webhook
-  try {
-    const conn = await pool.getConnection();
-    await conn.execute(
-      'INSERT INTO webhook_events_log (proveedor, evento_tipo, evento_id, payload, fecha_recepcion, ip_origen) VALUES (?, ?, ?, ?, NOW(), ?)',
-      ['stripe', event.type, event.id, JSON.stringify(event.data.object), req.ip]
-    );
-    conn.release();
-  } catch (error) {
-    console.error('Error guardando log de webhook:', error.message);
-  }
-
-  // Procesar eventos
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    console.log('💳 Pago completado:', session.id);
-
-    try {
-      await procesarPagoCompletado(session);
-    } catch (error) {
-      console.error('Error procesando pago:', error.message);
-    }
-  }
-
-  res.json({ received: true });
-});
-
-// Body parsers para el resto de rutas
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 // ============================================
-// MYSQL CONNECTION POOL
+// MYSQL POOL
 // ============================================
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -100,9 +52,63 @@ async function checkDatabaseConnection() {
 }
 
 // ============================================
+// WEBHOOK STRIPE (antes de JSON parser)
+// ============================================
+app.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    console.log('✅ Webhook verificado:', event.type);
+  } catch (err) {
+    console.error('❌ Error verificando webhook:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Log de evento
+  try {
+    const conn = await pool.getConnection();
+    await conn.execute(
+      'INSERT INTO webhook_events_log (proveedor, evento_tipo, evento_id, payload, fecha_recepcion, ip_origen) VALUES (?, ?, ?, ?, NOW(), ?)',
+      ['stripe', event.type, event.id, JSON.stringify(event.data.object), req.ip]
+    );
+    conn.release();
+  } catch (error) {
+    console.error('Error guardando log de webhook:', error.message);
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    console.log('💳 Pago completado (webhook):', session.id);
+    try {
+      await procesarPagoCompletado(session, null);
+    } catch (error) {
+      console.error('Error procesando pago (webhook):', error.message);
+    }
+  }
+
+  res.json({ received: true });
+});
+
+// ============================================
+// BODY PARSERS PARA EL RESTO
+// ============================================
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Logging simple
+app.use((req, res, next) => {
+  if (req.path !== '/webhook/stripe') {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  }
+  next();
+});
+
+// ============================================
 // FUNCIONES AUXILIARES
 // ============================================
-
 function generarCodigoAcceso() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
@@ -191,7 +197,6 @@ async function enviarNotificacionEmail(usuarioId, email, codigo, nombre) {
   const conn = await pool.getConnection();
   try {
     console.log(`📧 Email a ${email}: Código ${codigo}`);
-    
     await conn.execute(
       'INSERT INTO notificaciones (usuario_id, email, tipo, asunto, mensaje, estado, proveedor, fecha_creacion) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
       [usuarioId, email, 'email', 'Tu código de acceso SkillsCert', `Hola ${nombre}, tu código es: ${codigo}`, 'enviado', 'postmark']
@@ -202,10 +207,10 @@ async function enviarNotificacionEmail(usuarioId, email, codigo, nombre) {
 }
 
 async function enviarNotificacionWhatsApp(usuarioId, telefono, codigo, nombre) {
+  if (!telefono) return;
   const conn = await pool.getConnection();
   try {
     console.log(`📱 WhatsApp a ${telefono}: Código ${codigo}`);
-    
     await conn.execute(
       'INSERT INTO notificaciones (usuario_id, telefono, tipo, mensaje, estado, proveedor, fecha_creacion) VALUES (?, ?, ?, ?, ?, ?, NOW())',
       [usuarioId, telefono, 'whatsapp', `Hola ${nombre}, tu código de acceso SkillsCert es: ${codigo}`, 'enviado', 'meta']
@@ -215,44 +220,40 @@ async function enviarNotificacionWhatsApp(usuarioId, telefono, codigo, nombre) {
   }
 }
 
-async function procesarPagoCompletado(session) {
+async function procesarPagoCompletado(session, ip) {
   const email = session.customer_details.email;
   const nombre = session.metadata?.nombre || session.customer_details.name || 'Usuario';
   const telefono = session.metadata?.telefono || session.customer_details.phone;
   const codigo = generarCodigoAcceso();
-  const monto = session.amount_total / 100; // Convertir de centavos
+  const monto = session.amount_total / 100; // centavos → MXN
 
   console.log('Procesando pago para:', email);
 
   const usuarioId = await guardarUsuarioYCodigo(
-    email, nombre, telefono, codigo, session.id, monto, null
+    email, nombre, telefono, codigo, session.id, monto, ip
   );
 
   await registrarTransaccion(
-    usuarioId, email, session.id, session.payment_intent, monto, session.currency.toUpperCase(), null
+    usuarioId, email, session.id, session.payment_intent, monto, session.currency.toUpperCase(), ip
   );
 
-  await logActividad(usuarioId, email, 'pago_webhook', `Pago completado vía webhook: ${session.id}`, null);
+  await logActividad(usuarioId, email, 'pago', `Pago completado: ${session.id}`, ip);
 
   await enviarNotificacionEmail(usuarioId, email, codigo, nombre);
-  if (telefono) {
-    await enviarNotificacionWhatsApp(usuarioId, telefono, codigo, nombre);
-  }
+  await enviarNotificacionWhatsApp(usuarioId, telefono, codigo, nombre);
 
-  console.log('✅ Pago procesado:', codigo);
+  console.log('✅ Pago procesado. Código:', codigo);
 
-  return {
-    redirectUrl: `/dashboard?token=${generateTokenForUser(usuarioId)}`
-  };
+  return { usuarioId, email, codigo };
 }
 
 // ============================================
-// ENDPOINTS
+// ENDPOINTS PÚBLICOS
 // ============================================
 
+// Health
 app.get('/health', async (req, res) => {
   const dbConnected = await checkDatabaseConnection();
-  
   let stripeStatus = 'not_configured';
   try {
     if (process.env.STRIPE_SECRET_KEY) {
@@ -272,28 +273,129 @@ app.get('/health', async (req, res) => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', async () => {
-  console.log('\n================================================');
-  console.log('🚀 SERVIDOR EC0301 v2.0 INICIADO');
-  console.log('================================================');
-  console.log(`📡 Puerto: ${PORT}`);
-  console.log(`💾 MySQL: ${await checkDatabaseConnection() ? '✅' : '❌'}`);
-  console.log(`💳 Stripe: ${process.env.STRIPE_SECRET_KEY ? '✅' : '❌'}`);
-  console.log('\n📋 Endpoints:');
-  console.log('  GET  /health');
-  console.log('  POST /create-checkout-session');
-  console.log('  POST /verify-payment');
-  console.log('  POST /login');
-  console.log('  POST /webhook/stripe');
-  console.log('================================================\n');
+// Crear sesión de pago
+app.post('/create-checkout-session', async (req, res) => {
+  console.log('\n=== POST /create-checkout-session ===');
+  console.log('Body:', req.body);
+
+  try {
+    const { email, name, phone } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Email requerido' });
+    }
+
+    const origin = req.headers.origin ||
+      req.headers.referer?.replace(/\/$/, '') ||
+      allowedOrigin;
+
+    const successUrl = `${origin}/?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${origin}/?canceled=true`;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'mxn',
+          product_data: {
+            name: 'Acceso SkillsCert EC0301',
+            description: 'Sistema completo - 90 días de acceso'
+          },
+          unit_amount: 99900
+        },
+        quantity: 1
+      }],
+      mode: 'payment',
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      customer_email: email,
+      metadata: {
+        email: email,
+        nombre: name || '',
+        telefono: phone || ''
+      }
+    });
+
+    console.log('✅ Sesión Stripe creada:', session.id);
+
+    res.json({
+      success: true,
+      id: session.id,
+      url: session.url
+    });
+
+  } catch (error) {
+    console.error('❌ Error /create-checkout-session:', error);
+    res.status(500).json({
+      success: false,
+      error: 'No se pudo crear la sesión de pago'
+    });
+  }
 });
 
-process.on('SIGTERM', async () => {
-  console.log('Cerrando...');
-  await pool.end();
-  process.exit(0);
+// Verificar pago desde el frontend
+app.post('/verify-payment', async (req, res) => {
+  console.log('\n=== POST /verify-payment ===');
+  const { sessionId } = req.body;
+
+  if (!sessionId) {
+    return res.status(400).json({ success: false, error: 'Session ID requerido' });
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      return res.json({
+        success: false,
+        error: 'Pago no completado',
+        status: session.payment_status
+      });
+    }
+
+    const result = await procesarPagoCompletado(session, req.ip);
+
+    return res.json({
+      success: true,
+      email: result.email,
+      accessCode: result.codigo,
+      expirationDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ Error /verify-payment:', error);
+    res.status(500).json({ success: false, error: 'Error al verificar el pago' });
+  }
 });
 
-process.on('unhandledRejection', (error) => {
-  console.error('❌ Unhandled Rejection:', error);
-});
+// Login con código
+app.post('/login', async (req, res) => {
+  console.log('\n=== POST /login ===');
+
+  const { email, accessCode } = req.body;
+
+  if (!email || !accessCode) {
+    return res.status(400).json({ success: false, error: 'Email y código requeridos' });
+  }
+
+  try {
+    const conn = await pool.getConnection();
+    const [users] = await conn.execute(
+      `SELECT id, email, nombre, codigo_acceso, activo, bloqueado, fecha_expiracion, intentos_login_fallidos
+       FROM usuarios
+       WHERE email = ? AND activo = 1
+       LIMIT 1`,
+      [email]
+    );
+
+    if (users.length === 0) {
+      conn.release();
+      await logActividad(null, email, 'login_fallido', 'Usuario no encontrado', req.ip);
+      return res.status(401).json({ success: false, error: 'Credenciales inválidas' });
+    }
+
+    const user = users[0];
+
+    if (user.bloqueado) {
+      conn.release();
+      return res.status(401).json({ succ
