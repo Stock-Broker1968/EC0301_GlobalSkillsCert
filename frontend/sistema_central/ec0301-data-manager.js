@@ -2,8 +2,9 @@
 /**
  * EC0301 Data Manager - v2.1
  * - Guarda datos del proyecto en localStorage
- * - Controla el avance de módulos EC0301 y candados
+ * - Controla avance de módulos EC0301 y candados
  */
+
 const EC0301Manager = (function () {
   'use strict';
 
@@ -14,9 +15,9 @@ const EC0301Manager = (function () {
     'carta',        // Carta Descriptiva
     'logistica',    // Logística y formatos
     'evaluaciones', // Instrumentos de Evaluación
-    'manuales',     // Manuales
+    'manuales',     // Manuales del curso
     'respuestas',   // Hoja de respuestas
-    'auditoria'     // Auditoría
+    'auditoria'     // Auditoría EC0301
   ];
 
   let projectData = {};
@@ -30,7 +31,7 @@ const EC0301Manager = (function () {
     MODULES_ORDER.forEach((mod, index) => {
       if (!projectData.modulos[mod]) {
         projectData.modulos[mod] = {
-          desbloqueado: index === 0, // Solo la carta está desbloqueada al inicio
+          desbloqueado: index === 0, // Solo la carta está abierta al inicio
           completado: false,
           porcentaje: 0,
           fecha: null
@@ -119,8 +120,12 @@ const EC0301Manager = (function () {
     return !!(m && m.desbloqueado);
   }
 
-  // Marca avance de un módulo (0-100). Si >=80 lo da por completado y
-  // desbloquea el siguiente módulo en MODULES_ORDER.
+  /**
+   * Marca avance de un módulo (0-100).
+   * Si >= 80:
+   *   - marca el módulo como completado
+   *   - desbloquea el siguiente módulo según MODULES_ORDER
+   */
   function markModuleProgress(modulo, porcentaje) {
     ensureModulesStructure();
 
@@ -136,7 +141,7 @@ const EC0301Manager = (function () {
     m.completado = pct >= 80;
     m.fecha = new Date().toISOString();
 
-    // Si se completó, desbloquear el siguiente
+    // Si se completó, desbloquear el siguiente en la cadena
     if (m.completado) {
       const idx = MODULES_ORDER.indexOf(modulo);
       const siguiente = MODULES_ORDER[idx + 1];
@@ -155,10 +160,12 @@ const EC0301Manager = (function () {
     }
 
     saveDataToStorage();
-    console.log(`[DataManager] Progreso módulo "${modulo}": ${pct}% (completado=${m.completado})`);
+    console.log(
+      `[DataManager] Progreso módulo "${modulo}": ${pct}% (completado=${m.completado})`
+    );
   }
 
-  // Atajo: marcar módulo como 100%
+  // Atajo: marcar módulo como completado al 100%
   function markModuleComplete(modulo) {
     markModuleProgress(modulo, 100);
   }
@@ -167,7 +174,6 @@ const EC0301Manager = (function () {
     projectData = {};
     localStorage.removeItem(DATA_KEY);
     console.log('[DataManager] Datos borrados.');
-    // Re-inicializar estructura base para nueva sesión
     ensureModulesStructure();
     saveDataToStorage();
   }
