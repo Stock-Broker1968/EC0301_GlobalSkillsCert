@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carta Descriptiva EC0301 - SkillsCert Professional</title>
+    <title>Carta Descriptiva EC0217.01 - SkillsCert Professional</title>
 
-    <script src="sistema_central/auth.js"></script>
-    <script src="sistema_central/ec0301-data-manager.js"></script>
+    <script src="sistema_central/auth.js" defer></script>
+    <script src="sistema_central/ec0301-data-manager.js" defer></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -31,20 +31,17 @@
             --border: #e2e8f0;
             --shadow: 0 10px 30px rgba(99, 102, 241, 0.1);
         }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: var(--dark);
             line-height: 1.6;
         }
-
         /* ========== HEADER ========== */
         .header {
             background: var(--white);
@@ -54,7 +51,6 @@
             z-index: 1000;
             border-bottom: 3px solid var(--primary);
         }
-
         .header-content {
             max-width: 1400px;
             margin: 0 auto;
@@ -65,36 +61,30 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
-
         .header-title {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
-
         .header-title i {
             font-size: 2rem;
             color: var(--primary);
         }
-
         .header-title h1 {
             font-size: 1.5rem;
             color: var(--dark);
             font-weight: 700;
         }
-
         .header-title .subtitle {
             font-size: 0.85rem;
             color: #64748b;
             font-weight: 400;
         }
-
         .toolbar {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
         }
-
         .btn {
             padding: 0.65rem 1.25rem;
             border: none;
@@ -109,54 +99,43 @@
             text-decoration: none;
             white-space: nowrap;
         }
-
         .btn-primary {
             background: var(--primary);
             color: var(--white);
         }
-
         .btn-primary:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
-
         .btn-secondary {
             background: #64748b;
             color: var(--white);
         }
-
         .btn-secondary:hover {
             background: #475569;
         }
-
         .btn-success {
             background: var(--success);
             color: var(--white);
         }
-
         .btn-success:hover {
             background: #059669;
         }
-
         .btn-warning {
             background: var(--warning);
             color: var(--white);
         }
-
         .btn-warning:hover {
             background: #d97706;
         }
-
         .btn-danger {
             background: var(--danger);
             color: var(--white);
         }
-
         .btn-danger:hover {
             background: #dc2626;
         }
-
         /* ========== PROGRESS BAR ========== */
         .progress-container {
             background: var(--light);
@@ -164,7 +143,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .progress-bar {
             height: 100%;
             background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
@@ -172,14 +150,12 @@
             border-radius: 0 4px 4px 0;
             box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
         }
-
         /* ========== MAIN CONTAINER ========== */
         .container {
             max-width: 1400px;
             margin: 2rem auto;
             padding: 0 2rem 2rem;
         }
-
         /* ========== SECTIONS ========== */
         .section {
             background: var(--white);
@@ -190,7 +166,6 @@
             border: 1px solid var(--border);
             animation: fadeIn 0.5s ease;
         }
-
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -201,7 +176,6 @@
                 transform: translateY(0);
             }
         }
-
         .section-title {
             color: var(--primary);
             font-size: 1.5rem;
@@ -213,11 +187,9 @@
             align-items: center;
             gap: 0.75rem;
         }
-
         .section-title i {
             font-size: 1.75rem;
         }
-
         /* ========== BOX COMPONENTS ========== */
         .box {
             background: var(--light);
@@ -227,7 +199,6 @@
             border: 1px solid var(--border);
             position: relative;
         }
-
         .box h3 {
             color: var(--dark);
             margin-bottom: 1.25rem;
@@ -237,16 +208,13 @@
             justify-content: space-between;
             gap: 1rem;
         }
-
         .box h3 i {
             color: var(--primary);
         }
-
         /* ========== FORM ELEMENTS ========== */
         .form-group {
             margin-bottom: 1.25rem;
         }
-
         label {
             display: block;
             font-weight: 600;
@@ -254,16 +222,13 @@
             color: var(--dark);
             font-size: 0.95rem;
         }
-
         label .required {
             color: var(--danger);
             margin-left: 0.25rem;
         }
-
         input, select, textarea {
             width: 100%;
-            /* ===== MEJORA 1: Campos más altos ===== */
-            padding: 0.85rem; /* Aumentado de 0.75rem */
+            padding: 0.85rem; 
             border: 2px solid var(--border);
             border-radius: 8px;
             font-size: 0.95rem;
@@ -271,46 +236,47 @@
             transition: all 0.3s;
             background: var(--white);
         }
-
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
-
         textarea {
-            /* ===== MEJORA 2: Textareas más grandes ===== */
-            min-height: 130px; /* Aumentado de 100px */
+            min-height: 130px; 
             resize: vertical;
         }
-
         input:disabled, select:disabled, textarea:disabled {
             background: var(--light);
             cursor: not-allowed;
             opacity: 0.7;
         }
-
         /* ========== GRID LAYOUTS ========== */
         .grid-2 {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 1.25rem;
         }
-
         .grid-3 {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.25rem;
         }
-        
-        /* === NUEVO: GRID 4 === */
         .grid-4 {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.25rem;
         }
-
-
+        .grid-5-dev {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+        .time-input { max-width: 100px; text-align: right; }
+        .total-time-box { background: var(--primary-light); border: 2px solid var(--primary); }
+        .total-time-box #sum_total { font-size: 1.1rem; color: var(--primary-dark); }
+        .total-time-box #time_warning { color: var(--danger); font-weight: 600; }
+        
         /* ========== DOMAIN SELECTOR ========== */
         .doms {
             display: flex;
@@ -318,7 +284,6 @@
             margin-bottom: 1rem;
             flex-wrap: wrap;
         }
-
         .dom {
             padding: 0.75rem 1.25rem;
             background: var(--white);
@@ -329,18 +294,15 @@
             font-weight: 600;
             font-size: 0.9rem;
         }
-
         .dom:hover {
             border-color: var(--primary);
             transform: translateY(-2px);
         }
-
         .dom.active {
             background: var(--primary);
             color: var(--white);
             border-color: var(--primary);
         }
-
         /* ========== VERBOS SELECTOR ========== */
         .verbos-container {
             background: var(--white);
@@ -349,18 +311,15 @@
             margin: 1rem 0;
             border: 1px solid var(--border);
         }
-
         .verbos-container small {
             display: block;
             color: #64748b;
             margin-bottom: 0.75rem;
             font-weight: 600;
         }
-
         .verbo-category {
             margin: 0.75rem 0;
         }
-
         .verbo-category strong {
             display: block;
             color: var(--primary);
@@ -369,7 +328,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .verbo {
             display: inline-block;
             padding: 0.4rem 0.9rem;
@@ -382,14 +340,12 @@
             font-weight: 500;
             transition: all 0.2s;
         }
-
         .verbo:hover {
             background: var(--primary);
             color: var(--white);
             border-color: var(--primary);
             transform: scale(1.05);
         }
-
         /* ========== PREVIEW BOX ========== */
         .preview-box {
             background: linear-gradient(135deg, #e0e7ff 0%, #fef3c7 100%);
@@ -398,7 +354,6 @@
             border-left: 4px solid var(--primary);
             margin-top: 1rem;
         }
-
         .preview-box strong {
             display: block;
             color: var(--primary);
@@ -407,14 +362,12 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .preview-box #og_preview {
             color: var(--dark);
             font-size: 1.05rem;
             line-height: 1.6;
             font-style: italic;
         }
-
         /* ========== TIME BADGES ========== */
         .time {
             background: var(--primary);
@@ -425,7 +378,6 @@
             font-weight: 600;
             letter-spacing: 0.5px;
         }
-
         /* ========== VALIDATION INDICATOR ========== */
         .validation-indicator {
             position: fixed;
@@ -443,16 +395,13 @@
             transition: all 0.3s;
             border: 2px solid transparent;
         }
-
         .validation-indicator.valid {
             border-color: var(--success);
             animation: pulse-success 2s infinite;
         }
-
         .validation-indicator.invalid {
             border-color: var(--danger);
         }
-
         @keyframes pulse-success {
             0%, 100% {
                 box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
@@ -461,11 +410,9 @@
                 box-shadow: 0 10px 40px rgba(16, 185, 129, 0.6);
             }
         }
-
         .validation-indicator i {
             font-size: 1.5rem;
         }
-
         /* ========== HELP TIP ========== */
         .help-tip {
             display: inline-block;
@@ -481,35 +428,28 @@
             margin-left: 0.5rem;
             font-weight: 700;
         }
-
         /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
                 align-items: stretch;
             }
-
             .toolbar {
                 flex-direction: column;
             }
-
             .btn {
                 width: 100%;
                 justify-content: center;
             }
-
-            .grid-2, .grid-3, .grid-4 {
+            .grid-2, .grid-3, .grid-4, .grid-5-dev {
                 grid-template-columns: 1fr;
             }
-
             .doms {
                 flex-direction: column;
             }
-
             .dom {
                 text-align: center;
             }
-
             .validation-indicator {
                 bottom: 1rem;
                 right: 1rem;
@@ -517,7 +457,6 @@
                 padding: 1rem;
             }
         }
-
         /* ========== ANIMATIONS ========== */
         @keyframes slideUp {
             from {
@@ -529,15 +468,12 @@
                 transform: translateY(0);
             }
         }
-
         .mt-1 {
             margin-top: 1rem;
         }
-
         .pulse {
             animation: pulse-btn 2s infinite;
         }
-
         @keyframes pulse-btn {
             0%, 100% {
                 transform: scale(1);
@@ -549,14 +485,13 @@
     </style>
 </head>
 <body>
-
     <header class="header">
         <div class="header-content">
             <div class="header-title">
                 <i class="fas fa-file-contract"></i>
                 <div>
                     <h1>Carta Descriptiva</h1>
-                    <span class="subtitle">Carta Descriptiva / Guion Instruccional (Presencial / Mixto)</span>
+                    <span class="subtitle">Guion Instruccional (Presencial / Mixto)</span>
                 </div>
             </div>
             <div class="toolbar">
@@ -598,14 +533,14 @@
                 <i class="fas fa-info-circle"></i>
                 1. Información General del Curso
             </h2>
-            <div class="grid-2">
+            <div class="grid-3">
                 <div class="form-group">
                     <label for="cd_nombre">Nombre del Curso/Taller <span class="required">*</span></label>
-                    <input id="cd_nombre" placeholder="Ej: Diseño de cursos de capacitación presencial" required>
+                    <input id="cd_nombre" placeholder="Ej: Curso de Inducción..." required>
                 </div>
                 <div class="form-group">
                     <label for="cd_duracion">Duración total (horas) <span class="required">*</span></label>
-                    <input id="cd_duracion" type="number" placeholder="Ej: 8" min="1" max="500" required>
+                    <input id="cd_duracion" type="number" placeholder="Ej: 8" min="1" max="500" required onchange="recalcTimes()">
                 </div>
                 <div class="form-group">
                     <label for="cd_facilitador">Nombre del facilitador/instructor <span class="required">*</span></label>
@@ -625,18 +560,16 @@
                     <label for="cd_modalidad">Modalidad del curso <span class="required">*</span></label>
                     <select id="cd_modalidad" required>
                         <option value="">Seleccione una opción...</option>
-                        <option value="presencial">Presencial (EC0217)</option>
+                        <option value="presencial" selected>Presencial (EC0217)</option>
                         <option value="mixto">Mixto (Línea y Presencial)</option>
                         <option value="linea_sincrono">En línea Síncrono (EC0301)</option>
                         <option value="linea_asincrono">En línea Asíncrono (EC0301)</option>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <label for="cd_diseñador">Nombre del diseñador <span class="required">*</span></label>
-                    <input id="cd_diseñador" placeholder="Nombre completo del diseñador" required>
-                </div>
-
+            </div>
+             <div class="form-group">
+                <label for="cd_diseñador">Nombre del diseñador <span class="required">*</span></label>
+                <input id="cd_diseñador" placeholder="Nombre completo del diseñador" required>
             </div>
             <div class="form-group mt-1">
                 <label for="cd_proposito">Propósito/Beneficio del curso <span class="required">*</span></label>
@@ -651,8 +584,8 @@
             </h2>
             <div class="grid-2">
                 <div class="form-group">
-                    <label for="cd_psico">Perfil del participante <span class="required">*</span></label>
-                    <textarea id="cd_psico" placeholder="Edad, ocupación, nivel educativo, experiencia previa, motivaciones, estilo de aprendizaje..." required></textarea>
+                    <label for="cd_perfil">Perfil del Participante (Características) <span class="required">*</span></label>
+                    <textarea id="cd_perfil" placeholder="Edad, ocupación, nivel educativo, experiencia previa, motivaciones, estilo de aprendizaje..." required></textarea>
                 </div>
                 <div class="form-group">
                     <label for="cd_conoc">Conocimientos previos requeridos <span class="required">*</span></label>
@@ -669,7 +602,7 @@
                 </div>
                 <div class="form-group">
                     <label for="cd_num">Número de participantes <span class="required">*</span></label>
-                    <input id="cd_num" placeholder="Ej: 15-25 personas" required>
+                    <input id="cd_num" type="number" min="1" placeholder="Ej: 15" required>
                 </div>
                 <div class="form-group">
                     <label for="cd_tipo">Tipo de grupo <span class="required">*</span></label>
@@ -677,7 +610,6 @@
                         <option value="">Seleccione una opción...</option>
                         <option value="homogeneo">Homogéneo (mismo perfil)</option>
                         <option value="heterogeneo">Heterogéneo (perfiles diversos)</option>
-                        <option value="mixto">Mixto</option>
                     </select>
                 </div>
             </div>
@@ -720,8 +652,7 @@
                 </div>
                 
                 <input type="hidden" id="og_criterio" value="según lo establecido en la sección de evaluación">
-
-
+                
                 <div class="preview-box">
                     <strong>Vista previa del objetivo:</strong>
                     <div id="og_preview">Complete los campos anteriores para visualizar el objetivo general...</div>
@@ -729,39 +660,13 @@
             </div>
 
             <div id="objetivosParticulares">
-                <div class="box" data-op="1">
-                    <h3>
-                        <span><i class="fas fa-tasks"></i> Objetivo Particular 1</span>
-                    </h3>
-                    <div class="doms">
-                        <div class="dom active" data-op="1" data-d="cognitivo" onclick="selDom(1, 'cognitivo')">Cognitivo</div>
-                        <div class="dom" data-op="1" data-d="psicomotriz" onclick="selDom(1, 'psicomotriz')">Psicomotriz</div>
-                        <div class="dom" data-op="1" data-d="afectivo" onclick="selDom(1, 'afectivo')">Afectivo</div>
-                        <div class="dom" data-op="1" data-d="relacional" onclick="selDom(1, 'relacional')">Relacional</div>
-                    </div>
-                    <div class="verbos-container" id="verbs1"></div>
-                    <div class="grid-2">
-                        <div class="form-group">
-                            <label>Verbo + Acción <span class="required">*</span></label>
-                            <input id="op1_accion" placeholder="Ej: Identificará los elementos clave de..." required>
-                        </div>
-                        <div class="form-group">
-                            <label>Condición/Contexto <span class="required">*</span></label>
-                            <textarea id="op1_cond" placeholder="¿En qué condiciones o con qué recursos?" required></textarea>
-                        </div>
-                    </div>
-                    <div class="form-group mt-1">
-                        <label>Temas relacionados</label>
-                        <textarea id="op1_temas" placeholder="Liste los temas o módulos que apoyan este objetivo (uno por línea)"></textarea>
-                    </div>
-                    </div>
-            </div>
+                </div>
             <button class="btn btn-primary mt-1" onclick="addObjetivoParticular()">
                 <i class="fas fa-plus"></i>
                 Agregar Objetivo Particular
             </button>
         </section>
-
+        
         <section class="section">
              <h2 class="section-title">
                 <i class="fas fa-clipboard-list"></i>
@@ -769,11 +674,11 @@
             </h2>
             <div class="grid-2">
                 <div class="form-group">
-                    <label>Instalaciones, mobiliario y su distribución <span class="required">*</span></label>
+                    <label>Requerimientos en instalaciones, mobiliario y su distribución <span class="required">*</span></label>
                     <textarea id="rq_instalaciones" placeholder="1. Salón o aula para X personas...&#10;2. Mesas y sillas...&#10;3. Distribución en 'U' o herradura...&#10;4. Acceso a sanitarios y rutas de evacuación..." required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Equipo de apoyo y su distribución <span class="required">*</span></label>
+                    <label>Requerimientos en equipo de apoyo y su distribución <span class="required">*</span></label>
                     <textarea id="rq_equipo" placeholder="1. Laptop para el instructor&#10;2. Pantalla o proyector...&#10;3. Pizarrón blanco o pintarrón...&#10;4. Extensión eléctrica y multicontactos..." required></textarea>
                 </div>
                 <div class="form-group">
@@ -790,7 +695,6 @@
                 <textarea id="rq_humanos" placeholder="1. Instructor certificado en EC0217...&#10;2. Personal de apoyo logístico (opcional)..." required></textarea>
             </div>
         </section>
-
 
         <section class="section">
             <h2 class="section-title">
@@ -833,11 +737,11 @@
                 <div class="grid-3">
                     <div class="form-group">
                         <label>Porcentaje (%)</label>
-                        <input type="number" id="ev_diag_pct" placeholder="Ej: 10" onchange="sumarPorcentajes()">
+                        <input type="number" id="ev_diag_pct" value="10" oninput="sumarPorcentajes()">
                     </div>
                     <div class="form-group">
                         <label>Instrumento</label>
-                        <input id="ev_diag_ins" placeholder="Ej: Cuestionario" value="Cuestionario">
+                        <input id="ev_diag_ins" value="Cuestionario">
                     </div>
                     <div class="form-group">
                         <label>Tipo</label>
@@ -851,11 +755,11 @@
                 <div class="grid-3">
                     <div class="form-group">
                         <label>Porcentaje (%)</label>
-                        <input type="number" id="ev_form_pct" placeholder="Ej: 50" onchange="sumarPorcentajes()">
+                        <input type="number" id="ev_form_pct" value="50" oninput="sumarPorcentajes()">
                     </div>
                     <div class="form-group">
                         <label>Instrumentos</label>
-                        <input id="ev_form_ins" placeholder="Ej: Guía de observación, Prácticas" value="Guía de observación">
+                        <input id="ev_form_ins" value="Guía de observación">
                     </div>
                     <div class="form-group">
                         <label>Tipo</label>
@@ -869,11 +773,11 @@
                 <div class="grid-3">
                     <div class="form-group">
                         <label>Porcentaje (%)</label>
-                        <input type="number" id="ev_sum_pct" placeholder="Ej: 40" onchange="sumarPorcentajes()">
+                        <input type="number" id="ev_sum_pct" value="40" oninput="sumarPorcentajes()">
                     </div>
                     <div class="form-group">
                         <label>Instrumentos</label>
-                        <input id="ev_sum_ins" placeholder="Ej: Cuestionario, Proyecto" value="Cuestionario">
+                        <input id="ev_sum_ins" value="Cuestionario">
                     </div>
                     <div class="form-group">
                         <label>Tipo</label>
@@ -881,8 +785,26 @@
                     </div>
                 </div>
             </div>
+
+            <div class="box">
+                <h3>Evaluación Satisfacción <span class="time">Final</span></h3>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label>Porcentaje (%)</label>
+                        <input type="number" id="ev_sat_pct" value="0" oninput="sumarPorcentajes()">
+                    </div>
+                    <div class="form-group">
+                        <label>Instrumentos</label>
+                        <input id="ev_sat_ins" value="Cuestionario">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <input id="ev_sat_tipo" value="Heteroevaluación" placeholder="Heteroevaluación...">
+                    </div>
+                </div>
+            </div>
             
-            <div class="box" style="background: var(--light);">
+            <div class="box total-time-box">
                 <h3 style="justify-content: flex-end;">
                     Suma Total de Porcentajes: 
                     <span id="ev_total_pct" style="color: var(--primary); font-size: 1.5rem; margin-left: 1rem;">0%</span>
@@ -901,49 +823,51 @@
                     <i class="fas fa-tasks"></i> 6.1 Comprobación de Recursos (Previo al curso)
                     <span class="time" id="precursoTime">30 min</span>
                 </h3>
-                <div class="form-group">
-                    <label>Actividades de Verificación (basado en EC0217)</label>
-                    <textarea id="dc_verificacion" rows="5" placeholder="1. Aplicar la lista de verificación de requerimientos.&#10;2. Realizar pruebas de funcionamiento del equipo.&#10;3. Verificar la distribución del mobiliario y equipo.&#10;4. Verificar la suficiencia de material..."></textarea>
-                </div>
-                <div class="form-group mt-1">
-                    <label>Tiempo estimado (minutos)</label>
-                    <input type="number" id="dc_precurso_t" value="30" min="5" onchange="recalcTimes()">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Actividades de Verificación (basado en EC0217)</label>
+                        <textarea id="dc_verificacion" rows="5" placeholder="1. Aplicar la lista de verificación de requerimientos.&#10;2. Realizar pruebas de funcionamiento del equipo.&#10;3. Verificar la distribución del mobiliario y equipo.&#10;4. Verificar la suficiencia de material..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Tiempo estimado (minutos)</label>
+                        <input type="number" id="dc_precurso_t" value="30" min="5" onchange="recalcTimes()" class="time-input" style="max-width: 150px;">
+                    </div>
                 </div>
             </div>
 
             <div class="box">
-                <h3>6.2 Apertura o Encuadre <span class="time" id="encuadreTime">20 min</span></h3>
+                <h3>6.2 Apertura o Encuadre <span class="time" id="encuadreTime">22 min</span></h3>
                 
                 <div class="form-group">
-                    <label>1. Presentación del instructor y participantes</label>
-                    <textarea id="enc_1_presentacion" rows="3" placeholder="Técnica rompehielo, presentación del instructor, etc."></textarea>
+                    <label>1. Presentación del instructor y participantes (Técnica Rompehielo)</label>
+                    <textarea id="enc_1_presentacion" rows="3" placeholder="El instructor se presenta, aplica técnica rompehielo 'Mentira verdad', explica objetivo de la técnica, controla tiempo y propicia presentación."></textarea>
                 </div>
                 <div class="form-group">
                     <label>2. Presentación del curso</label>
-                    <textarea id="enc_2_curso" rows="3" placeholder="Objetivo general, particulares, temario, beneficios."></textarea>
+                    <textarea id="enc_2_curso" rows="3" placeholder="Presentar objetivos, temario, beneficios del curso y crear ambiente participativo."></textarea>
                 </div>
                 <div class="form-group">
                     <label>3. Momentos e instrumentos de evaluación</label>
-                    <textarea id="enc_3_evaluacion" rows="3" placeholder="Explicar evaluación diagnóstica, formativa, sumativa, y sus porcentajes."></textarea>
+                    <textarea id="enc_3_evaluacion" rows="3" placeholder="Especificar tipos de evaluación (diagnóstica, formativa, sumativa), instrumentos, momentos y ponderaciones."></textarea>
                 </div>
                 <div class="form-group">
                     <label>4. Acuerdos y compromisos</label>
-                    <textarea id="enc_4_acuerdos" rows="3" placeholder="Reglas de operación (puntualidad, participación, etc.), Contrato de Aprendizaje."></textarea>
+                    <textarea id="enc_4_acuerdos" rows="3" placeholder="Revisar expectativas, acordar reglas de operación (participación, respeto, etc.), realizar Contrato de Aprendizaje."></textarea>
                 </div>
                 <div class="form-group">
                     <label>5. Evaluación diagnóstica</label>
-                    <textarea id="enc_5_diagnostico" rows="3" placeholder="Explicar alcance, instrucciones, tiempo para contestar y aclarar dudas."></textarea>
+                    <textarea id="enc_5_diagnostico" rows="3" placeholder="Explicar alcance, dar instrucciones, indicar tiempo para contestar y aclarar dudas."></textarea>
                 </div>
-
                 <div class="form-group mt-1">
                     <label>Tiempo total del Encuadre (minutos)</label>
-                    <input type="number" id="dc_encuadre_t" value="20" min="5" onchange="recalcTimes()">
+                    <input type="number" id="dc_encuadre_t" value="22" min="5" onchange="recalcTimes()" class="time-input" style="max-width: 150px;">
                 </div>
             </div>
-
+            
             <div class="box">
                 <h3>6.3 Desarrollo de Contenidos <span class="time" id="desarrolloTime">0 min</span></h3>
-                <div id="temasContainer"></div>
+                <div id="temasContainer">
+                    </div>
                 <button class="btn btn-primary mt-1" onclick="addTema()">
                     <i class="fas fa-plus"></i>
                     Agregar Tema/Módulo
@@ -973,18 +897,17 @@
                     <label>5. Despedida y agradecimientos</label>
                     <textarea id="cierre_5_despedida" rows="2" placeholder="Agradecer la participación y cerrar el curso."></textarea>
                 </div>
-
                 <div class="form-group mt-1">
                     <label>Tiempo total del Cierre (minutos)</label>
-                    <input type="number" id="dc_cierre_t" value="10" min="5" onchange="recalcTimes()">
+                    <input type="number" id="dc_cierre_t" value="10" min="5" onchange="recalcTimes()" class="time-input" style="max-width: 150px;">
                 </div>
             </div>
 
-            <div class="box">
+            <div class="box total-time-box">
                 <h3>Distribución del Tiempo Total</h3>
                 <div class="grid-4">
                     <div class="form-group">
-                        <label>Pre-Curso</label>
+                        <label>Comprobación</label>
                         <input id="sum_precurso" disabled>
                     </div>
                     <div class="form-group">
@@ -1002,11 +925,11 @@
                 </div>
                 <div class="form-group mt-1" style="text-align: right;">
                     <label>Total del Curso (calculado)</label>
-                    <input id="sum_total" disabled style="font-weight: bold; color: var(--primary); max-width: 250px; display: inline-block;">
+                    <input id="sum_total" disabled style="font-weight: bold; max-width: 250px; display: inline-block;">
+                    <div id="time_warning" style="display: none;"></div>
                 </div>
             </div>
         </section>
-
     </main>
 
     <div class="validation-indicator invalid" id="validationIndicator" style="display: none;">
@@ -1047,62 +970,68 @@
                 facilitacion: ['Facilitar', 'Moderar', 'Coordinar', 'Dinamizar', 'Gestionar']
             }
         };
-
         // Variables globales
         const $ = id => document.getElementById(id);
-        let objetivosCount = 1;
+        let objetivosCount = 0; // Se inicia en 0, se agregarán 4 fijos
         let temasCount = 0;
 
         // ========== PROTECCIÓN DE PÁGINA ==========
-        
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🔍 Verificando sistema...');
             
-            // Verificar módulos
-            if (typeof auth === 'undefined' || typeof EC0301Manager === 'undefined') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error Crítico del Sistema',
-                    html: '<p>No se pudieron cargar los módulos del sistema.</p><p>Verifica que existan:</p><ul style="text-align:left"><li>sistema_central/auth.js</li><li>sistema_central/ec0301-data-manager.js</li></ul>',
-                    confirmButtonColor: '#ef4444',
-                    allowOutsideClick: false
-                }).then(() => window.location.href = 'index.html');
-                return; // Detiene la ejecución
-            }
+            // ===== CORRECCIÓN: Guardia de Seguridad Robusta =====
+            setTimeout(() => {
+                if (typeof auth === 'undefined' || typeof EC0301Manager === 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Crítico del Sistema',
+                        html: '<p>No se pudieron cargar los módulos del sistema.</p><p>Verifica que existan:</p><ul style="text-align:left"><li>sistema_central/auth.js</li><li>sistema_central/ec0301-data-manager.js</li></ul>',
+                        confirmButtonColor: '#ef4444',
+                        allowOutsideClick: false
+                    }).then(() => window.location.href = 'index.html');
+                    return; // Detiene la ejecución
+                }
 
-            // Verificar autenticación
-            if (!auth.isLoggedIn()) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Acceso Denegado',
-                    text: 'Debes iniciar sesión para acceder a este módulo.',
-                    confirmButtonColor: '#6366f1',
-                    allowOutsideClick: false
-                }).then(() => window.location.href = 'index.html');
-                return; // Detiene la ejecución
-            }
+                // Verificar autenticación
+                if (!auth.isLoggedIn()) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Acceso Denegado',
+                        text: 'Debes iniciar sesión para acceder a este módulo.',
+                        confirmButtonColor: '#6366f1',
+                        allowOutsideClick: false
+                    }).then(() => window.location.href = 'index.html');
+                    return; // Detiene la ejecución
+                }
 
-            console.log('✅ Sistema verificado correctamente');
-            initializeApp();
+                console.log('✅ Sistema verificado correctamente');
+                initializeApp();
+            }, 50); // 50ms de espera
         });
 
         // ========== INICIALIZACIÓN ==========
-
         function initializeApp() {
-            renderVerbos(1, 'cognitivo');
+            // === CAMBIO 5: Crear 4 objetivos fijos ===
+            if(objetivosCount === 0) { // Solo si no se han cargado
+                addObjetivoParticular('Cognitivo');
+                addObjetivoParticular('Psicomotriz');
+                addObjetivoParticular('Afectivo');
+                addObjetivoParticular('Relacional');
+            }
+
             loadDraft();
+            
             // Si no hay temas cargados, añade uno por defecto
             if (temasCount === 0) {
                 addTema();
             }
             recalcTimes();
-            // === CAMBIO 3: Llamar a sumarPorcentajes ===
             sumarPorcentajes(); 
             updateProgress();
             
             // Auto-guardar cada 30 segundos
             setInterval(() => {
-                if (updateProgress() > 10) { // Solo si hay algo que guardar
+                if (updateProgress() > 5) { // Solo si hay algo que guardar
                     saveDraft(true); // true = silencioso
                 }
             }, 30000);
@@ -1123,17 +1052,12 @@
             });
             Toast.fire({ icon, title: message });
         }
-
-
         // ========== FUNCIONES DE VERBOS ==========
-
-        function renderVerbos(n, dominio = 'cognitivo') {
+        function renderVerbos(n, dominio) {
             const container = $(`verbs${n}`);
             if (!container) return;
-
             let html = '<small>💡 Verbos sugeridos (clic para usar):</small>';
             const categorias = VERBOS[dominio] || VERBOS.cognitivo;
-
             for (const [categoria, verbos] of Object.entries(categorias)) {
                 html += `<div class="verbo-category">
                     <strong>${categoria.charAt(0).toUpperCase() + categoria.slice(1)}:</strong><br>
@@ -1142,11 +1066,9 @@
             }
             container.innerHTML = html;
         }
-
         function insertVerbo(n, verbo) {
             const input = $(`op${n}_accion`);
             if (!input) return;
-
             const textoActual = input.value.trim();
             if (!textoActual) {
                 input.value = verbo + ' ';
@@ -1156,97 +1078,100 @@
             input.focus();
             updateProgress();
         }
-
         function selDom(n, dominio) {
             document.querySelectorAll(`[data-op="${n}"] .dom`).forEach(d => d.classList.remove('active'));
             document.querySelector(`[data-op="${n}"] .dom[data-d="${dominio}"]`)?.classList.add('active');
-            renderVerbos(n, dominio);
+            renderVerbos(n, dominio.toLowerCase());
             updateProgress();
         }
-
         // ========== OBJETIVOS ==========
-
         function updateOG() {
             const sujeto = 'Al finalizar el curso, el participante';
             const accion = $('og_accion').value.trim();
             const condicion = $('og_cond').value.trim();
             
-            // === CAMBIO 3: Criterio ya no es un campo de usuario ===
-            // const criterio = $('og_criterio').value.trim(); 
-
             let preview = sujeto;
             if (accion) preview += ' ' + accion;
             if (condicion) preview += ', ' + condicion;
-            // if (criterio) preview += ', ' + criterio; // Removido
-
+            
             $('og_preview').innerHTML = preview + '.';
             updateProgress();
         }
-
-        function addObjetivoParticular() {
+        
+        // === CAMBIO 5: Función de Objetivo Particular modificada ===
+        function addObjetivoParticular(dominioFijo = 'cognitivo') {
             objetivosCount++;
             const container = $('objetivosParticulares');
             const newObj = document.createElement('div');
             newObj.className = 'box';
             newObj.setAttribute('data-op', objetivosCount);
+            
+            let domsHTML = '';
+            const dominios = ['Cognitivo', 'Psicomotriz', 'Afectivo', 'Relacional'];
+            
+            if (objetivosCount <= 4) { // Si son los 4 fijos
+                dominioFijo = dominios[objetivosCount - 1];
+                domsHTML = `<div class="dom active" data-op="${objetivosCount}" data-d="${dominioFijo.toLowerCase()}">${dominioFijo}</div>`;
+            } else { // Si el usuario añade más
+                domsHTML = dominios.map(d => 
+                    `<div class="dom ${d.toLowerCase() === dominioFijo.toLowerCase() ? 'active' : ''}" data-op="${objetivosCount}" data-d="${d.toLowerCase()}" onclick="selDom(${objetivosCount}, '${d.toLowerCase()}')">${d}</div>`
+                ).join('');
+            }
+
             newObj.innerHTML = `
                 <h3>
-                    <span><i class="fas fa-tasks"></i> Objetivo Particular ${objetivosCount}</span>
-                    <button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="removeObjetivo(this)">
-                        <i class="fas fa-trash"></i> Eliminar
-                    </button>
+                    <span><i class="fas fa-tasks"></i> Objetivo Particular ${objetivosCount} (${dominioFijo})</span>
+                    ${objetivosCount > 4 ? `<button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="removeObjetivo(this)"><i class="fas fa-trash"></i></button>` : ''}
                 </h3>
-                <div class="doms">
-                    <div class="dom active" data-op="${objetivosCount}" data-d="cognitivo" onclick="selDom(${objetivosCount}, 'cognitivo')">Cognitivo</div>
-                    <div class="dom" data-op="${objetivosCount}" data-d="psicomotriz" onclick="selDom(${objetivosCount}, 'psicomotriz')">Psicomotriz</div>
-                    <div class="dom" data-op="${objetivosCount}" data-d="afectivo" onclick="selDom(${objetivosCount}, 'afectivo')">Afectivo</div>
-                    <div class="dom" data-op="${objetivosCount}" data-d="relacional" onclick="selDom(${objetivosCount}, 'relacional')">Relacional</div>
-                </div>
+                <div class="doms">${domsHTML}</div>
                 <div class="verbos-container" id="verbs${objetivosCount}"></div>
                 <div class="grid-2">
                     <div class="form-group">
                         <label>Verbo + Acción <span class="required">*</span></label>
-                        <input id="op${objetivosCount}_accion" placeholder="Ej: Aplicará las técnicas..." required>
+                        <input id="op${objetivosCount}_accion" placeholder="Ej: Identificará los elementos clave de..." required>
                     </div>
                     <div class="form-group">
                         <label>Condición/Contexto <span class="required">*</span></label>
-                        <textarea id="op${objetivosCount}_cond" placeholder="¿En qué condiciones?" required></textarea>
+                        <textarea id="op${objetivosCount}_cond" placeholder="¿En qué condiciones o con qué recursos?" required></textarea>
                     </div>
                 </div>
                 <div class="form-group mt-1">
-                    <label>Temas relacionados</label>
-                    <textarea id="op${objetivosCount}_temas" placeholder="Liste los temas (uno por línea)"></textarea>
+                    <label>Temas relacionados (Opcional)</label>
+                    <textarea id="op${objetivosCount}_temas" placeholder="Liste los temas o módulos que apoyan este objetivo (uno por línea)"></textarea>
                 </div>
                 `;
             container.appendChild(newObj);
-            renderVerbos(objetivosCount, 'cognitivo');
+            renderVerbos(objetivosCount, dominioFijo.toLowerCase());
             newObj.style.animation = 'slideUp 0.5s ease';
             updateProgress();
+            
+            // Ocultar el botón de "Agregar" si ya llegamos a 4
+             if(objetivosCount >= 4) {
+                 $('objetivosParticulares').nextElementSibling.style.display = 'none';
+             }
         }
-
         function removeObjetivo(button) {
+            // Solo permite borrar si hay más de 4 (los 4 fijos no se borran)
             const totalObjetivos = document.querySelectorAll('#objetivosParticulares .box').length;
-            if (totalObjetivos <= 1) {
-                Swal.fire('Error', 'Debe mantener al menos un objetivo particular', 'warning');
+            if (totalObjetivos <= 4) {
+                Swal.fire('Error', 'Los 4 objetivos de dominio son requeridos.', 'warning');
                 return;
             }
             
             Swal.fire({
                 title: '¿Eliminar objetivo?', text: 'Esta acción no se puede deshacer',
                 icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b', confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
+                cancelButtonColor: '#64748b', confirmButtonText: 'Sí, eliminar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    button.closest('.box').remove(); // Busca el 'box' padre y lo elimina
-                    Swal.fire('Eliminado', 'Objetivo eliminado correctamente', 'success');
+                    button.closest('.box').remove();
+                    Swal.fire('Eliminado', 'Objetivo eliminado.', 'success');
                     updateProgress();
                 }
             });
         }
-
-        // ========== TEMAS ==========
-
+        
+        // ========== TEMAS (Desarrollo) ==========
         // === CAMBIO 6: Función addTema modificada para EC0217 (Presencial) ===
         function addTema() {
             temasCount++;
@@ -1280,7 +1205,7 @@
                     </div>
                     <div class="form-group">
                         <label>Duración (minutos) <span class="required">*</span></label>
-                        <input type="number" id="tema${temasCount}_duracion" placeholder="60" min="15" onchange="recalcTimes()" required>
+                        <input type="number" id="tema${temasCount}_duracion" placeholder="60" min="5" onchange="recalcTimes()" required class="time-input">
                     </div>
                 </div>
             `;
@@ -1288,55 +1213,57 @@
             tema.style.animation = 'slideUp 0.5s ease';
             recalcTimes();
         }
-
-
         function removeTema(button) {
             Swal.fire({
                 title: '¿Eliminar tema?', text: 'Esta acción no se puede deshacer',
                 icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b', confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
+                cancelButtonColor: '#64748b', confirmButtonText: 'Sí, eliminar'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    button.closest('.box').remove(); // Busca el 'box' padre y lo elimina
+                    button.closest('.box').remove(); 
                     recalcTimes();
-                    Swal.fire('Eliminado', 'Tema eliminado correctamente', 'success');
+                    Swal.fire('Eliminado', 'Tema eliminado.', 'success');
                 }
             });
         }
 
         // ========== CÁLCULOS ==========
-
         // === CAMBIO 4: recalcTimes actualizado ===
         function recalcTimes() {
             const precurso = parseInt($('dc_precurso_t').value) || 0;
-            $('sum_precurso').value = `${precurso} minutos`;
+            $('sum_precurso').value = `${precurso} min`;
             $('precursoTime').textContent = `${precurso} min`;
-
+            
             const encuadre = parseInt($('dc_encuadre_t').value) || 0;
-            $('sum_encuadre').value = `${encuadre} minutos`;
+            $('sum_encuadre').value = `${encuadre} min`;
             $('encuadreTime').textContent = `${encuadre} min`;
-
+            
             const cierre = parseInt($('dc_cierre_t').value) || 0;
-            $('sum_cierre').value = `${cierre} minutos`;
+            $('sum_cierre').value = `${cierre} min`;
             $('cierreTime').textContent = `${cierre} min`;
 
             let desarrollo = 0;
-            // === CAMBIO 6: Cálculo de tiempo de OP eliminado ===
-            // document.querySelectorAll('[data-op] input[type="number"]').forEach(input => {
-            //     if (input.id.includes('_tiempo')) desarrollo += parseInt(input.value) || 0;
-            // });
             document.querySelectorAll('[data-tema] input[type="number"]').forEach(input => {
                 if (input.id.includes('_duracion')) desarrollo += parseInt(input.value) || 0;
             });
-
-            $('sum_desarrollo').value = `${desarrollo} minutos`;
+            $('sum_desarrollo').value = `${desarrollo} min`;
             $('desarrolloTime').textContent = `${desarrollo} min`;
 
-            const total = precurso + encuadre + desarrollo + cierre;
-            const horas = Math.floor(total / 60);
-            const minutos = total % 60;
-            $('sum_total').value = `${horas} horas ${minutos} minutos`;
+            const totalMinutos = encuadre + desarrollo + cierre; // Precurso no suma al total del curso
+            const totalHoras = (totalMinutos / 60).toFixed(2);
+            
+            $('sum_total').value = `${totalHoras} horas (${totalMinutos} min)`;
+            
+            // Validar contra el encabezado
+            const duracionHoras = parseFloat($('cd_duracion').value) || 0;
+            const timeWarning = $('time_warning');
+            
+            if (duracionHoras > 0 && parseFloat(totalHoras) !== duracionHoras) {
+                timeWarning.textContent = `¡Advertencia! El tiempo total (${totalHoras}h) no coincide con la duración del curso (${duracionHoras}h).`;
+                timeWarning.style.display = 'block';
+            } else {
+                timeWarning.style.display = 'none';
+            }
 
             updateProgress();
         }
@@ -1346,7 +1273,8 @@
             const diag = parseInt($('ev_diag_pct').value) || 0;
             const form = parseInt($('ev_form_pct').value) || 0;
             const sum = parseInt($('ev_sum_pct').value) || 0;
-            const total = diag + form + sum;
+            const sat = parseInt($('ev_sat_pct').value) || 0;
+            const total = diag + form + sum + sat;
             
             const totalEl = $('ev_total_pct');
             totalEl.textContent = total + '%';
@@ -1357,28 +1285,19 @@
             }
             updateProgress();
         }
-        
-        // === CAMBIO 3: recalcEval() eliminada ===
-        /*
-        function recalcEval() {
-            const formPct = parseInt($('ev_form_pct').value) || 40;
-            $('ev_sum_pct').value = (100 - formPct) + '%';
-            updateProgress();
-        }
-        */
 
-        // ========== PROGRESO Y VALIDACIÓN ==========
-
+        // ========== PROGRESO Y VALIDACIÓN (BUG FIX) ==========
         function updateProgress() {
             const campos = [
-                'cd_nombre', 'cd_duracion', 'cd_diseñador', 'cd_facilitador',
-                'cd_modalidad', 'cd_proposito', 'cd_psico', 'cd_conoc', 
+                'cd_nombre', 'cd_duracion', 'cd_facilitador', 'cd_diseñador',
+                'cd_modalidad', 'cd_proposito', 'cd_perfil', 'cd_conoc', 
                 'cd_hab', 'cd_num', 'cd_tipo',
-                'og_dom', 'og_accion', 'og_cond',
-                'op1_accion', 'op1_cond',
-                // === CAMBIO 2: Campos de Requerimientos actualizados ===
-                'rq_instalaciones', 'rq_equipo', 'rq_seguridad', 'rq_materiales', 'rq_humanos',
-                'ev_min'
+                'og_accion', 'og_cond',
+                'op1_accion', 'op1_cond', 'op2_accion', 'op2_cond', 'op3_accion', 'op3_cond', 'op4_accion', 'op4_cond',
+                // Requerimientos actualizados
+                'rq_instalaciones', 'rq_equipo', 'rq_materiales', 'rq_humanos', 'rq_seguridad',
+                'ev_min', 'ev_diag_pct', 'ev_form_pct', 'ev_sum_pct', 'ev_sat_pct',
+                'dc_verificacion', 'enc_1_presentacion', 'cierre_1_resumen'
             ];
             
             let completados = 0;
@@ -1386,18 +1305,19 @@
                 if ($(id) && $(id).value.trim()) completados++;
             });
             
+            // Validar que al menos un tema exista
             if ($('tema1_nombre') && $('tema1_nombre').value.trim()) completados++;
             
-            const totalCampos = campos.length + 1;
+            const totalCampos = campos.length + 1; // +1 por el tema1
             const porcentaje = Math.round((completados / totalCampos) * 100);
             
             if ($('progressBar')) $('progressBar').style.width = porcentaje + '%';
             
             const indicator = $('validationIndicator');
             if (indicator) {
-                if (porcentaje >= 80) {
+                if (porcentaje >= 95) { // Subimos el umbral
                     indicator.className = 'validation-indicator valid';
-                    indicator.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i><span>Documento válido (' + porcentaje + '%)</span>';
+                    indicator.innerHTML = `<i class="fas fa-check-circle" style="color: var(--success);"></i><span>Documento válido (${porcentaje}%)</span>`;
                 } else {
                     indicator.className = 'validation-indicator invalid';
                     indicator.innerHTML = `<i class="fas fa-exclamation-circle" style="color: var(--danger);"></i><span>${porcentaje}% completado</span>`;
@@ -1409,10 +1329,10 @@
 
         function validateForm() {
             const porcentaje = updateProgress();
-            if (porcentaje < 80) {
+            if (porcentaje < 95) {
                 Swal.fire({
                     title: 'Validación',
-                    html: `<p>El documento está <strong>${porcentaje}% completo</strong>.</p><p>Se requiere al menos 80% para considerarlo válido según el estándar.</p>`,
+                    html: `<p>El documento está <strong>${porcentaje}% completo</strong>.</p><p>Se requiere al menos 95% para considerarlo válido.</p>`,
                     icon: 'warning',
                     confirmButtonText: 'Entendido'
                 });
@@ -1425,10 +1345,8 @@
                 });
             }
         }
-
-        // ========== GUARDAR Y CARGAR ==========
-
-        // === Función collectData() actualizada con todos los cambios ===
+        
+        // ========== GUARDAR Y CARGAR (ACTUALIZADO) ==========
         function collectData() {
             const data = {
                 // Información General
@@ -1436,12 +1354,12 @@
                 duracion: $('cd_duracion').value,
                 diseñador: $('cd_diseñador').value,
                 facilitador: $('cd_facilitador').value,
-                lugar: $('cd_lugar').value, // CAMBIO 1
-                fecha: $('cd_fecha').value, // CAMBIO 1
+                lugar: $('cd_lugar').value, 
+                fecha: $('cd_fecha').value, 
                 modalidad: $('cd_modalidad').value,
                 proposito: $('cd_proposito').value,
                 // Perfil
-                psico: $('cd_psico').value,
+                perfil: $('cd_perfil').value, // 'psico' renombrado a 'perfil'
                 conoc: $('cd_conoc').value,
                 hab: $('cd_hab').value,
                 actitudes: $('cd_actitudes').value,
@@ -1452,10 +1370,10 @@
                     dom: $('og_dom').value,
                     accion: $('og_accion').value,
                     cond: $('og_cond').value,
-                    criterio: $('og_criterio').value // Mantenido aunque oculto
+                    criterio: $('og_criterio').value
                 },
                 objetivos: [],
-                // CAMBIO 2: Requerimientos
+                // Requerimientos
                 rq: {
                     instalaciones: $('rq_instalaciones').value,
                     equipo: $('rq_equipo').value,
@@ -1463,17 +1381,18 @@
                     materiales: $('rq_materiales').value,
                     humanos: $('rq_humanos').value
                 },
-                // CAMBIO 3: Evaluación
+                // Evaluación
                 ev: {
                     min: $('ev_min').value,
                     escala: $('ev_escala').value,
                     cert: $('ev_cert').value,
-                    diag: { pct: $('ev_diag_pct').value, ins: $('ev_diag_ins').value, tipo: $('ev_diag_tipo').value },
-                    form: { pct: $('ev_form_pct').value, ins: $('ev_form_ins').value, tipo: $('ev_form_tipo').value },
-                    sum: { pct: $('ev_sum_pct').value, ins: $('ev_sum_ins').value, tipo: $('ev_sum_tipo').value }
+                    diag_pct: $('ev_diag_pct').value, diag_ins: $('ev_diag_ins').value, diag_tipo: $('ev_diag_tipo').value,
+                    form_pct: $('ev_form_pct').value, form_ins: $('ev_form_ins').value, form_tipo: $('ev_form_tipo').value,
+                    sum_pct: $('ev_sum_pct').value, sum_ins: $('ev_sum_ins').value, sum_tipo: $('ev_sum_tipo').value,
+                    sat_pct: $('ev_sat_pct').value, sat_ins: $('ev_sat_ins').value, sat_tipo: $('ev_sat_tipo').value
                 },
-                // CAMBIOS 4, 5, 7: Desarrollo
-                dc: {
+                // Desarrollo
+                dev: {
                     verificacion: $('dc_verificacion').value,
                     precurso_t: $('dc_precurso_t').value,
                     enc_1: $('enc_1_presentacion').value,
@@ -1492,8 +1411,7 @@
                 temas: [],
                 fechaActualizacion: new Date().toISOString()
             };
-
-            // Recopilar los objetivos particulares
+            
             document.querySelectorAll('#objetivosParticulares .box').forEach(box => {
                 const n = box.dataset.op;
                 if ($(`op${n}_accion`)) {
@@ -1502,23 +1420,22 @@
                         dom: document.querySelector(`[data-op="${n}"] .dom.active`)?.dataset.d || 'cognitivo',
                         accion: $(`op${n}_accion`).value,
                         cond: $(`op${n}_cond`).value,
-                        temas: $(`op${n}_temas`).value,
-                        // tiempo: $(`op${n}_tiempo`)?.value || '' // CAMBIO 6: Removido
+                        temas: $(`op${n}_temas`).value
                     });
                 }
             });
             
-            // CAMBIO 6: Recopilar los temas (formato presencial)
-            document.querySelectorAll('#temasContainer .box').forEach(box => {
-                const n = box.dataset.tema;
-                if ($(`tema${n}_nombre`)) {
+            document.querySelectorAll('#temasContainer .box').forEach((box, index) => {
+                const n = index + 1; // Re-indexar para evitar saltos si se borra
+                const id = box.dataset.tema;
+                if ($(`tema${id}_nombre`)) {
                     data.temas.push({
-                        num: n,
-                        nombre: $(`tema${n}_nombre`).value,
-                        duracion: $(`tema${n}_duracion`).value,
-                        actividades: $(`tema${n}_actividades`).value,
-                        tecnicas: $(`tema${n}_tecnicas`).value,
-                        material: $(`tema${n}_material`).value
+                        num: n, // Guardar como 1, 2, 3...
+                        nombre: $(`tema${id}_nombre`).value,
+                        duracion: $(`tema${id}_duracion`).value,
+                        actividades: $(`tema${id}_actividades`).value,
+                        tecnicas: $(`tema${id}_tecnicas`).value,
+                        material: $(`tema${id}_material`).value
                     });
                 }
             });
@@ -1539,8 +1456,7 @@
                 if (!silent) toast(`Error al guardar: ${e.message}`, 'error');
             }
         }
-
-        // === Función loadDraft() actualizada con todos los cambios ===
+        
         function loadDraft() {
             if (!EC0301Manager) {
                 toast('Error: Módulo de datos no cargado', 'error');
@@ -1550,7 +1466,6 @@
                 const data = EC0301Manager.getData();
                 if (!data || !data.nombre) { 
                     toast('No hay datos guardados. Empezando un nuevo documento.', 'info');
-                    addTema(); // Añade el primer tema si el documento está vacío
                     return;
                 }
                 
@@ -1559,12 +1474,12 @@
                 $('cd_duracion').value = data.duracion || '';
                 $('cd_diseñador').value = data.diseñador || '';
                 $('cd_facilitador').value = data.facilitador || '';
-                $('cd_lugar').value = data.lugar || ''; // CAMBIO 1
-                $('cd_fecha').value = data.fecha || ''; // CAMBIO 1
-                $('cd_modalidad').value = data.modalidad || '';
+                $('cd_lugar').value = data.lugar || '';
+                $('cd_fecha').value = data.fecha || '';
+                $('cd_modalidad').value = data.modalidad || 'presencial';
                 $('cd_proposito').value = data.proposito || '';
                 
-                $('cd_psico').value = data.psico || '';
+                $('cd_perfil').value = data.perfil || data.psico || ''; // Compatibilidad
                 $('cd_conoc').value = data.conoc || '';
                 $('cd_hab').value = data.hab || '';
                 $('cd_actitudes').value = data.actitudes || '';
@@ -1579,7 +1494,6 @@
                     updateOG();
                 }
                 
-                // CAMBIO 2: Requerimientos
                 if (data.rq) {
                     $('rq_instalaciones').value = data.rq.instalaciones || '';
                     $('rq_equipo').value = data.rq.equipo || '';
@@ -1588,44 +1502,39 @@
                     $('rq_humanos').value = data.rq.humanos || '';
                 }
                 
-                // CAMBIO 3: Evaluación
                 if (data.ev) {
                     $('ev_min').value = data.ev.min || '80';
                     $('ev_escala').value = data.ev.escala || '0-100';
                     $('ev_cert').value = data.ev.cert || 'constancia';
-                    if (data.ev.diag) {
-                        $('ev_diag_pct').value = data.ev.diag.pct || '';
-                        $('ev_diag_ins').value = data.ev.diag.ins || '';
-                        $('ev_diag_tipo').value = data.ev.diag.tipo || '';
-                    }
-                    if (data.ev.form) {
-                        $('ev_form_pct').value = data.ev.form.pct || '';
-                        $('ev_form_ins').value = data.ev.form.ins || '';
-                        $('ev_form_tipo').value = data.ev.form.tipo || '';
-                    }
-                    if (data.ev.sum) {
-                        $('ev_sum_pct').value = data.ev.sum.pct || '';
-                        $('ev_sum_ins').value = data.ev.sum.ins || '';
-                        $('ev_sum_tipo').value = data.ev.sum.tipo || '';
-                    }
+                    $('ev_diag_pct').value = data.ev.diag_pct || '10';
+                    $('ev_diag_ins').value = data.ev.diag_ins || 'Cuestionario';
+                    $('ev_diag_tipo').value = data.ev.diag_tipo || 'Heteroevaluación';
+                    $('ev_form_pct').value = data.ev.form_pct || '50';
+                    $('ev_form_ins').value = data.ev.form_ins || 'Guía de observación';
+                    $('ev_form_tipo').value = data.ev.form_tipo || 'Heteroevaluación';
+                    $('ev_sum_pct').value = data.ev.sum_pct || '40';
+                    $('ev_sum_ins').value = data.ev.sum_ins || 'Cuestionario';
+                    $('ev_sum_tipo').value = data.ev.sum_tipo || 'Heteroevaluación';
+                    $('ev_sat_pct').value = data.ev.sat_pct || '0';
+                    $('ev_sat_ins').value = data.ev.sat_ins || 'Cuestionario';
+                    $('ev_sat_tipo').value = data.ev.sat_tipo || 'Heteroevaluación';
                 }
                 
-                // CAMBIOS 4, 5, 7: Desarrollo
-                if (data.dc) {
-                    $('dc_verificacion').value = data.dc.verificacion || '';
-                    $('dc_precurso_t').value = data.dc.precurso_t || '30';
-                    $('enc_1_presentacion').value = data.dc.enc_1 || '';
-                    $('enc_2_curso').value = data.dc.enc_2 || '';
-                    $('enc_3_evaluacion').value = data.dc.enc_3 || '';
-                    $('enc_4_acuerdos').value = data.dc.enc_4 || '';
-                    $('enc_5_diagnostico').value = data.dc.enc_5 || '';
-                    $('dc_encuadre_t').value = data.dc.encuadre_t || '20';
-                    $('cierre_1_resumen').value = data.dc.cierre_1 || '';
-                    $('cierre_2_logro').value = data.dc.cierre_2 || '';
-                    $('cierre_3_sugerencias').value = data.dc.cierre_3 || '';
-                    $('cierre_4_satisfaccion').value = data.dc.cierre_4 || '';
-                    $('cierre_5_despedida').value = data.dc.cierre_5 || '';
-                    $('dc_cierre_t').value = data.dc.cierre_t || '10';
+                if (data.dev) {
+                    $('dc_verificacion').value = data.dev.verificacion || '';
+                    $('dc_precurso_t').value = data.dev.precurso_t || '30';
+                    $('enc_1_presentacion').value = data.dev.enc_1 || '';
+                    $('enc_2_curso').value = data.dev.enc_2 || '';
+                    $('enc_3_evaluacion').value = data.dev.enc_3 || '';
+                    $('enc_4_acuerdos').value = data.dev.enc_4 || '';
+                    $('enc_5_diagnostico').value = data.dev.enc_5 || '';
+                    $('dc_encuadre_t').value = data.dev.encuadre_t || '20';
+                    $('cierre_1_resumen').value = data.dev.cierre_1 || '';
+                    $('cierre_2_logro').value = data.dev.cierre_2 || '';
+                    $('cierre_3_sugerencias').value = data.dev.cierre_3 || '';
+                    $('cierre_4_satisfaccion').value = data.dev.cierre_4 || '';
+                    $('cierre_5_despedida').value = data.dev.cierre_5 || '';
+                    $('dc_cierre_t').value = data.dev.cierre_t || '10';
                 }
                 
                 // Cargar Objetivos Particulares
@@ -1633,95 +1542,45 @@
                     $('objetivosParticulares').innerHTML = '';
                     objetivosCount = 0; 
                     data.objetivos.forEach(obj => {
-                        objetivosCount++; // Asegura que el conteo sea 1, 2, 3...
-                        const container = $('objetivosParticulares');
-                        const newObj = document.createElement('div');
-                        newObj.className = 'box';
-                        newObj.setAttribute('data-op', objetivosCount);
-                        newObj.innerHTML = `
-                            <h3>
-                                <span><i class="fas fa-tasks"></i> Objetivo Particular ${objetivosCount}</span>
-                                <button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="removeObjetivo(this, ${objetivosCount})">
-                                    <i class="fas fa-trash"></i> Eliminar
-                                </button>
-                            </h3>
-                            <div class="doms">
-                                <div class="dom ${obj.dom === 'cognitivo' ? 'active' : ''}" data-op="${objetivosCount}" data-d="cognitivo" onclick="selDom(${objetivosCount}, 'cognitivo')">Cognitivo</div>
-                                <div class="dom ${obj.dom === 'psicomotriz' ? 'active' : ''}" data-op="${objetivosCount}" data-d="psicomotriz" onclick="selDom(${objetivosCount}, 'psicomotriz')">Psicomotriz</div>
-                                <div class="dom ${obj.dom === 'afectivo' ? 'active' : ''}" data-op="${objetivosCount}" data-d="afectivo" onclick="selDom(${objetivosCount}, 'afectivo')">Afectivo</div>
-                                <div class="dom ${obj.dom === 'relacional' ? 'active' : ''}" data-op="${objetivosCount}" data-d="relacional" onclick="selDom(${objetivosCount}, 'relacional')">Relacional</div>
-                            </div>
-                            <div class="verbos-container" id="verbs${objetivosCount}"></div>
-                            <div class="grid-2">
-                                <div class="form-group"><label>Verbo + Acción <span class="required">*</span></label><input id="op${objetivosCount}_accion" value="${obj.accion || ''}" required></div>
-                                <div class="form-group"><label>Condición/Contexto <span class="required">*</span></label><textarea id="op${objetivosCount}_cond" required>${obj.cond || ''}</textarea></div>
-                            </div>
-                            <div class="form-group mt-1"><label>Temas relacionados</label><textarea id="op${objetivosCount}_temas">${obj.temas || ''}</textarea></div>
-                        `;
-                        container.appendChild(newObj);
-                        renderVerbos(objetivosCount, obj.dom || 'cognitivo');
+                        addObjetivoParticular(obj.dom || dominios[objetivosCount-1]); // Llama a la función para crear el HTML
+                        
+                        // Llena los datos
+                        $(`op${obj.num}_accion`).value = obj.accion || '';
+                        $(`op${obj.num}_cond`).value = obj.cond || '';
+                        $(`op${obj.num}_temas`).value = obj.temas || '';
                     });
                 }
-
-                // CAMBIO 6: Cargar Temas (formato presencial)
+                
+                // Cargar Temas
                 if (data.temas && data.temas.length > 0) {
                     $('temasContainer').innerHTML = '';
                     temasCount = 0; 
                     data.temas.forEach(tema => {
-                        temasCount++; // Asegura que el conteo sea 1, 2, 3...
-                        const container = $('temasContainer');
-                        const temaEl = document.createElement('div');
-                        temaEl.className = 'box';
-                        temaEl.setAttribute('data-tema', temasCount);
-                        temaEl.innerHTML = `
-                            <h3>
-                                <span>Tema/Módulo ${temasCount}</span>
-                                <button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="removeTema(this, ${temasCount})">
-                                    <i class="fas fa-trash"></i> Eliminar
-                                </button>
-                            </h3>
-                            <div class="form-group">
-                                <label>Nombre del Tema/Módulo <span class="required">*</span></label><input id="tema${temasCount}_nombre" value="${tema.nombre || ''}" required>
-                            </div>
-                            <div class="form-group mt-1">
-                                <label>Actividades (del instructor y participantes)</label>
-                                <textarea id="tema${temasCount}_actividades" rows="4">${tema.actividades || ''}</textarea>
-                            </div>
-                            <div class="grid-3 mt-1">
-                                <div class="form-group">
-                                    <label>Técnicas Grupales/Instruccionales</label>
-                                    <input id="tema${temasCount}_tecnicas" value="${tema.tecnicas || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Material y Equipo de Apoyo</label>
-                                    <input id="tema${temasCount}_material" value="${tema.material || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Duración (minutos) <span class="required">*</span></label>
-                                    <input type="number" id="tema${temasCount}_duracion" value="${tema.duracion || ''}" min="15" onchange="recalcTimes()" required>
-                                </div>
-                            </div>
-                        `;
-                        container.appendChild(temaEl);
+                        addTema(); // Llama a la función para crear el HTML
+                        
+                        // Llena los datos
+                        $(`tema${tema.num}_nombre`).value = tema.nombre || '';
+                        $(`tema${tema.num}_duracion`).value = tema.duracion || '';
+                        $(`tema${tema.num}_actividades`).value = tema.actividades || '';
+                        $(`tema${tema.num}_tecnicas`).value = tema.tecnicas || '';
+                        $(`tema${tema.num}_material`).value = tema.material || '';
                     });
                 }
                 
                 recalcTimes();
-                sumarPorcentajes(); // CAMBIO 3
+                sumarPorcentajes();
                 updateProgress();
                 toast('Datos cargados correctamente', 'success');
             } catch (error) {
                 console.error(error);
                 toast('Error al cargar los datos. Se iniciará un documento vacío.', 'error');
-                if (temasCount === 0) addTema(); // Añade el primer tema si todo falla
+                if (temasCount === 0) addTema();
             }
         }
-
         // ========== EXPORTACIÓN ==========
         function exportCarta(formato) { 
             Swal.fire('Función en desarrollo', 'La exportación a PDF se habilitará en futuras versiones.', 'info');
         }
-
         // ========== AYUDA ==========
         function showHelp() { 
             Swal.fire({
@@ -1738,12 +1597,11 @@
                 width: 600, confirmButtonText: 'Entendido', confirmButtonColor: '#1E3A8A'
             });
         }
-
         // ========== COMPLETAR ==========
         async function markComplete() {
-            if (updateProgress() < 80) {
+            if (updateProgress() < 95) { // Umbral más alto
                 await Swal.fire({
-                    title: 'Documento incompleto', text: 'Se requiere mínimo 80%.',
+                    title: 'Documento incompleto', text: 'Se requiere un 95% de llenado para marcar como completo.',
                     icon: 'warning', confirmButtonText: 'Entendido'
                 });
                 return;
@@ -1751,7 +1609,7 @@
             
             const result = await Swal.fire({
                 title: '¿Marcar como completado?',
-                text: 'Esto guardará la carta y la marcará como completa en el dashboard.',
+                text: 'Esto guardará la carta y desbloqueará los siguientes módulos en el dashboard.',
                 icon: 'question', showCancelButton: true, confirmButtonText: 'Sí, completar',
                 cancelButtonText: 'Cancelar', confirmButtonColor: '#22C55E'
             });
