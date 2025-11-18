@@ -88,6 +88,12 @@
         .btn-ai:hover {
             background: linear-gradient(135deg, #5a6fde 0%, #684094 100%);
         }
+        .btn:disabled {
+            background-color: var(--border);
+            color: var(--muted);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
 
         /* --- Estilos de Auditoría --- */
         .generation-panel {
@@ -261,7 +267,7 @@
             <h1><i class="fa-solid fa-shield-check" style="color: var(--accent);"></i> Auditoría de Cumplimiento</h1>
             <div>
                 <a href="acceso.html" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
-                <button class="btn btn-primary" onclick="printDocument()">
+                <button class="btn btn-primary" onclick="printDocument()" disabled id="btn-print">
                     <i class="fa-solid fa-print"></i> Imprimir Auditoría
                 </button>
             </div>
@@ -332,16 +338,12 @@
         }, 50); // 50ms de espera
     });
 
-    function showMissingDataAlert() {
+    function showMissingDataAlert(missingProduct = 'los datos') {
         Swal.fire({
             icon: 'warning',
             title: 'Datos incompletos',
-            html: 'No se encontraron todos los datos necesarios.<br><br>' +
-                  'Antes de ejecutar la auditoría asegúrate de:<br>' +
-                  '• Guardar la <strong>Carta Descriptiva</strong>.<br>' +
-                  '• Generar y guardar las <strong>Evaluaciones</strong>.<br>' +
-                  '• Generar los <strong>Manuales del participante e instructor</strong>.<br>' +
-                  '• Generar la <strong>clave de respuestas</strong> de las evaluaciones.',
+            html: `No se encontraron datos de <strong>${missingProduct}</strong>.<br><br>` +
+                  'Antes de ejecutar la auditoría asegúrate de haber completado y guardado todos los módulos anteriores.',
             confirmButtonText: 'Ir a Carta Descriptiva',
             confirmButtonColor: '#1E3A8A'
         }).then(() => {
@@ -351,37 +353,57 @@
 
     async function runAudit() {
         try {
-            cartaData           = EC0301Manager.getData() || {};
-            evaluacionSumativa  = EC0301Manager.loadProduct('evaluacion-sumativa') || [];
-            manualesData        = EC0301Manager.loadProduct('manuales') || {};
-            respuestasData      = EC0301Manager.loadProduct('respuestas') || null;
+            // 1. Cargar todos los datos
+            cartaData = EC0301Manager.getData() || {};
+            evaluacionSumativa = EC0301Manager.loadProduct('evaluacion-sumativa') || [];
+            manualesData = EC0301Manager.loadProduct('manuales') || {};
+            respuestasData = EC0301Manager.loadProduct('respuestas') || null;
 
+            // 2. Validar que todos los productos existan
             if (!cartaData || !cartaData.nombre) {
-                showMissingDataAlert();
+                showMissingDataAlert('Carta Descriptiva');
+                return;
+            }
+             if (evaluacionSumativa.length === 0) {
+                showMissingDataAlert('Evaluación Sumativa');
+                return;
+            }
+            if (!manualesData.participante || !manualesData.instructor) {
+                showMissingDataAlert('Manuales');
+                return;
+            }
+             if (!respuestasData) {
+                showMissingDataAlert('Hoja de Respuestas');
                 return;
             }
         } catch (error) {
             console.error('Error al cargar datos para auditoría:', error);
-            showMissingDataAlert();
+            showMissingDataAlert('los datos');
             return;
         }
 
+        // 3. Mostrar Spinner
         $('audit-button').disabled = true;
         $('loading-spinner').style.display = 'block';
         $('audit-results-container').style.display = 'none';
 
+        // 4. Simular procesamiento de IA
         await new Promise(resolve => setTimeout(resolve, 2500));
 
-        // ===== CORRECCIÓN: Llamada a la función actualizada =====
+        // 5. Ejecutar la lógica de auditoría
         const auditResults = runECAudit_EC0217();
-
+        
+        // 6. Ocultar Spinner
         $('loading-spinner').style.display = 'none';
         $('audit-results-container').style.display = 'block';
+
+        // 7. Mostrar resultados
         renderAuditResults(auditResults);
-
+        
         $('audit-button').disabled = false;
+        $('btn-print').disabled = false; // Activar botón de imprimir
     }
-
+    
     /**
      * ===== FUNCIÓN DE AUDITORÍA ACTUALIZADA =====
      * Motor de auditoría EC0301/EC0217:
@@ -399,7 +421,7 @@
         };
 
         const check = (elemento, condition, titulo, okDetail, failDetail, recomendacion) => {
-            const pass = !!condition;
+            const pass = !!(condition); // Asegura que sea booleano
             totalCriteria++;
             if (byElement[elemento]) {
                 byElement[elemento].total++;
@@ -418,25 +440,25 @@
         // =====================================================
 
         check(1,
-            !!cartaData.nombre, 'Nombre del curso',
+            cartaData.nombre, 'Nombre del curso',
             'El curso tiene un nombre definido.',
             'No se ha definido el nombre del curso.',
             'Define un nombre claro para tu curso en la Sección 1.'
         );
         check(1,
-            !!cartaData.facilitador, 'Nombre del facilitador',
+            cartaData.facilitador, 'Nombre del facilitador',
             'Se identifica al facilitador del curso.',
             'No se ha capturado el nombre del facilitador.',
             'Registra el nombre del facilitador en la Sección 1.'
         );
         check(1,
-            !!cartaData.perfil, 'Perfil del participante',
+            cartaData.perfil, 'Perfil del participante',
             'El perfil del participante describe las características del grupo.',
             'No se describe claramente el perfil del participante.',
             'Define el perfil de los participantes en la Sección 2.'
         );
         check(1,
-            !!cartaData.num, 'Número de participantes',
+            cartaData.num, 'Número de participantes',
             'Se especifica el número de participantes.',
             'No se ha indicado el número de participantes.',
             'Establece el número de participantes en la Sección 2.'
@@ -500,7 +522,7 @@
         check(2,
             evaluacionSumativa.every(p => p.pregunta && Array.isArray(p.opciones) && p.opciones.length >= 4),
             'Reactivos sumativos completos',
-            'Todos los reactivos sumativos tienen pregunta y 4 opciones de respuesta.',
+            'Todos los reactivos sumativos tienen pregunta y al menos 4 opciones de respuesta.',
             'Hay reactivos incompletos (sin pregunta o sin las 4 opciones).',
             'Revisa el "Banco de Reactivos" y completa los textos de pregunta y las 4 opciones en cada reactivo.'
         );
@@ -567,7 +589,7 @@
             'Sistema de evaluación (Manual Participante)',
             'El manual del participante explica cómo será evaluado el participante (en la sección de Cierre).',
             'No se describe el sistema de evaluación en el manual del participante.',
-            'Asegúrate de que el manual generado incluya una sección de Cierre/EvaluACIÓN.'
+            'Asegúrate de que el manual generado incluya una sección de Cierre/Evaluación.'
         );
         check(3,
             manualInstructor && manualInstructor.cover && manualInstructor.cover.title,
@@ -584,7 +606,7 @@
             'Asegúrate de que el manual del instructor se genere correctamente, incluyendo las notas didácticas.'
         );
         check(3,
-            manualInstructor && manualInstructor.sections.some(s => s.title.includes(cartaData.temas[0]?.nombre || 'Tema 1')),
+            manualInstructor && cartaData.temas && cartaData.temas.length > 0 && manualInstructor.sections.some(s => s.title.includes(cartaData.temas[0]?.nombre || 'Tema 1')),
             'Desarrollo de Temas (Manual Instructor)',
             'El manual del instructor desarrolla los temas de la Carta Descriptiva.',
             'El temario del manual del instructor no coincide con la Carta Descriptiva.',
@@ -635,6 +657,7 @@
         const checklistBody = $('checklist-body');
         checklistBody.innerHTML = '';
 
+        // Resumen por Elemento
         const resumenWrapper = document.createElement('div');
         resumenWrapper.style.display = 'grid';
         resumenWrapper.style.gridTemplateColumns = 'repeat(auto-fit, minmax(220px, 1fr))';
@@ -667,6 +690,7 @@
 
         checklistBody.appendChild(resumenWrapper);
 
+        // Detalle de Criterios
         checklist.forEach(item => {
             const row = document.createElement('div');
             row.className = 'checklist-item';
