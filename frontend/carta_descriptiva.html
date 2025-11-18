@@ -1597,33 +1597,53 @@
                 width: 600, confirmButtonText: 'Entendido', confirmButtonColor: '#1E3A8A'
             });
         }
-        // ========== COMPLETAR ==========
-        async function markComplete() {
-            if (updateProgress() < 95) { // Umbral más alto
-                await Swal.fire({
-                    title: 'Documento incompleto', text: 'Se requiere un 95% de llenado para marcar como completo.',
-                    icon: 'warning', confirmButtonText: 'Entendido'
-                });
-                return;
-            }
-            
-            const result = await Swal.fire({
-                title: '¿Marcar como completado?',
-                text: 'Esto guardará la carta y desbloqueará los siguientes módulos en el dashboard.',
-                icon: 'question', showCancelButton: true, confirmButtonText: 'Sí, completar',
-                cancelButtonText: 'Cancelar', confirmButtonColor: '#22C55E'
-            });
-            
-            if (result.isConfirmed) {
-                saveDraft(true); // Guardado silencioso
-                Swal.fire({
-                    title: '¡Completado!',
-                    text: 'La carta descriptiva ha sido marcada como completa. Serás redirigido al dashboard.',
-                    icon: 'success', confirmButtonText: 'Excelente', timer: 2000, timerProgressBar: true
-                }).then(() => {
-                    window.location.href = 'acceso.html'; // Volver al dashboard
-                });
-            }
+       // ========== COMPLETAR ==========
+async function markComplete() {
+    const porcentaje = updateProgress(); // ya calcula % de la carta
+
+    if (porcentaje < 80) {
+        await Swal.fire({
+            title: 'Documento incompleto',
+            text: `Llevas ${porcentaje}%. Necesitas al menos 80% para completar esta etapa.`,
+            icon: 'warning',
+            confirmButtonText: 'Entendido'
+        });
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: '¿Marcar como completado?',
+        text: 'Esto guardará la carta y desbloqueará el módulo de "Logística y formatos" en tu Dashboard.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, completar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#22C55E'
+    });
+
+    if (!result.isConfirmed) return;
+
+    // Guardado silencioso
+    saveDraft(true);
+
+    // 👉 Disparador del avance global: marcar módulo "carta"
+    try {
+        EC0301Manager.markModuleProgress('carta', porcentaje);
+    } catch (e) {
+        console.error('[Carta] Error al marcar progreso del módulo carta:', e);
+    }
+
+    await Swal.fire({
+        title: '¡Completado!',
+        text: 'La carta descriptiva está completa. Puedes continuar con Logística y formatos.',
+        icon: 'success',
+        confirmButtonText: 'Ir al Dashboard',
+        timer: 2000,
+        timerProgressBar: true
+    });
+
+    window.location.href = 'acceso.html';
+}
         }
     </script>
 </body>
