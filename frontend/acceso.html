@@ -1,693 +1,417 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <title>Plataforma EC0301 - Acceso</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>Plataforma EC0301 - Acceso</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
 
-  <!-- Puedes usar tu propio CSS, aquí uso Bootstrap + estilos ligeros -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          sans-serif;
+        background: radial-gradient(circle at top left, #6366f1, #4f46e5, #312e81);
+        min-height: 100vh;
+        color: #111827;
+      }
 
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at top left, #7b5cff 0, #2b1e94 45%, #140b3b 100%);
-      min-height: 100vh;
-      color: #111827;
-    }
+      header {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid #e5e7eb;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
 
-    .shell {
-      max-width: 1180px;
-      margin: 32px auto;
-      background: #f9fafb;
-      border-radius: 24px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-      padding: 24px 28px 32px;
-    }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+      }
 
-    .app-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
+      .brand-badge {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        background: conic-gradient(
+          from 180deg at 50% 50%,
+          #4f46e5,
+          #6366f1,
+          #a855f7,
+          #f97316
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 20px;
+      }
 
-    .app-title {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+      }
 
-    .app-logo {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      background: radial-gradient(circle at 30% 20%, #fbbf24, #f97316);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 22px;
-      box-shadow: 0 10px 30px rgba(249, 115, 22, 0.5);
-    }
+      .pill {
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 500;
+      }
 
-    .app-subtitle {
-      font-size: 13px;
-      color: #6b7280;
-    }
+      .pill-success {
+        background: #ecfdf3;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+      }
 
-    .status-pill {
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-weight: 600;
-    }
+      .pill-danger {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+      }
 
-    .status-active {
-      background: #ecfdf3;
-      color: #15803d;
-      border: 1px solid #bbf7d0;
-    }
+      .btn {
+        border-radius: 999px;
+        border: none;
+        padding: 8px 14px;
+        font-size: 14px;
+        cursor: pointer;
+        font-weight: 500;
+      }
 
-    .status-loading {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-    }
+      .btn-outline {
+        background: transparent;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+      }
 
-    .btn-logout {
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      padding-inline: 18px;
-    }
+      .btn-outline:hover {
+        background: #f3f4f6;
+      }
 
-    .welcome {
-      margin-bottom: 8px;
-    }
+      main {
+        max-width: 1120px;
+        margin: 32px auto 40px;
+        padding: 0 16px 32px;
+      }
 
-    .welcome h1 {
-      font-size: clamp(1.5rem, 1.2rem + 1vw, 1.9rem);
-      margin-bottom: 4px;
-    }
+      .panel {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 24px;
+        padding: 32px 24px 32px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+      }
 
-    .welcome p {
-      font-size: 0.95rem;
-      color: #4b5563;
-      margin: 0;
-    }
+      h1 {
+        font-size: 26px;
+        margin: 0 0 8px;
+      }
 
-    .hint-text {
-      font-size: 0.85rem;
-      color: #6b7280;
-      margin-bottom: 18px;
-    }
+      .subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 24px;
+      }
 
-    .modules-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 18px;
-      margin-top: 10px;
-    }
+      .grid-modulos {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+      }
 
-    .module-card {
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 16px 16px 18px;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      box-shadow: 0 12px 25px rgba(15, 23, 42, 0.06);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 170px;
-    }
+      .mod-card {
+        border-radius: 20px;
+        padding: 18px 18px 16px;
+        border: 1px solid #e5e7eb;
+        background: linear-gradient(
+          135deg,
+          rgba(249, 250, 251, 0.9),
+          rgba(255, 255, 255, 1)
+        );
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        position: relative;
+        overflow: hidden;
+      }
 
-    .module-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 6px;
-      margin-bottom: 6px;
-    }
+      .mod-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(
+          circle at top right,
+          rgba(129, 140, 248, 0.35),
+          transparent 55%
+        );
+        opacity: 0.7;
+      }
 
-    .module-title {
-      font-weight: 600;
-      font-size: 1rem;
-    }
+      .mod-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+        position: relative;
+        z-index: 1;
+      }
 
-    .step-pill {
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: #eef2ff;
-      color: #4f46e5;
-      font-weight: 600;
-      white-space: nowrap;
-    }
+      .mod-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
 
-    .module-body {
-      font-size: 0.85rem;
-      color: #4b5563;
-      margin-bottom: 10px;
-    }
+      .mod-step {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-weight: 500;
+      }
 
-    .module-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
-    }
+      .mod-desc {
+        font-size: 13px;
+        color: #6b7280;
+        margin: 4px 0 8px;
+        position: relative;
+        z-index: 1;
+      }
 
-    .progress-text {
-      font-weight: 600;
-      color: #111827;
-    }
+      .mod-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+        position: relative;
+        z-index: 1;
+      }
 
-    .progress-sub {
-      color: #6b7280;
-      font-size: 0.78rem;
-    }
+      .mod-status {
+        font-size: 12px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: #f3f4f6;
+        color: #374151;
+      }
 
-    .badge-state {
-      font-size: 0.72rem;
-      border-radius: 999px;
-      padding: 3px 7px;
-    }
+      .mod-button {
+        font-size: 13px;
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 7px 14px;
+        background: #4f46e5;
+        color: white;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: none;
+      }
 
-    .badge-en-progreso {
-      background: #eff6ff;
-      color: #1d4ed8;
-    }
+      .mod-button:hover {
+        background: #4338ca;
+      }
 
-    .badge-completo {
-      background: #ecfdf3;
-      color: #15803d;
-    }
+      .mod-card.card--locked {
+        opacity: 0.6;
+      }
 
-    .badge-bloqueado {
-      background: #fef2f2;
-      color: #b91c1c;
-    }
+      .mod-card.card--locked .mod-button {
+        background: #9ca3af;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
 
-    .btn-open {
-      border-radius: 999px;
-      font-size: 0.83rem;
-      padding: 6px 14px;
-    }
+      .mod-card.card--locked .mod-status {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
 
-    .btn-open[disabled] {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-
-    /* Modal de error crítico */
-    .critical-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .critical-modal {
-      background: #ffffff;
-      border-radius: 18px;
-      max-width: 440px;
-      width: 90%;
-      padding: 24px 22px 18px;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
-    }
-
-    .critical-icon {
-      width: 70px;
-      height: 70px;
-      border-radius: 999px;
-      border: 2px solid #fecaca;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 10px;
-      color: #dc2626;
-      font-size: 32px;
-    }
-
-    .critical-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .critical-body {
-      font-size: 0.9rem;
-      color: #4b5563;
-      margin-bottom: 18px;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="shell">
-    <header class="app-header">
-      <div class="app-title">
-        <div class="app-logo">
-          🎓
-        </div>
+      @media (max-width: 640px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .panel {
+          padding: 24px 16px 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <div class="brand-badge">🎓</div>
         <div>
-          <div class="fw-semibold">Plataforma EC0301</div>
-          <div class="app-subtitle">Generador profesional de documentos</div>
+          <div>Plataforma EC0301</div>
+          <div style="font-size: 12px; color: #6b7280">
+            Generador profesional de documentos
+          </div>
         </div>
       </div>
 
-      <div class="d-flex align-items-center gap-2">
-        <span id="badge-estado" class="status-pill status-loading">
-          Cargando acceso...
-        </span>
-        <button id="btnLogout" class="btn btn-outline-danger btn-logout">
-          Cerrar sesión
-        </button>
+      <div class="header-actions">
+        <span id="badge-estado" class="pill pill-success">Acceso activo</span>
+        <span id="badge-email" style="font-size: 13px; color: #4b5563"
+          >Cargando…</span
+        >
+        <button id="btn-logout" class="btn btn-outline">Cerrar sesión</button>
       </div>
     </header>
 
-    <section class="welcome">
-      <h1>Bienvenido a tu Plataforma</h1>
-      <p>
-        Completa cada módulo en orden para generar tu portafolio alineado al estándar EC0301.
-      </p>
-    </section>
+    <main>
+      <div class="panel">
+        <h1>Bienvenido a tu Plataforma</h1>
+        <p class="subtitle">
+          Completa cada módulo en orden para generar tu portafolio alineado al
+          estándar EC0301. Los módulos se irán desbloqueando conforme termines
+          el anterior.
+        </p>
 
-    <p class="hint-text">
-      Los módulos se irán <strong>desbloqueando automáticamente</strong> conforme avances:
-      primero <strong>Carta Descriptiva</strong>, luego <strong>Logística</strong>, <strong>Evaluaciones</strong>, <strong>Manuales</strong>, <strong>Respuestas</strong> y finalmente <strong>Auditoría</strong>.
-    </p>
-
-    <div class="modules-grid">
-
-      <!-- 1. Carta Descriptiva -->
-      <article class="module-card" data-module="carta">
-        <div>
-          <div class="module-header-row">
-            <div class="module-title">Carta Descriptiva</div>
-            <div class="step-pill">Paso 1 de 6</div>
-          </div>
-          <p class="module-body">
-            Genera el guion instruccional completo de tu curso de capacitación.
-          </p>
-        </div>
-        <div class="module-footer">
-          <div>
-            <div class="progress-text">
-              Avance: <span id="avance-carta">0%</span>
+        <div class="grid-modulos">
+          <!-- 1. Carta Descriptiva -->
+          <article id="mod-carta" class="mod-card">
+            <div class="mod-top">
+              <div class="mod-title">Carta Descriptiva</div>
+              <div class="mod-step">Paso 1 de 6</div>
             </div>
-            <div class="progress-sub">
-              <span id="estado-texto-carta" class="badge-state badge-en-progreso">
-                En progreso
-              </span>
+            <p class="mod-desc">
+              Genera el guion instruccional completo para tu curso de
+              capacitación.
+            </p>
+            <div class="mod-footer">
+              <span class="mod-status" data-role="status">Pendiente</span>
+              <a
+                href="carta_descriptiva.html"
+                class="mod-button"
+                data-role="open-module"
+                >Abrir módulo →</a
+              >
             </div>
-          </div>
-          <button
-            class="btn btn-primary btn-open"
-            data-target="carta_descriptiva.html"
-            id="btn-carta"
-          >
-            Abrir módulo →
-          </button>
-        </div>
-      </article>
+          </article>
 
-      <!-- 2. Logística y Formatos -->
-      <article class="module-card" data-module="logistica">
-        <div>
-          <div class="module-header-row">
-            <div class="module-title">Logística y Formatos</div>
-            <div class="step-pill">Paso 2 de 6</div>
-          </div>
-          <p class="module-body">
-            Genera listas de asistencia, contratos y formatos de requerimientos.
-          </p>
-        </div>
-        <div class="module-footer">
-          <div>
-            <div class="progress-text">
-              Avance: <span id="avance-logistica">0%</span>
+          <!-- 2. Logística y Formatos -->
+          <article id="mod-logistica" class="mod-card card--locked">
+            <div class="mod-top">
+              <div class="mod-title">Logística y Formatos</div>
+              <div class="mod-step">Paso 2 de 6</div>
             </div>
-            <div class="progress-sub">
-              <span id="estado-texto-logistica" class="badge-state badge-bloqueado">
-                Bloqueado
-              </span>
+            <p class="mod-desc">
+              Genera listas de asistencia, contratos y formatos de
+              requerimientos.
+            </p>
+            <div class="mod-footer">
+              <span class="mod-status" data-role="status">Bloqueado</span>
+              <a
+                href="logistica.html"
+                class="mod-button"
+                data-role="open-module"
+                >Abrir módulo →</a
+              >
             </div>
-          </div>
-          <button
-            class="btn btn-primary btn-open"
-            data-target="logistica.html"
-            id="btn-logistica"
-            disabled
-          >
-            Abrir módulo →
-          </button>
-        </div>
-      </article>
+          </article>
 
-      <!-- 3. Evaluaciones -->
-      <article class="module-card" data-module="evaluaciones">
-        <div>
-          <div class="module-header-row">
-            <div class="module-title">Instrumentos de Evaluación</div>
-            <div class="step-pill">Paso 3 de 6</div>
-          </div>
-          <p class="module-body">
-            Crea rúbricas, listas de cotejo y guías de observación alineadas al estándar.
-          </p>
-        </div>
-        <div class="module-footer">
-          <div>
-            <div class="progress-text">
-              Avance: <span id="avance-evaluaciones">0%</span>
+          <!-- 3. Instrumentos de Evaluación -->
+          <article id="mod-evaluaciones" class="mod-card card--locked">
+            <div class="mod-top">
+              <div class="mod-title">Instrumentos de Evaluación</div>
+              <div class="mod-step">Paso 3 de 6</div>
             </div>
-            <div class="progress-sub">
-              <span id="estado-texto-evaluaciones" class="badge-state badge-bloqueado">
-                Bloqueado
-              </span>
+            <p class="mod-desc">
+              Crea rúbricas, listas de cotejo y guías de observación alineadas
+              al estándar.
+            </p>
+            <div class="mod-footer">
+              <span class="mod-status" data-role="status">Bloqueado</span>
+              <a
+                href="evaluaciones.html"
+                class="mod-button"
+                data-role="open-module"
+                >Abrir módulo →</a
+              >
             </div>
-          </div>
-          <button
-            class="btn btn-primary btn-open"
-            data-target="evaluaciones.html"
-            id="btn-evaluaciones"
-            disabled
-          >
-            Abrir módulo →
-          </button>
-        </div>
-      </article>
+          </article>
 
-      <!-- 4. Manuales -->
-      <article class="module-card" data-module="manuales">
-        <div>
-          <div class="module-header-row">
-            <div class="module-title">Manuales del Curso</div>
-            <div class="step-pill">Paso 4 de 6</div>
-          </div>
-          <p class="module-body">
-            Desarrolla los manuales del participante y del facilitador.
-          </p>
-        </div>
-        <div class="module-footer">
-          <div>
-            <div class="progress-text">
-              Avance: <span id="avance-manuales">0%</span>
+          <!-- 4. Manuales del Curso -->
+          <article id="mod-manuales" class="mod-card card--locked">
+            <div class="mod-top">
+              <div class="mod-title">Manuales del Curso</div>
+              <div class="mod-step">Paso 4 de 6</div>
             </div>
-            <div class="progress-sub">
-              <span id="estado-texto-manuales" class="badge-state badge-bloqueado">
-                Bloqueado
-              </span>
+            <p class="mod-desc">
+              Desarrolla los manuales del participante y del facilitador.
+            </p>
+            <div class="mod-footer">
+              <span class="mod-status" data-role="status">Bloqueado</span>
+              <a
+                href="manuales.html"
+                class="mod-button"
+                data-role="open-module"
+                >Abrir módulo →</a
+              >
             </div>
-          </div>
-          <button
-            class="btn btn-primary btn-open"
-            data-target="manuales.html"
-            id="btn-manuales"
-            disabled
-          >
-            Abrir módulo →
-          </button>
-        </div>
-      </article>
+          </article>
 
-      <!-- 5. Hoja de Respuestas -->
-      <article class="module-card" data-module="respuestas">
-        <div>
-          <div class="module-header-row">
-            <div class="module-title">Hoja de Respuestas</div>
-            <div class="step-pill">Paso 5 de 6</div>
-          </div>
-          <p class="module-body">
-            Crea la clave de respuestas para tus instrumentos de evaluación.
-          </p>
-        </div>
-        <div class="module-footer">
-          <div>
-            <div class="progress-text">
-              Avance: <span id="avance-respuestas">0%</span>
+          <!-- 5. Hoja de Respuestas -->
+          <article id="mod-respuestas" class="mod-card card--locked">
+            <div class="mod-top">
+              <div class="mod-title">Hoja de Respuestas</div>
+              <div class="mod-step">Paso 5 de 6</div>
             </div>
-            <div class="progress-sub">
-              <span id="estado-texto-respuestas" class="badge-state badge-bloqueado">
-                Bloqueado
-              </span>
+            <p class="mod-desc">
+              Crea la clave de respuestas para tus instrumentos de evaluación.
+            </p>
+            <div class="mod-footer">
+              <span class="mod-status" data-role="status">Bloqueado</span>
+              <a
+                href="respuestas.html"
+                class="mod-button"
+                data-role="open-module"
+                >Abrir módulo →</a
+              >
             </div>
-          </div>
-          <button
-            class="btn btn-primary btn-open"
-            data-target="respuestas.html"
-            id="btn-respuestas"
-            disabled
-          >
-            Abrir módulo →
-          </button>
-        </div>
-      </article>
+          </article>
 
-      <!-- 6. Auditoría -->
-      <article class="module-card" data-module="auditoria">
-        <div>
-          <div class="module-header-row">
-            <div class="module-title">Auditoría EC0301</div>
-            <div class="step-pill">Paso 6 de 6</div>
-          </div>
-          <p class="module-body">
-            Valida tu portafolio de evidencias contra los requisitos del estándar.
-          </p>
-        </div>
-        <div class="module-footer">
-          <div>
-            <div class="progress-text">
-              Avance: <span id="avance-auditoria">0%</span>
+          <!-- 6. Auditoría EC0301 -->
+          <article id="mod-auditoria" class="mod-card card--locked">
+            <div class="mod-top">
+              <div class="mod-title">Auditoría EC0301</div>
+              <div class="mod-step">Paso 6 de 6</div>
             </div>
-            <div class="progress-sub">
-              <span id="estado-texto-auditoria" class="badge-state badge-bloqueado">
-                Bloqueado
-              </span>
+            <p class="mod-desc">
+              Valida tu portafolio de evidencias contra los requisitos del
+              estándar.
+            </p>
+            <div class="mod-footer">
+              <span class="mod-status" data-role="status">Bloqueado</span>
+              <a
+                href="auditoria.html"
+                class="mod-button"
+                data-role="open-module"
+                >Abrir módulo →</a
+              >
             </div>
-          </div>
-          <button
-            class="btn btn-primary btn-open"
-            data-target="auditoria.html"
-            id="btn-auditoria"
-            disabled
-          >
-            Abrir módulo →
-          </button>
+          </article>
         </div>
-      </article>
+      </div>
+    </main>
 
-    </div>
-  </div>
-
-  <!-- Modal de error crítico -->
-  <div id="critical-backdrop" class="critical-backdrop">
-    <div class="critical-modal">
-      <div class="critical-icon">✖</div>
-      <div class="critical-title">Error crítico del sistema</div>
-      <p class="critical-body" id="critical-message">
-        No se pudieron cargar los módulos de sistema <strong>auth.js</strong> o
-        <strong>ec0301-data-manager.js</strong>.
-      </p>
-      <button id="critical-ok" class="btn btn-danger px-4">
-        OK
-      </button>
-    </div>
-  </div>
-
-  <!-- ================== SCRIPTS ================== -->
-
-  <!-- 1. Módulos de sistema (rutas CORRECTAS, mismos directorio que acceso.html) -->
-  <script src="./auth.js"></script>
-  <script src="./ec0301-data-manager.js"></script>
-
-  <!-- 2. Lógica de la pantalla de acceso -->
-  <script>
-    (function () {
-      'use strict';
-
-      // -------- Utilidades de error crítico --------
-      const criticalBackdrop = document.getElementById('critical-backdrop');
-      const criticalMessage = document.getElementById('critical-message');
-      const criticalOk = document.getElementById('critical-ok');
-
-      function showCriticalError(msg) {
-        criticalMessage.innerHTML = msg;
-        criticalBackdrop.style.display = 'flex';
-      }
-
-      criticalOk.addEventListener('click', function () {
-        criticalBackdrop.style.display = 'none';
-      });
-
-      // -------- Verificación de módulos base --------
-      if (typeof window.auth === 'undefined' || typeof window.EC0301Manager === 'undefined') {
-        showCriticalError(
-          'No se pudieron cargar los módulos de sistema <strong>auth.js</strong> o ' +
-          '<strong>ec0301-data-manager.js</strong>. Verifica las rutas de los archivos en el servidor.'
-        );
-        return;
-      }
-
-      // -------- Manejo de sesión --------
-      const badgeEstado = document.getElementById('badge-estado');
-      const btnLogout = document.getElementById('btnLogout');
-
-      if (!auth.isLoggedIn()) {
-        // Si no hay sesión, regresa al login principal
-        window.location.href = 'index.html';
-        return;
-      } else {
-        badgeEstado.textContent = 'Acceso activo';
-        badgeEstado.classList.remove('status-loading');
-        badgeEstado.classList.add('status-active');
-      }
-
-      btnLogout.addEventListener('click', function () {
-        auth.logout();
-      });
-
-      // -------- Lógica de avance y bloqueo de módulos --------
-      const data = EC0301Manager.getData() || {};
-      const productos = data.productos || {};
-
-      // Regla simple: si existe el producto en localStorage, lo consideramos 100%
-      const hasCarta = !!productos.carta_descriptiva;
-      const hasLogistica = !!productos.logistica;
-      const hasEvaluaciones = !!productos.evaluaciones;
-      const hasManuales = !!productos.manuales;
-      const hasRespuestas = !!productos.respuestas;
-      const hasAuditoria = !!productos.auditoria;
-
-      function setModuleState(config) {
-        const {
-          prefix,
-          enabled,
-          percent,
-          stateText,
-          stateClass
-        } = config;
-
-        const avanceEl = document.getElementById('avance-' + prefix);
-        const estadoEl = document.getElementById('estado-texto-' + prefix);
-        const btn = document.getElementById('btn-' + prefix);
-
-        if (!avanceEl || !estadoEl || !btn) return;
-
-        avanceEl.textContent = (percent ?? 0) + '%';
-
-        estadoEl.className = 'badge-state ' + stateClass;
-        estadoEl.textContent = stateText;
-
-        btn.disabled = !enabled;
-      }
-
-      // Carta Descriptiva (siempre desbloqueada)
-      setModuleState({
-        prefix: 'carta',
-        enabled: true,
-        percent: hasCarta ? 100 : 0,
-        stateText: hasCarta ? 'Completo' : 'En progreso',
-        stateClass: hasCarta ? 'badge-completo' : 'badge-en-progreso'
-      });
-
-      // Logística (depende de Carta)
-      setModuleState({
-        prefix: 'logistica',
-        enabled: hasCarta,
-        percent: hasLogistica ? 100 : 0,
-        stateText: !hasCarta ? 'Bloqueado' : hasLogistica ? 'Completo' : 'En progreso',
-        stateClass: !hasCarta ? 'badge-bloqueado' : hasLogistica ? 'badge-completo' : 'badge-en-progreso'
-      });
-
-      // Evaluaciones (depende de Logística)
-      setModuleState({
-        prefix: 'evaluaciones',
-        enabled: hasCarta && hasLogistica,
-        percent: hasEvaluaciones ? 100 : 0,
-        stateText: !(hasCarta && hasLogistica)
-          ? 'Bloqueado'
-          : hasEvaluaciones
-          ? 'Completo'
-          : 'En progreso',
-        stateClass: !(hasCarta && hasLogistica)
-          ? 'badge-bloqueado'
-          : hasEvaluaciones
-          ? 'badge-completo'
-          : 'badge-en-progreso'
-      });
-
-      // Manuales (depende de Evaluaciones)
-      setModuleState({
-        prefix: 'manuales',
-        enabled: hasCarta && hasLogistica && hasEvaluaciones,
-        percent: hasManuales ? 100 : 0,
-        stateText: !(hasCarta && hasLogistica && hasEvaluaciones)
-          ? 'Bloqueado'
-          : hasManuales
-          ? 'Completo'
-          : 'En progreso',
-        stateClass: !(hasCarta && hasLogistica && hasEvaluaciones)
-          ? 'badge-bloqueado'
-          : hasManuales
-          ? 'badge-completo'
-          : 'badge-en-progreso'
-      });
-
-      // Respuestas (depende de Manuales)
-      setModuleState({
-        prefix: 'respuestas',
-        enabled: hasCarta && hasLogistica && hasEvaluaciones && hasManuales,
-        percent: hasRespuestas ? 100 : 0,
-        stateText: !(hasCarta && hasLogistica && hasEvaluaciones && hasManuales)
-          ? 'Bloqueado'
-          : hasRespuestas
-          ? 'Completo'
-          : 'En progreso',
-        stateClass: !(hasCarta && hasLogistica && hasEvaluaciones && hasManuales)
-          ? 'badge-bloqueado'
-          : hasRespuestas
-          ? 'badge-completo'
-          : 'badge-en-progreso'
-      });
-
-      // Auditoría (depende de Respuestas)
-      setModuleState({
-        prefix: 'auditoria',
-        enabled: hasCarta && hasLogistica && hasEvaluaciones && hasManuales && hasRespuestas,
-        percent: hasAuditoria ? 100 : 0,
-        stateText: !(hasCarta && hasLogistica && hasEvaluaciones && hasManuales && hasRespuestas)
-          ? 'Bloqueado'
-          : hasAuditoria
-          ? 'Completo'
-          : 'En progreso',
-        stateClass: !(hasCarta && hasLogistica && hasEvaluaciones && hasManuales && hasRespuestas)
-          ? 'badge-bloqueado'
-          : hasAuditoria
-          ? 'badge-completo'
-          : 'badge-en-progreso'
-      });
-
-      // Navegación al hacer clic en "Abrir módulo"
-      document.querySelectorAll('.btn-open').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          const target = btn.getAttribute('data-target');
-          if (!btn.disabled && target) {
-            window.location.href = target;
-          }
-        });
-      });
-    })();
-  </script>
-</body>
+    <!-- Módulos de sistema -->
+    <script src="auth.js"></script>
+    <script src="ec0301-data-manager.js"></script>
+    <!-- Lógica de este dashboard -->
+    <script src="js/login.js"></script>
+  </body>
 </html>
