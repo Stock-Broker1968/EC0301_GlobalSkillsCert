@@ -1,21 +1,25 @@
-// sistema_central/payment.js (Versión Frontend Segura)
+// sistema_central/payment.js
+// Gestión de pagos (Frontend) - Conectado correctamente a index.html y Backend
 
 const PAYMENT_API_URL = 'https://ec0301-globalskillscert-backend.onrender.com';
 
 const payment = {
+    // Función principal llamada desde index.html
     startCheckout: async (email, nombre, telefono) => {
         try {
-            // Mostrar spinner de carga
+            // 1. Feedback visual inmediato
             Swal.fire({
                 title: 'Conectando con Stripe...',
-                text: 'Te estamos redirigiendo a la pasarela de pago segura.',
+                text: 'Estamos preparando tu pago seguro.',
                 allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
                 }
             });
 
-            // Petición al backend para crear la sesión
+            console.log("Iniciando pago para:", email);
+
+            // 2. Petición al Backend
             const response = await fetch(`${PAYMENT_API_URL}/create-checkout-session`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -23,26 +27,28 @@ const payment = {
                     email: email,
                     nombre: nombre,
                     telefono: telefono,
-                    courseName: 'Certificación EC0301'
+                    courseName: 'Certificación EC0301' // Nombre del producto
                 })
             });
 
             const data = await response.json();
+            console.log("Respuesta del servidor:", data);
 
+            // 3. Validación flexible (Funciona con tu backend actual)
+            // Tu backend devuelve { url: '...', ... }
             if (data.url) {
-                // ÉXITO: Redirigir a Stripe
-                window.location.href = data.url;
+                window.location.href = data.url; // Redirigir a Stripe
             } else {
-                console.error('Error del servidor:', data);
-                throw new Error(data.error || 'No se recibió la URL de pago');
+                console.error('Error: El servidor no devolvió una URL.', data);
+                throw new Error(data.error || 'No se recibió el enlace de pago');
             }
 
         } catch (error) {
-            console.error('Error en el proceso de pago:', error);
+            console.error('Error crítico en pago:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error de conexión',
-                text: 'No se pudo conectar con el servidor de pagos. Por favor intenta de nuevo.'
+                text: 'No se pudo conectar con el servidor de pagos. Revisa tu internet e intenta de nuevo.'
             });
         }
     }
