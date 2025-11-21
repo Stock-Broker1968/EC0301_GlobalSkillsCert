@@ -1,1634 +1,1519 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carta Descriptiva EC0301 - SkillsCert Professional</title>
-
-    <script src="sistema_central/auth.js"></script>
-    <script src="sistema_central/ec0301-data-manager.js"></script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://unpkg.com/docx@7.8.0/build/index.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --accent: #FF6B35;
-            --success: #10b981;
-            --warning: #F59E0B;
-            --danger: #ef4444;
-            --dark: #1e293b;
-            --light: #f1f5f9;
-            --white: #ffffff;
-            --border: #e2e8f0;
-            --shadow: 0 10px 30px rgba(99, 102, 241, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--dark);
-            line-height: 1.6;
-        }
-
-        /* ========== HEADER ========== */
-        .header {
-            background: var(--white);
-            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 3px solid var(--primary);
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .header-title i {
-            font-size: 2rem;
-            color: var(--primary);
-        }
-
-        .header-title h1 {
-            font-size: 1.5rem;
-            color: var(--dark);
-            font-weight: 700;
-        }
-
-        .header-title .subtitle {
-            font-size: 0.85rem;
-            color: #64748b;
-            font-weight: 400;
-        }
-
-        .toolbar {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 0.65rem 1.25rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s;
-            text-decoration: none;
-            white-space: nowrap;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-secondary {
-            background: #64748b;
-            color: var(--white);
-        }
-
-        .btn-secondary:hover {
-            background: #475569;
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: var(--white);
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: var(--white);
-        }
-
-        .btn-warning:hover {
-            background: #d97706;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: var(--white);
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        /* ========== PROGRESS BAR ========== */
-        .progress-container {
-            background: var(--light);
-            height: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
-            transition: width 0.5s ease;
-            border-radius: 0 4px 4px 0;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-        }
-
-        /* ========== MAIN CONTAINER ========== */
-        .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem 2rem;
-        }
-
-        /* ========== SECTIONS ========== */
-        .section {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .section-title {
-            color: var(--primary);
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 3px solid var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .section-title i {
-            font-size: 1.75rem;
-        }
-
-        /* ========== BOX COMPONENTS ========== */
-        .box {
-            background: var(--light);
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border);
-            position: relative;
-        }
-
-        .box h3 {
-            color: var(--dark);
-            margin-bottom: 1.25rem;
-            font-size: 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .box h3 i {
-            color: var(--primary);
-        }
-
-        /* ========== FORM ELEMENTS ========== */
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--dark);
-            font-size: 0.95rem;
-        }
-
-        label .required {
-            color: var(--danger);
-            margin-left: 0.25rem;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            /* ===== MEJORA 1: Campos más altos ===== */
-            padding: 0.85rem; /* Aumentado de 0.75rem */
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            transition: all 0.3s;
-            background: var(--white);
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        textarea {
-            /* ===== MEJORA 2: Textareas más grandes ===== */
-            min-height: 130px; /* Aumentado de 100px */
-            resize: vertical;
-        }
-
-        input:disabled, select:disabled, textarea:disabled {
-            background: var(--light);
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        /* ========== GRID LAYOUTS ========== */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 1.25rem;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.25rem;
-        }
-
-        /* ========== DOMAIN SELECTOR ========== */
-        .doms {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .dom {
-            padding: 0.75rem 1.25rem;
-            background: var(--white);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .dom:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .dom.active {
-            background: var(--primary);
-            color: var(--white);
-            border-color: var(--primary);
-        }
-
-        /* ========== VERBOS SELECTOR ========== */
-        .verbos-container {
-            background: var(--white);
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border: 1px solid var(--border);
-        }
-
-        .verbos-container small {
-            display: block;
-            color: #64748b;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-        }
-
-        .verbo-category {
-            margin: 0.75rem 0;
-        }
-
-        .verbo-category strong {
-            display: block;
-            color: var(--primary);
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .verbo {
-            display: inline-block;
-            padding: 0.4rem 0.9rem;
-            margin: 0.25rem;
-            background: var(--light);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .verbo:hover {
-            background: var(--primary);
-            color: var(--white);
-            border-color: var(--primary);
-            transform: scale(1.05);
-        }
-
-        /* ========== PREVIEW BOX ========== */
-        .preview-box {
-            background: linear-gradient(135deg, #e0e7ff 0%, #fef3c7 100%);
-            padding: 1.25rem;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-            margin-top: 1rem;
-        }
-
-        .preview-box strong {
-            display: block;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .preview-box #og_preview {
-            color: var(--dark);
-            font-size: 1.05rem;
-            line-height: 1.6;
-            font-style: italic;
-        }
-
-        /* ========== TIME BADGES ========== */
-        .time {
-            background: var(--primary);
-            color: var(--white);
-            padding: 0.35rem 0.85rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        /* ========== VALIDATION INDICATOR ========== */
-        .validation-indicator {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: var(--white);
-            padding: 1.25rem 1.75rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-weight: 600;
-            z-index: 999;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-
-        .validation-indicator.valid {
-            border-color: var(--success);
-            animation: pulse-success 2s infinite;
-        }
-
-        .validation-indicator.invalid {
-            border-color: var(--danger);
-        }
-
-        @keyframes pulse-success {
-            0%, 100% {
-                box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
-            }
-            50% {
-                box-shadow: 0 10px 40px rgba(16, 185, 129, 0.6);
-            }
-        }
-
-        .validation-indicator i {
-            font-size: 1.5rem;
-        }
-
-        /* ========== HELP TIP ========== */
-        .help-tip {
-            display: inline-block;
-            background: var(--warning);
-            color: var(--white);
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 24px;
-            font-size: 0.85rem;
-            cursor: help;
-            margin-left: 0.5rem;
-            font-weight: 700;
-        }
-
-        /* ========== RESPONSIVE ========== */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .toolbar {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .grid-2, .grid-3 {
-                grid-template-columns: 1fr;
-            }
-
-            .doms {
-                flex-direction: column;
-            }
-
-            .dom {
-                text-align: center;
-            }
-
-            .validation-indicator {
-                bottom: 1rem;
-                right: 1rem;
-                left: 1rem;
-                padding: 1rem;
-            }
-        }
-
-        /* ========== ANIMATIONS ========== */
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .mt-1 {
-            margin-top: 1rem;
-        }
-
-        .pulse {
-            animation: pulse-btn 2s infinite;
-        }
-
-        @keyframes pulse-btn {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <header class="header">
-        <div class="header-content">
-            <div class="header-title">
-                <i class="fas fa-file-contract"></i>
-                <div>
-                    <h1>Carta Descriptiva EC0301</h1>
-                    <span class="subtitle">Guion Instruccional para Cursos en Línea</span>
-                </div>
+import React, { useState, useEffect } from 'react';
+import { Save, FileText, CheckCircle, AlertCircle, Plus, Trash2, Download, Clock, Users, Target, BookOpen } from 'lucide-react';
+
+const CartaDescriptivaEC0301 = () => {
+  const [activeSection, setActiveSection] = useState('info-general');
+  const [formData, setFormData] = useState({
+    // INFORMACIÓN GENERAL
+    nombreCurso: '',
+    facilitador: '',
+    lugarInstruccion: '',
+    duracionHoras: 2,
+    fechas: '',
+    perfilParticipante: '',
+    numeroParticipantes: 4,
+    proposito: '',
+    
+    // OBJETIVO GENERAL
+    objetivoGeneral: {
+      cognitivo: '',
+      psicomotor: '',
+      afectivo: '',
+      relacional: '',
+      condicion: '',
+      generado: ''
+    },
+    
+    // OBJETIVOS PARTICULARES (4 dimensiones)
+    objetivosParticulares: [
+      {
+        dimension: 'COGNITIVO',
+        sujeto: 'El Participante',
+        accion: '',
+        condicion: '',
+        temas: '',
+        tiempo: 0
+      },
+      {
+        dimension: 'PSICOMOTOR',
+        sujeto: 'El Participante',
+        accion: '',
+        condicion: '',
+        temas: '',
+        tiempo: 0
+      },
+      {
+        dimension: 'AFECTIVO',
+        sujeto: 'El Participante',
+        accion: '',
+        condicion: '',
+        temas: '',
+        tiempo: 0
+      },
+      {
+        dimension: 'RELACIONAL/SOCIALES',
+        sujeto: 'El Participante',
+        accion: '',
+        condicion: '',
+        temas: '',
+        tiempo: 0
+      }
+    ],
+    
+    // REQUERIMIENTOS
+    requerimientos: {
+      instalaciones: '',
+      equipo: '',
+      materiales: '',
+      humanos: '',
+      saludSeguridad: ''
+    },
+    
+    // EVALUACIÓN
+    evaluacion: {
+      aspectos: [
+        { aspecto: 'Evaluación Diagnóstica', porcentaje: 0, instrumento: 'Cuestionario', momento: 'Al inicio', tipo: 'Heteroevaluación' },
+        { aspecto: 'Evaluación Formativa (intermedia)', porcentaje: 50, instrumento: 'Guía de observación', momento: 'Intermedia', tipo: 'Heteroevaluación' },
+        { aspecto: 'Evaluación Sumativa (final)', porcentaje: 40, instrumento: 'Cuestionario', momento: 'Al final', tipo: 'Heteroevaluación' },
+        { aspecto: 'Evaluación Satisfacción', porcentaje: 10, instrumento: 'Cuestionario', momento: 'Al final', tipo: 'Heteroevaluación' }
+      ],
+      minimoAprobatorio: 70
+    },
+    
+    // COMPROBACIÓN
+    comprobacion: {
+      actividades: '1. Aplicar la lista de verificación de requerimientos.\n2. Realizar pruebas de funcionamiento del equipo.\n3. Verificar la distribución del mobiliario y equipo.\n4. Verificar la suficiencia de material conforme al número de participantes.',
+      duracion: 30,
+      tecnicas: 'Lista de verificación de requerimientos',
+      materiales: 'Lista de verificación de requerimientos'
+    },
+    
+    // APERTURA/ENCUADRE
+    apertura: {
+      etapas: [
+        {
+          nombre: 'Presentación del instructor y participantes',
+          actividades: '',
+          duracion: 0,
+          tecnicas: 'Presentación, Rompehielo',
+          materiales: 'Presentación en PowerPoint, laptop, proyector'
+        },
+        {
+          nombre: 'Presentación del curso',
+          actividades: '',
+          duracion: 0,
+          tecnicas: 'Expositiva dialogada',
+          materiales: 'Presentación en PowerPoint, laptop, proyector'
+        },
+        {
+          nombre: 'Momentos e instrumentos de evaluación',
+          actividades: '',
+          duracion: 0,
+          tecnicas: 'Expositiva',
+          materiales: 'Formatos impresos'
+        },
+        {
+          nombre: 'Acuerdos y compromisos',
+          actividades: '',
+          duracion: 0,
+          tecnicas: 'Técnica grupal',
+          materiales: 'Rotafolio, marcadores, contratos de aprendizaje'
+        },
+        {
+          nombre: 'Evaluación diagnóstica',
+          actividades: '',
+          duracion: 0,
+          tecnicas: 'Evaluación diagnóstica',
+          materiales: 'Cuestionario diagnóstico, bolígrafos'
+        }
+      ]
+    },
+    
+    // DESARROLLO
+    desarrollo: {
+      temas: []
+    },
+    
+    // EVALUACIÓN FORMATIVA (Intermedia)
+    evaluacionFormativa: {
+      actividades: 'El instructor indica el alcance y estrategias de la evaluación: sirve para retroalimentar el avance logrado. Se realiza durante la técnica demostrativa. Aclara dudas.',
+      duracion: 0,
+      tecnicas: 'Evaluación formativa (Guía de observación)',
+      materiales: 'Guía de observación, bolígrafos'
+    },
+    
+    // ENERGIZANTE/REACTIVACIÓN
+    energizante: {
+      actividades: '',
+      duracion: 0,
+      tecnicas: 'Técnica energizante',
+      materiales: 'Espacio libre, música opcional'
+    },
+    
+    // CIERRE
+    cierre: {
+      etapas: [
+        {
+          nombre: 'Conclusiones y resumen',
+          actividades: '',
+          duracion: 0,
+          tecnicas: 'Técnica grupal de cierre',
+          materiales: 'Pizarrón, laptop, proyector'
+        },
+        {
+          nombre: 'Logro de expectativas y objetivos',
+          actividades: '',
+          duracion: 0,
+          tecnicas: 'Técnica grupal',
+          materiales: 'Rotafolio, marcadores'
+        },
+        {
+          nombre: 'Sugerencias de continuidad y referencias',
+          actividades: '',
+          duracion: 0,
+          tecnicas: 'Expositiva',
+          materiales: 'Presentación'
+        },
+        {
+          nombre: 'Evaluación de satisfacción',
+          actividades: '',
+          duracion: 0,
+          tecnicas: 'Evaluación de satisfacción',
+          materiales: 'Formatos impresos, bolígrafos'
+        },
+        {
+          nombre: 'Despedida y agradecimientos',
+          actividades: '',
+          duracion: 0,
+          tecnicas: 'Técnica grupal',
+          materiales: '—'
+        }
+      ]
+    }
+  });
+
+  const generarObjetivoGeneral = () => {
+    const { cognitivo, psicomotor, afectivo, relacional, condicion } = formData.objetivoGeneral;
+    
+    if (!cognitivo || !psicomotor || !afectivo || !relacional || !condicion) {
+      alert('⚠️ Complete todos los campos para generar el objetivo');
+      return;
+    }
+
+    const objetivo = `Al finalizar el curso, el participante ${cognitivo}, ${psicomotor}, ${afectivo} y ${relacional}, ${condicion}`;
+    
+    setFormData(prev => ({
+      ...prev,
+      objetivoGeneral: { ...prev.objetivoGeneral, generado: objetivo }
+    }));
+  };
+
+  const agregarTema = () => {
+    setFormData(prev => ({
+      ...prev,
+      desarrollo: {
+        temas: [...prev.desarrollo.temas, {
+          id: Date.now(),
+          nombre: '',
+          subtemas: '',
+          actividades: '',
+          duracion: 0,
+          tecnicas: '',
+          materiales: ''
+        }]
+      }
+    }));
+  };
+
+  const eliminarTema = (id) => {
+    setFormData(prev => ({
+      ...prev,
+      desarrollo: {
+        temas: prev.desarrollo.temas.filter(t => t.id !== id)
+      }
+    }));
+  };
+
+  const actualizarTema = (id, campo, valor) => {
+    setFormData(prev => ({
+      ...prev,
+      desarrollo: {
+        temas: prev.desarrollo.temas.map(t => 
+          t.id === id ? { ...t, [campo]: valor } : t
+        )
+      }
+    }));
+  };
+
+  const actualizarObjetivoParticular = (index, campo, valor) => {
+    setFormData(prev => ({
+      ...prev,
+      objetivosParticulares: prev.objetivosParticulares.map((obj, idx) =>
+        idx === index ? { ...obj, [campo]: valor } : obj
+      )
+    }));
+  };
+
+  const actualizarEtapaApertura = (index, campo, valor) => {
+    setFormData(prev => ({
+      ...prev,
+      apertura: {
+        etapas: prev.apertura.etapas.map((etapa, idx) =>
+          idx === index ? { ...etapa, [campo]: valor } : etapa
+        )
+      }
+    }));
+  };
+
+  const actualizarEtapaCierre = (index, campo, valor) => {
+    setFormData(prev => ({
+      ...prev,
+      cierre: {
+        etapas: prev.cierre.etapas.map((etapa, idx) =>
+          idx === index ? { ...etapa, [campo]: valor } : etapa
+        )
+      }
+    }));
+  };
+
+  const actualizarEvaluacion = (index, campo, valor) => {
+    setFormData(prev => ({
+      ...prev,
+      evaluacion: {
+        ...prev.evaluacion,
+        aspectos: prev.evaluacion.aspectos.map((asp, idx) =>
+          idx === index ? { ...asp, [campo]: valor } : asp
+        )
+      }
+    }));
+  };
+
+  const calcularTiempos = () => {
+    const comprobacion = formData.comprobacion.duracion || 0;
+    const apertura = formData.apertura.etapas.reduce((sum, e) => sum + (e.duracion || 0), 0);
+    const desarrollo = formData.desarrollo.temas.reduce((sum, t) => sum + (t.duracion || 0), 0);
+    const formativa = formData.evaluacionFormativa.duracion || 0;
+    const energizante = formData.energizante.duracion || 0;
+    const cierre = formData.cierre.etapas.reduce((sum, e) => sum + (e.duracion || 0), 0);
+    
+    return {
+      comprobacion,
+      apertura,
+      desarrollo,
+      formativa,
+      energizante,
+      cierre,
+      total: apertura + desarrollo + formativa + energizante + cierre,
+      esperado: formData.duracionHoras * 60
+    };
+  };
+
+  const calcularTotalEvaluacion = () => {
+    return formData.evaluacion.aspectos.reduce((sum, asp) => sum + (asp.porcentaje || 0), 0);
+  };
+
+  const guardarBorrador = () => {
+    try {
+      localStorage.setItem('cartaEC0301_v2', JSON.stringify(formData));
+      alert('✅ Borrador guardado correctamente');
+    } catch (e) {
+      alert('❌ Error al guardar: ' + e.message);
+    }
+  };
+
+  const exportarJSON = () => {
+    const blob = new Blob([JSON.stringify(formData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `carta-descriptiva-${formData.nombreCurso || 'sin-nombre'}.json`;
+    a.click();
+  };
+
+  useEffect(() => {
+    const guardado = localStorage.getItem('cartaEC0301_v2');
+    if (guardado) {
+      try {
+        setFormData(JSON.parse(guardado));
+      } catch (e) {
+        console.error('Error al cargar datos');
+      }
+    }
+  }, []);
+
+  const tiempos = calcularTiempos();
+  const totalEvaluacion = calcularTotalEvaluacion();
+  const evaluacionValida = totalEvaluacion === 100;
+  const tiempoValido = tiempos.total === tiempos.esperado;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      {/* HEADER */}
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <FileText className="w-10 h-10 text-indigo-600" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Carta Descriptiva EC0301</h1>
+              <p className="text-sm text-gray-600">Sistema Completo para Cursos Presenciales</p>
             </div>
-            <div class="toolbar">
-                <a href="acceso.html" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i>
-                    Dashboard
-                </a>
-                <button class="btn btn-secondary" onclick="showHelp()">
-                    <i class="fas fa-question-circle"></i>
-                    Ayuda
-                </button>
-                <button class="btn btn-primary" onclick="saveDraft()">
-                    <i class="fas fa-save"></i>
-                    Guardar
-                </button>
-                <button class="btn btn-success" onclick="validateForm()">
-                    <i class="fas fa-check-circle"></i>
-                    Validar
-                </button>
-                <button class="btn btn-warning" onclick="exportCarta('pdf')">
-                    <i class="fas fa-file-pdf"></i>
-                    Exportar PDF
-                </button>
-                <button class="btn btn-success pulse" onclick="markComplete()">
-                    <i class="fas fa-trophy"></i>
-                    Completar
-                </button>
-            </div>
-        </div>
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
-        </div>
-    </header>
-
-    <main class="container">
-
-        <section class="section">
-            <h2 class="section-title">
-                <i class="fas fa-info-circle"></i>
-                1. Información General del Curso
-            </h2>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label for="cd_nombre">Nombre del Curso/Taller <span class="required">*</span></label>
-                    <input id="cd_nombre" placeholder="Ej: Diseño de cursos de capacitación presencial" required>
-                </div>
-                <div class="form-group">
-                    <label for="cd_duracion">Duración total (horas) <span class="required">*</span></label>
-                    <input id="cd_duracion" type="number" placeholder="Ej: 40" min="1" max="500" required>
-                </div>
-                <div class="form-group">
-                    <label for="cd_diseñador">Nombre del diseñador instruccional <span class="required">*</span></label>
-                    <input id="cd_diseñador" placeholder="Nombre completo del diseñador" required>
-                </div>
-                <div class="form-group">
-                    <label for="cd_facilitador">Nombre del facilitador/tutor <span class="required">*</span></label>
-                    <input id="cd_facilitador" placeholder="Nombre completo del facilitador" required>
-                </div>
-                <div class="form-group">
-                    <label for="cd_modalidad">Modalidad del curso <span class="required">*</span></label>
-                    <select id="cd_modalidad" required>
-                        <option value="">Seleccione una opción...</option>
-                        <option value="sincrono">En línea Síncrono</option>
-                        <option value="asincrono">En línea Asíncrono</option>
-                        <option value="mixto">Mixto (Síncrono y Asíncrono)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="cd_proposito">Propósito/Beneficio del curso <span class="required">*</span></label>
-                    <textarea id="cd_proposito" placeholder="Describa el propósito del curso y los beneficios que obtendrá el participante y la organización..." required></textarea>
-                </div>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">
-                <i class="fas fa-users"></i>
-                2. Perfil del Participante
-            </h2>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label for="cd_psico">Características psicográficas <span class="required">*</span></label>
-                    <textarea id="cd_psico" placeholder="Edad, ocupación, nivel educativo, experiencia previa, motivaciones, estilo de aprendizaje..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="cd_conoc">Conocimientos previos requeridos <span class="required">*</span></label>
-                    <textarea id="cd_conoc" placeholder="¿Qué debe saber el participante antes de iniciar el curso?" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="cd_hab">Habilidades tecnológicas requeridas <span class="required">*</span></label>
-                    <textarea id="cd_hab" placeholder="Uso de navegador web, correo electrónico, plataforma LMS, herramientas de videoconferencia..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="cd_actitudes">Actitudes deseables</label>
-                    <textarea id="cd_actitudes" placeholder="Disposición al aprendizaje, trabajo colaborativo, autogestión del tiempo, proactividad..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="cd_num">Número de participantes <span class="required">*</span></label>
-                    <input id="cd_num" placeholder="Ej: 15-25 personas" required>
-                </div>
-                <div class="form-group">
-                    <label for="cd_tipo">Tipo de grupo <span class="required">*</span></label>
-                    <select id="cd_tipo" required>
-                        <option value="">Seleccione una opción...</option>
-                        <option value="homogeneo">Homogéneo (mismo perfil)</option>
-                        <option value="heterogeneo">Heterogéneo (perfiles diversos)</option>
-                        <option value="mixto">Mixto</option>
-                    </select>
-                </div>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">
-                <i class="fas fa-bullseye"></i>
-                3. Objetivos de Aprendizaje
-            </h2>
-
-            <div class="box">
-                <h3>
-                    <span><i class="fas fa-star"></i> Objetivo General</span>
-                    <span class="help-tip" title="Debe cumplir con criterios SMART: Específico, Medible, Alcanzable, Relevante, Temporal">?</span>
-                </h3>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Sujeto (predefinido)</label>
-                        <input value="Al finalizar el curso, el participante" disabled>
-                    </div>
-                    <div class="form-group">
-                        <label>Dominio principal <span class="required">*</span></label>
-                        <select id="og_dom" required onchange="updateOG()">
-                            <option value="">Seleccione el dominio...</option>
-                            <option value="cognitivo">Cognitivo (Conocimientos)</option>
-                            <option value="psicomotriz">Psicomotriz (Habilidades prácticas)</option>
-                            <option value="afectivo">Afectivo (Actitudes y valores)</option>
-                            <option value="relacional">Relacional-Social</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group mt-1">
-                    <label>Acción/Comportamiento observable <span class="required">*</span></label>
-                    <textarea id="og_accion" placeholder="¿Qué será capaz de hacer el participante al finalizar? Use verbos en futuro (diseñará, aplicará, evaluará...)" required onkeyup="updateOG()"></textarea>
-                </div>
-                <div class="form-group mt-1">
-                    <label>Condición de operación <span class="required">*</span></label>
-                    <textarea id="og_cond" placeholder="¿En qué contexto o bajo qué condiciones? (utilizando la plataforma LMS, a partir de casos prácticos, con las herramientas proporcionadas...)" required onkeyup="updateOG()"></textarea>
-                </div>
-                <div class="form-group mt-1">
-                    <label>Criterio de evaluación <span class="required">*</span></label>
-                    <textarea id="og_criterio" placeholder="¿Cómo se medirá el logro? (cumpliendo con el 90% de la rúbrica, sin errores, en tiempo establecido...)" required onkeyup="updateOG()"></textarea>
-                </div>
-                <div class="preview-box">
-                    <strong>Vista previa del objetivo:</strong>
-                    <div id="og_preview">Complete los campos anteriores para visualizar el objetivo general...</div>
-                </div>
-            </div>
-
-            <div id="objetivosParticulares">
-                <div class="box" data-op="1">
-                    <h3>
-                        <span><i class="fas fa-tasks"></i> Objetivo Particular 1</span>
-                    </h3>
-                    <div class="doms">
-                        <div class="dom active" data-op="1" data-d="cognitivo" onclick="selDom(1, 'cognitivo')">Cognitivo</div>
-                        <div class="dom" data-op="1" data-d="psicomotriz" onclick="selDom(1, 'psicomotriz')">Psicomotriz</div>
-                        <div class="dom" data-op="1" data-d="afectivo" onclick="selDom(1, 'afectivo')">Afectivo</div>
-                        <div class="dom" data-op="1" data-d="relacional" onclick="selDom(1, 'relacional')">Relacional</div>
-                    </div>
-                    <div class="verbos-container" id="verbs1"></div>
-                    <div class="grid-2">
-                        <div class="form-group">
-                            <label>Verbo + Acción <span class="required">*</span></label>
-                            <input id="op1_accion" placeholder="Ej: Identificará los elementos clave de..." required>
-                        </div>
-                        <div class="form-group">
-                            <label>Condición/Contexto <span class="required">*</span></label>
-                            <textarea id="op1_cond" placeholder="¿En qué condiciones o con qué recursos?" required></textarea>
-                        </div>
-                    </div>
-                    <div class="form-group mt-1">
-                        <label>Temas relacionados</label>
-                        <textarea id="op1_temas" placeholder="Liste los temas o módulos que apoyan este objetivo (uno por línea)"></textarea>
-                    </div>
-                    <div class="form-group mt-1">
-                        <label>Tiempo estimado (minutos)</label>
-                        <input type="number" id="op1_tiempo" placeholder="120" min="15" onchange="recalcTimes()">
-                    </div>
-                </div>
-            </div>
-            <button class="btn btn-primary mt-1" onclick="addObjetivoParticular()">
-                <i class="fas fa-plus"></i>
-                Agregar Objetivo Particular
+          </div>
+          <div className="flex gap-2">
+            <button onClick={guardarBorrador} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              <Save className="w-4 h-4" /> Guardar
             </button>
-        </section>
+            <button onClick={exportarJSON} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+              <Download className="w-4 h-4" /> Exportar
+            </button>
+          </div>
+        </div>
 
-        <section class="section">
-             <h2 class="section-title">
-                <i class="fas fa-clipboard-list"></i>
-                4. Requerimientos del Curso (EC0301)
-            </h2>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Plataforma y Software <span class="required">*</span></label>
-                    <textarea id="rq_plataforma" placeholder="LMS (Moodle, Canvas, Blackboard), herramientas de videoconferencia (Zoom, Teams), software especializado..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Recursos Didácticos Digitales <span class="required">*</span></label>
-                    <textarea id="rq_recursos" placeholder="Manuales en PDF, videos, paquetes SCORM, infografías, simuladores, enlaces web, podcasts..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Materiales de Evaluación <span class="required">*</span></label>
-                    <textarea id="rq_evaluacion" placeholder="Cuestionarios en línea, rúbricas para foros, listas de cotejo para proyectos, exámenes automatizados..." required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Requerimientos de Hardware (participante)</label>
-                    <textarea id="rq_hardware" placeholder="Computadora con acceso a internet, cámara web, micrófono, auriculares..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Documentos Administrativos</label>
-                    <textarea id="rq_admin" placeholder="Contrato de aprendizaje, carta de confidencialidad, lista de asistencia digital, encuesta de satisfacción..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Recursos Humanos de Soporte</label>
-                    <textarea id="rq_rh" placeholder="Tutor/Facilitador, soporte técnico, administrador de plataforma, coordinador académico..."></textarea>
-                </div>
-            </div>
-        </section>
+        {/* INDICADORES */}
+        <div className="mt-6 grid md:grid-cols-4 gap-4">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-2 border-blue-200">
+            <p className="text-xs text-blue-700 font-semibold mb-1">TIEMPO DEL CURSO</p>
+            <p className="text-2xl font-bold text-blue-900">{tiempos.total} / {tiempos.esperado} min</p>
+            <p className="text-xs text-blue-600 mt-1">{tiempoValido ? '✓ Completo' : `Faltan ${tiempos.esperado - tiempos.total} min`}</p>
+          </div>
+          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border-2 border-green-200">
+            <p className="text-xs text-green-700 font-semibold mb-1">EVALUACIÓN</p>
+            <p className="text-2xl font-bold text-green-900">{totalEvaluacion}%</p>
+            <p className="text-xs text-green-600 mt-1">{evaluacionValida ? '✓ Válida (100%)' : '✗ Debe sumar 100%'}</p>
+          </div>
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border-2 border-purple-200">
+            <p className="text-xs text-purple-700 font-semibold mb-1">TEMAS</p>
+            <p className="text-2xl font-bold text-purple-900">{formData.desarrollo.temas.length}</p>
+            <p className="text-xs text-purple-600 mt-1">Módulos del curso</p>
+          </div>
+          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border-2 border-orange-200">
+            <p className="text-xs text-orange-700 font-semibold mb-1">OBJETIVOS</p>
+            <p className="text-2xl font-bold text-orange-900">4</p>
+            <p className="text-xs text-orange-600 mt-1">Dimensiones completas</p>
+          </div>
+        </div>
+      </div>
 
-        <section class="section">
-            <h2 class="section-title">
-                <i class="fas fa-chart-line"></i>
-                5. Sistema de Evaluación
-            </h2>
+      {/* NAVEGACIÓN */}
+      <div className="bg-white rounded-xl shadow-lg mb-6 overflow-x-auto">
+        <div className="flex gap-1 p-2">
+          {[
+            { id: 'info-general', label: '1. Info General', icon: FileText },
+            { id: 'objetivo-general', label: '2. Objetivo General', icon: Target },
+            { id: 'objetivos-particulares', label: '3. Objetivos Particulares', icon: BookOpen },
+            { id: 'requerimientos', label: '4. Requerimientos', icon: Users },
+            { id: 'evaluacion', label: '5. Evaluación', icon: CheckCircle },
+            { id: 'comprobacion', label: '6. Comprobación', icon: Clock },
+            { id: 'apertura', label: '7. Apertura', icon: Target },
+            { id: 'desarrollo', label: '8. Desarrollo', icon: BookOpen },
+            { id: 'cierre', label: '9. Cierre', icon: CheckCircle }
+          ].map(section => (
+            <button
+              key={section.id}
+              onClick={() => setActiveSection(section.id)}
+              className={`flex items-center gap-2 px-4 py-3 rounded-lg font-semibold transition whitespace-nowrap ${
+                activeSection === section.id
+                  ? 'bg-indigo-600 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <section.icon className="w-4 h-4" />
+              {section.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* CONTENIDO */}
+      <div className="space-y-6">
+        
+        {/* 1. INFORMACIÓN GENERAL */}
+        {activeSection === 'info-general' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">1. Información General del Curso</h2>
             
-            <div class="box">
-                <h3>Criterios Generales</h3>
-                <div class="grid-3">
-                    <div class="form-group">
-                        <label>Calificación mínima aprobatoria <span class="required">*</span></label>
-                        <select id="ev_min" required onchange="recalcEval()">
-                            <option value="">Seleccione...</option>
-                            <option value="70">70%</option>
-                            <option value="80" selected>80%</option>
-                            <option value="85">85%</option>
-                            <option value="90">90%</option>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Nombre del Curso-Taller <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.nombreCurso}
+                  onChange={(e) => setFormData({...formData, nombreCurso: e.target.value})}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  placeholder="Ej: Curso de Inducción en PLD y FT"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Nombre del Facilitador/Instructor <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.facilitador}
+                  onChange={(e) => setFormData({...formData, facilitador: e.target.value})}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  placeholder="Nombre completo"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Duración (horas) <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={formData.duracionHoras}
+                  onChange={(e) => setFormData({...formData, duracionHoras: parseFloat(e.target.value) || 0})}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  min="0.5"
+                  step="0.5"
+                />
+                <p className="text-xs text-gray-500 mt-1">= {formData.duracionHoras * 60} minutos</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Fecha(s) <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.fechas}
+                  onChange={(e) => setFormData({...formData, fechas: e.target.value})}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  placeholder="Ej: 17 julio 2025"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Número de Participantes <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={formData.numeroParticipantes}
+                  onChange={(e) => setFormData({...formData, numeroParticipantes: parseInt(e.target.value) || 0})}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  min="1"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Lugar de Instrucción <span className="text-red-600">*</span>
+              </label>
+              <textarea
+                value={formData.lugarInstruccion}
+                onChange={(e) => setFormData({...formData, lugarInstruccion: e.target.value})}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                rows="3"
+                placeholder="Salón, Hotel, Dirección completa..."
+              />
+            </div>
+
+            <div className="mt-6">
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Perfil del Participante <span className="text-red-600">*</span>
+              </label>
+              <textarea
+                value={formData.perfilParticipante}
+                onChange={(e) => setFormData({...formData, perfilParticipante: e.target.value})}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                rows="5"
+                placeholder="Nivel educativo, experiencia previa, conocimientos, actitudes..."
+              />
+            </div>
+
+            <div className="mt-6">
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Propósito/Beneficio del Curso <span className="text-red-600">*</span>
+              </label>
+              <textarea
+                value={formData.proposito}
+                onChange={(e) => setFormData({...formData, proposito: e.target.value})}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                rows="5"
+                placeholder="Describa el propósito y beneficios del curso..."
+              />
+            </div>
+          </div>
+        )}
+
+        {/* 2. OBJETIVO GENERAL */}
+        {activeSection === 'objetivo-general' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">2. Objetivo General (4 Dimensiones Integradas)</h2>
+            
+            <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-lg mb-6">
+              <p className="text-sm font-semibold text-blue-900 mb-2">📘 Estructura del Objetivo General:</p>
+              <p className="text-sm text-blue-800">
+                <strong>Sujeto (fijo):</strong> "Al finalizar el curso, el participante"<br/>
+                <strong>Acción integrada:</strong> [Cognitivo] + [Psicomotor] + [Afectivo] + [Relacional]<br/>
+                <strong>Condición:</strong> Contexto y finalidad
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  🧠 Dimensión Cognitiva <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.objetivoGeneral.cognitivo}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    objetivoGeneral: { ...formData.objetivoGeneral, cognitivo: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  placeholder="identificará y describirá las principales normativas..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  ✋ Dimensión Psicomotora <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.objetivoGeneral.psicomotor}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    objetivoGeneral: { ...formData.objetivoGeneral, psicomotor: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  placeholder="aplicará correctamente los procedimientos..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  ❤️ Dimensión Afectiva <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.objetivoGeneral.afectivo}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    objetivoGeneral: { ...formData.objetivoGeneral, afectivo: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  placeholder="asumirá una actitud proactiva y ética..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  🤝 Dimensión Relacional <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.objetivoGeneral.relacional}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    objetivoGeneral: { ...formData.objetivoGeneral, relacional: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  placeholder="colaborará en equipo para identificar riesgos..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  📋 Condición de Operación <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  value={formData.objetivoGeneral.condicion}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    objetivoGeneral: { ...formData.objetivoGeneral, condicion: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  rows="4"
+                  placeholder="aplicando estos conocimientos a casos prácticos, con el propósito de fortalecer la cultura de cumplimiento y reducir riesgos institucionales"
+                />
+              </div>
+
+              <button
+                onClick={generarObjetivoGeneral}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-lg font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transition flex items-center justify-center gap-3"
+              >
+                <CheckCircle className="w-6 h-6" />
+                Generar Objetivo General Completo
+              </button>
+
+              {formData.objetivoGeneral.generado && (
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border-l-4 border-indigo-600 p-6 rounded-lg">
+                  <p className="text-sm font-bold text-indigo-900 mb-3">✨ OBJETIVO GENERAL GENERADO:</p>
+                  <p className="text-gray-900 leading-relaxed text-lg italic font-medium">{formData.objetivoGeneral.generado}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 3. OBJETIVOS PARTICULARES */}
+        {activeSection === 'objetivos-particulares' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">3. Objetivos Particulares (4 Dimensiones)</h2>
+
+            {formData.objetivosParticulares.map((obj, idx) => (
+              <div key={idx} className="mb-6 border-2 border-gray-200 rounded-xl p-6 bg-gradient-to-br from-gray-50 to-white">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl ${
+                    obj.dimension === 'COGNITIVO' ? 'bg-blue-600' :
+                    obj.dimension === 'PSICOMOTOR' ? 'bg-green-600' :
+                    obj.dimension === 'AFECTIVO' ? 'bg-yellow-600' : 'bg-purple-600'
+                  }`}>
+                    {idx + 1}
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">{obj.dimension}</h3>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Sujeto (predefinido)
+                    </label>
+                    <input
+                      type="text"
+                      value={obj.sujeto}
+                      disabled
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-100 text-gray-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Acción o comportamiento <span className="text-red-600">*</span>
+                    </label>
+                    <textarea
+                      value={obj.accion}
+                      onChange={(e) => actualizarObjetivoParticular(idx, 'accion', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      rows="3"
+                      placeholder={
+                        obj.dimension === 'COGNITIVO' ? 'Al finalizar el curso, identificará y explicará las principales normativas...' :
+                        obj.dimension === 'PSICOMOTOR' ? 'Al finalizar el curso, aplicará correctamente los procedimientos...' :
+                        obj.dimension === 'AFECTIVO' ? 'Al finalizar el curso, asumirá una actitud proactiva y ética...' :
+                        'Durante el curso, colaborará en equipo para identificar señales de alerta...'
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Condición de operación <span className="text-red-600">*</span>
+                    </label>
+                    <textarea
+                      value={obj.condicion}
+                      onChange={(e) => actualizarObjetivoParticular(idx, 'condicion', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      rows="3"
+                      placeholder="A través de... mediante... con la finalidad de..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Temas <span className="text-red-600">*</span>
+                    </label>
+                    <textarea
+                      value={obj.temas}
+                      onChange={(e) => actualizarObjetivoParticular(idx, 'temas', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      rows="3"
+                      placeholder="- Tema 1&#10;- Tema 2&#10;- Tema 3"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Tiempo estimado (minutos)
+                    </label>
+                    <input
+                      type="number"
+                      value={obj.tiempo}
+                      onChange={(e) => actualizarObjetivoParticular(idx, 'tiempo', parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 4. REQUERIMIENTOS */}
+        {activeSection === 'requerimientos' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">4. Requerimientos (Estructura EC0301)</h2>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Requerimientos en instalaciones, mobiliario y su distribución <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  value={formData.requerimientos.instalaciones}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    requerimientos: { ...formData.requerimientos, instalaciones: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  rows="5"
+                  placeholder="Ej: Salón para 5 personas, mesas, sillas, ventilación, iluminación, distribución en U..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Requerimientos en equipo de apoyo y su distribución <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  value={formData.requerimientos.equipo}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    requerimientos: { ...formData.requerimientos, equipo: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  rows="5"
+                  placeholder="Ej: Laptop, proyector, pantalla, bocina, pizarrón, marcadores, extensión..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Requerimientos en materiales de apoyo <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  value={formData.requerimientos.materiales}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    requerimientos: { ...formData.requerimientos, materiales: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  rows="6"
+                  placeholder="Ej: Formatos de evaluación, manuales, contratos, lista de asistencia..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Requerimientos humanos <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  value={formData.requerimientos.humanos}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    requerimientos: { ...formData.requerimientos, humanos: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  rows="3"
+                  placeholder="Ej: Instructor certificado, personal de apoyo logístico..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Material y equipo para las medidas de salud/seguridad/higiene/protección civil <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  value={formData.requerimientos.saludSeguridad}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    requerimientos: { ...formData.requerimientos, saludSeguridad: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  rows="5"
+                  placeholder="Ej: Gel antibacterial, aerosol desinfectante, botiquín, señalización, extintor..."
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 5. EVALUACIÓN */}
+        {activeSection === 'evaluacion' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">5. Sistema de Evaluación</h2>
+
+            <div className="bg-amber-50 border-l-4 border-amber-600 p-4 rounded-lg mb-6">
+              <p className="text-sm font-bold text-amber-900">
+                ⚠️ Total actual: {totalEvaluacion}% {evaluacionValida ? '✅ VÁLIDO' : '❌ DEBE SUMAR 100%'}
+              </p>
+              <p className="text-xs text-amber-800 mt-1">
+                Si el participante cumple con al menos el {formData.evaluacion.minimoAprobatorio}% de la calificación total, se considerará aprobado.
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Calificación Mínima Aprobatoria (%)
+              </label>
+              <select
+                value={formData.evaluacion.minimoAprobatorio}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  evaluacion: { ...formData.evaluacion, minimoAprobatorio: parseInt(e.target.value) }
+                })}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+              >
+                <option value="60">60%</option>
+                <option value="70">70%</option>
+                <option value="80">80%</option>
+                <option value="90">90%</option>
+              </select>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-indigo-600 text-white">
+                    <th className="border border-indigo-700 px-4 py-3 text-left">Aspecto por evaluar</th>
+                    <th className="border border-indigo-700 px-4 py-3 text-center">Porcentaje</th>
+                    <th className="border border-indigo-700 px-4 py-3 text-left">Instrumento de evaluación</th>
+                    <th className="border border-indigo-700 px-4 py-3 text-left">Momento de aplicación</th>
+                    <th className="border border-indigo-700 px-4 py-3 text-left">Tipo de evaluación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData.evaluacion.aspectos.map((asp, idx) => (
+                    <tr key={idx} className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                      <td className="border border-gray-300 px-4 py-3 font-semibold">{asp.aspecto}</td>
+                      <td className="border border-gray-300 px-4 py-3">
+                        <input
+                          type="number"
+                          value={asp.porcentaje}
+                          onChange={(e) => actualizarEvaluacion(idx, 'porcentaje', parseInt(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none text-center"
+                          min="0"
+                          max="100"
+                        />
+                      </td>
+                      <td className="border border-gray-300 px-4 py-3">
+                        <input
+                          type="text"
+                          value={asp.instrumento}
+                          onChange={(e) => actualizarEvaluacion(idx, 'instrumento', e.target.value)}
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                        />
+                      </td>
+                      <td className="border border-gray-300 px-4 py-3">
+                        <input
+                          type="text"
+                          value={asp.momento}
+                          onChange={(e) => actualizarEvaluacion(idx, 'momento', e.target.value)}
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                        />
+                      </td>
+                      <td className="border border-gray-300 px-4 py-3">
+                        <select
+                          value={asp.tipo}
+                          onChange={(e) => actualizarEvaluacion(idx, 'tipo', e.target.value)}
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                        >
+                          <option value="Heteroevaluación">Heteroevaluación</option>
+                          <option value="Autoevaluación">Autoevaluación</option>
+                          <option value="Coevaluación">Coevaluación</option>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Escala de calificación</label>
-                        <select id="ev_escala">
-                            <option value="0-100">0-100</option>
-                            <option value="0-10">0-10</option>
-                            <option value="NA-S">NA/S (No Acreditado/Suficiente)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tipo de acreditación</label>
-                        <select id="ev_cert">
-                            <option value="constancia">Constancia de participación</option>
-                            <option value="diploma">Diploma de acreditación</option>
-                            <option value="certificado">Certificado EC0301</option>
-                        </select>
-                    </div>
-                </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* 6. COMPROBACIÓN */}
+        {activeSection === 'comprobacion' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">6. Comprobación de Recursos (Previo al curso)</h2>
+
+            <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-lg mb-6">
+              <p className="text-sm font-semibold text-blue-900">
+                ℹ️ Esta etapa se realiza {formData.comprobacion.duracion} minutos previos al inicio del curso
+              </p>
             </div>
 
-            <div class="box">
-                <h3>Evaluación Diagnóstica <span class="time">Inicio</span></h3>
-                <div class="grid-3">
-                    <div class="form-group">
-                        <label>Momento de aplicación</label>
-                        <input id="ev_diag_mom" placeholder="Ej: Módulo 0 - Inicio del curso" value="Módulo 0 - Inicio">
-                    </div>
-                    <div class="form-group">
-                        <label>Instrumento</label>
-                        <input id="ev_diag_ins" placeholder="Ej: Cuestionario en plataforma" value="Cuestionario en línea">
-                    </div>
-                    <div class="form-group">
-                        <label>Propósito</label>
-                        <input id="ev_diag_prop" placeholder="Ej: Identificar nivel inicial" value="Identificar conocimientos previos">
-                    </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Actividades <span className="text-red-600">*</span>
+                </label>
+                <textarea
+                  value={formData.comprobacion.actividades}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    comprobacion: { ...formData.comprobacion, actividades: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  rows="6"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Duración (min)</label>
+                  <input
+                    type="number"
+                    value={formData.comprobacion.duracion}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      comprobacion: { ...formData.comprobacion, duracion: parseInt(e.target.value) || 0 }
+                    })}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                    min="0"
+                  />
                 </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Técnicas Grupales/Instruccionales</label>
+                  <input
+                    type="text"
+                    value={formData.comprobacion.tecnicas}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      comprobacion: { ...formData.comprobacion, tecnicas: e.target.value }
+                    })}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Material y Equipo de Apoyo</label>
+                  <input
+                    type="text"
+                    value={formData.comprobacion.materiales}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      comprobacion: { ...formData.comprobacion, materiales: e.target.value }
+                    })}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 7. APERTURA */}
+        {activeSection === 'apertura' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">7. Apertura/Encuadre del Curso</h2>
+
+            <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded-lg mb-6">
+              <p className="text-sm font-semibold text-green-900">
+                ⏱️ Total de tiempo de apertura: {tiempos.apertura} minutos
+              </p>
             </div>
 
-            <div class="box">
-                <h3>Evaluación Formativa <span class="time">Durante</span></h3>
-                <div class="grid-3">
-                    <div class="form-group">
-                        <label>Ponderación (%)</label>
-                        <select id="ev_form_pct" onchange="recalcEval()">
-                            <option value="30">30%</option>
-                            <option value="40" selected>40%</option>
-                            <option value="50">50%</option>
-                            <option value="60">60%</option>
-                        </select>
+            {formData.apertura.etapas.map((etapa, idx) => (
+              <div key={idx} className="mb-6 border-2 border-gray-200 rounded-xl p-5 bg-gray-50">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">
+                    {idx + 1}
+                  </span>
+                  {etapa.nombre}
+                </h3>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Actividades</label>
+                    <textarea
+                      value={etapa.actividades}
+                      onChange={(e) => actualizarEtapaApertura(idx, 'actividades', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      rows="4"
+                      placeholder="Describa las actividades de esta etapa..."
+                    />
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Duración (min)</label>
+                      <input
+                        type="number"
+                        value={etapa.duracion}
+                        onChange={(e) => actualizarEtapaApertura(idx, 'duracion', parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                        min="0"
+                      />
                     </div>
-                    <div class="form-group">
-                        <label>Momentos de aplicación</label>
-                        <input id="ev_form_mom" placeholder="Ej: Al finalizar cada módulo" value="Al finalizar cada módulo/tema">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Técnicas</label>
+                      <input
+                        type="text"
+                        value={etapa.tecnicas}
+                        onChange={(e) => actualizarEtapaApertura(idx, 'tecnicas', e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      />
                     </div>
-                    <div class="form-group">
-                        <label>Instrumentos</label>
-                        <input id="ev_form_ins" placeholder="Ej: Foros, tareas, wikis" value="Foros, entrega de tareas, cuestionarios">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Material y Equipo</label>
+                      <input
+                        type="text"
+                        value={etapa.materiales}
+                        onChange={(e) => actualizarEtapaApertura(idx, 'materiales', e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      />
                     </div>
+                  </div>
                 </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 8. DESARROLLO */}
+        {activeSection === 'desarrollo' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">8. Desarrollo del Curso (Temas/Módulos)</h2>
+              <button
+                onClick={agregarTema}
+                className="flex items-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold"
+              >
+                <Plus className="w-5 h-5" /> Agregar Tema
+              </button>
             </div>
 
-            <div class="box">
-                <h3>Evaluación Sumativa <span class="time">Final</span></h3>
-                <div class="grid-3">
-                    <div class="form-group">
-                        <label>Ponderación (%) - Calculado automáticamente</label>
-                        <input id="ev_sum_pct" placeholder="60%" disabled>
-                    </div>
-                    <div class="form-group">
-                        <label>Momento de aplicación</label>
-                        <input id="ev_sum_mom" placeholder="Ej: Último módulo" value="Módulo final del curso">
-                    </div>
-                    <div class="form-group">
-                        <label>Instrumentos</label>
-                        <input id="ev_sum_ins" placeholder="Ej: Examen final, proyecto" value="Examen final en línea, proyecto integrador">
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">
-                <i class="fas fa-clock"></i>
-                6. Desarrollo Cronológico / Guion Instruccional
-            </h2>
-
-            <div class="box">
-                <h3>Encuadre / Módulo 0 <span class="time" id="encuadreTime">30 min</span></h3>
-                <div class="form-group">
-                    <label>Actividades de Encuadre (Inicio del curso)</label>
-                    <textarea id="dc_integracion" placeholder="Bienvenida, presentación de la plataforma, guía de navegación, presentación del tutor, foro social 'Cafetería', contrato de aprendizaje, evaluación diagnóstica..."></textarea>
-                </div>
-                <div class="form-group mt-1">
-                    <label>Tiempo estimado (minutos)</label>
-                    <input type="number" id="dc_encuadre_t" value="30" min="5" onchange="recalcTimes()">
-                </div>
+            <div className="bg-purple-50 border-l-4 border-purple-600 p-4 rounded-lg mb-6">
+              <p className="text-sm font-semibold text-purple-900">
+                📚 Total de tiempo de desarrollo: {tiempos.desarrollo} minutos
+              </p>
             </div>
 
-            <div class="box">
-                <h3>Desarrollo de Contenidos <span class="time" id="desarrolloTime">0 min</span></h3>
-                <div id="temasContainer"></div>
-                <button class="btn btn-primary mt-1" onclick="addTema()">
-                    <i class="fas fa-plus"></i>
-                    Agregar Tema/Módulo
-                </button>
+            {formData.desarrollo.temas.length === 0 && (
+              <div className="text-center py-12 text-gray-500">
+                <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <p className="text-lg font-semibold">No hay temas agregados</p>
+                <p className="text-sm mt-2">Haz clic en "Agregar Tema" para comenzar</p>
+              </div>
+            )}
+
+            {formData.desarrollo.temas.map((tema, idx) => (
+              <div key={tema.id} className="mb-6 border-2 border-gray-200 rounded-xl p-5 bg-gradient-to-br from-blue-50 to-white">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">Tema/Módulo {idx + 1}</h3>
+                  <button
+                    onClick={() => eliminarTema(tema.id)}
+                    className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                  >
+                    <Trash2 className="w-4 h-4" /> Eliminar
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Nombre del Tema</label>
+                    <input
+                      type="text"
+                      value={tema.nombre}
+                      onChange={(e) => actualizarTema(tema.id, 'nombre', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      placeholder="Ej: Introducción a la PLD/FT y marco normativo"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Subtemas</label>
+                    <textarea
+                      value={tema.subtemas}
+                      onChange={(e) => actualizarTema(tema.id, 'subtemas', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      rows="3"
+                      placeholder="- Conceptos básicos&#10;- Importancia y riesgos&#10;- Principales leyes y autoridades"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Actividades</label>
+                    <textarea
+                      value={tema.actividades}
+                      onChange={(e) => actualizarTema(tema.id, 'actividades', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      rows="5"
+                      placeholder="Describa las actividades de aprendizaje..."
+                    />
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Duración (min)</label>
+                      <input
+                        type="number"
+                        value={tema.duracion}
+                        onChange={(e) => actualizarTema(tema.id, 'duracion', parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                        min="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Técnicas Grupales/Instruccionales</label>
+                      <input
+                        type="text"
+                        value={tema.tecnicas}
+                        onChange={(e) => actualizarTema(tema.id, 'tecnicas', e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                        placeholder="Ej: Expositiva dialogada"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Material y Equipo de Apoyo</label>
+                      <input
+                        type="text"
+                        value={tema.materiales}
+                        onChange={(e) => actualizarTema(tema.id, 'materiales', e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                        placeholder="Ej: PowerPoint, laptop, proyector"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* EVALUACIÓN FORMATIVA */}
+            <div className="mt-8 border-2 border-yellow-400 rounded-xl p-5 bg-gradient-to-br from-yellow-50 to-white">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <CheckCircle className="w-6 h-6 text-yellow-600" />
+                Evaluación Formativa (Intermedia)
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Actividades</label>
+                  <textarea
+                    value={formData.evaluacionFormativa.actividades}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      evaluacionFormativa: { ...formData.evaluacionFormativa, actividades: e.target.value }
+                    })}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                    rows="4"
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Duración (min)</label>
+                    <input
+                      type="number"
+                      value={formData.evaluacionFormativa.duracion}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        evaluacionFormativa: { ...formData.evaluacionFormativa, duracion: parseInt(e.target.value) || 0 }
+                      })}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Técnicas</label>
+                    <input
+                      type="text"
+                      value={formData.evaluacionFormativa.tecnicas}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        evaluacionFormativa: { ...formData.evaluacionFormativa, tecnicas: e.target.value }
+                      })}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Material y Equipo</label>
+                    <input
+                      type="text"
+                      value={formData.evaluacionFormativa.materiales}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        evaluacionFormativa: { ...formData.evaluacionFormativa, materiales: e.target.value }
+                      })}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div class="box">
-                <h3>Cierre / Módulo Final <span class="time" id="cierreTime">60 min</span></h3>
-                <div class="form-group">
-                    <label>Actividades de Cierre</label>
-                    <textarea id="dc_cierre" placeholder="Resumen del curso, felicitación, aplicación de evaluación sumativa, encuesta de satisfacción, siguientes pasos, descarga de constancias..."></textarea>
+            {/* ENERGIZANTE/REACTIVACIÓN */}
+            <div className="mt-6 border-2 border-orange-400 rounded-xl p-5 bg-gradient-to-br from-orange-50 to-white">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <AlertCircle className="w-6 h-6 text-orange-600" />
+                Energizante / Reactivación
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Actividades</label>
+                  <textarea
+                    value={formData.energizante.actividades}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      energizante: { ...formData.energizante, actividades: e.target.value }
+                    })}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                    rows="3"
+                    placeholder="Ej: Técnica 'Jumping Compliance': los participantes se mueven y comparten conceptos clave..."
+                  />
                 </div>
-                <div class="form-group mt-1">
-                    <label>Tiempo estimado (minutos)</label>
-                    <input type="number" id="dc_cierre_t" value="60" min="15" onchange="recalcTimes()">
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Duración (min)</label>
+                    <input
+                      type="number"
+                      value={formData.energizante.duracion}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        energizante: { ...formData.energizante, duracion: parseInt(e.target.value) || 0 }
+                      })}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Técnicas</label>
+                    <input
+                      type="text"
+                      value={formData.energizante.tecnicas}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        energizante: { ...formData.energizante, tecnicas: e.target.value }
+                      })}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Material y Equipo</label>
+                    <input
+                      type="text"
+                      value={formData.energizante.materiales}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        energizante: { ...formData.energizante, materiales: e.target.value }
+                      })}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                    />
+                  </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 9. CIERRE */}
+        {activeSection === 'cierre' && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">9. Cierre del Curso</h2>
+
+            <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-lg mb-6">
+              <p className="text-sm font-semibold text-red-900">
+                🏁 Total de tiempo de cierre: {tiempos.cierre} minutos
+              </p>
             </div>
 
-            <div class="box">
-                <h3>Distribución del Tiempo Total</h3>
-                <div class="grid-3">
-                    <div class="form-group">
-                        <label>Encuadre</label>
-                        <input id="sum_encuadre" disabled>
+            {formData.cierre.etapas.map((etapa, idx) => (
+              <div key={idx} className="mb-6 border-2 border-gray-200 rounded-xl p-5 bg-gray-50">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">
+                    {idx + 1}
+                  </span>
+                  {etapa.nombre}
+                </h3>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Actividades</label>
+                    <textarea
+                      value={etapa.actividades}
+                      onChange={(e) => actualizarEtapaCierre(idx, 'actividades', e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      rows="4"
+                      placeholder="Describa las actividades de esta etapa..."
+                    />
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Duración (min)</label>
+                      <input
+                        type="number"
+                        value={etapa.duracion}
+                        onChange={(e) => actualizarEtapaCierre(idx, 'duracion', parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                        min="0"
+                      />
                     </div>
-                    <div class="form-group">
-                        <label>Desarrollo</label>
-                        <input id="sum_desarrollo" disabled>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Técnicas</label>
+                      <input
+                        type="text"
+                        value={etapa.tecnicas}
+                        onChange={(e) => actualizarEtapaCierre(idx, 'tecnicas', e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      />
                     </div>
-                    <div class="form-group">
-                        <label>Cierre</label>
-                        <input id="sum_cierre" disabled>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Material y Equipo</label>
+                      <input
+                        type="text"
+                        value={etapa.materiales}
+                        onChange={(e) => actualizarEtapaCierre(idx, 'materiales', e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-600 focus:outline-none"
+                      />
                     </div>
+                  </div>
                 </div>
-                <div class="form-group mt-1" style="text-align: right;">
-                    <label>Total del Curso (calculado)</label>
-                    <input id="sum_total" disabled style="font-weight: bold; color: var(--primary); max-width: 250px; display: inline-block;">
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* RESUMEN FINAL */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-xl p-8 mt-8">
+        <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+          <CheckCircle className="w-8 h-8" />
+          Resumen de Validación
+        </h2>
+
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white bg-opacity-20 backdrop-blur rounded-xl p-6">
+            <h3 className="text-lg font-bold mb-4">⏱️ Distribución de Tiempos</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Comprobación:</span>
+                <span className="font-bold">{tiempos.comprobacion} min</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Apertura:</span>
+                <span className="font-bold">{tiempos.apertura} min</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Desarrollo:</span>
+                <span className="font-bold">{tiempos.desarrollo} min</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Eval. Formativa:</span>
+                <span className="font-bold">{tiempos.formativa} min</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Energizante:</span>
+                <span className="font-bold">{tiempos.energizante} min</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Cierre:</span>
+                <span className="font-bold">{tiempos.cierre} min</span>
+              </div>
+              <div className="border-t-2 border-white border-opacity-40 pt-2 mt-2">
+                <div className="flex justify-between text-lg font-bold">
+                  <span>TOTAL:</span>
+                  <span>{tiempos.total} / {tiempos.esperado} min</span>
                 </div>
+                {tiempoValido ? (
+                  <p className="text-xs mt-1 text-green-200">✓ Tiempo exacto cumplido</p>
+                ) : (
+                  <p className="text-xs mt-1 text-yellow-200">⚠️ Ajustar: {tiempos.total > tiempos.esperado ? 'Reducir' : 'Aumentar'} {Math.abs(tiempos.total - tiempos.esperado)} minutos</p>
+                )}
+              </div>
             </div>
-        </section>
+          </div>
 
-    </main>
+          <div className="bg-white bg-opacity-20 backdrop-blur rounded-xl p-6">
+            <h3 className="text-lg font-bold mb-4">📊 Sistema de Evaluación</h3>
+            <div className="space-y-2 text-sm">
+              {formData.evaluacion.aspectos.map((asp, idx) => (
+                <div key={idx} className="flex justify-between">
+                  <span className="truncate mr-2">{asp.aspecto.split(' ')[1]}:</span>
+                  <span className="font-bold">{asp.porcentaje}%</span>
+                </div>
+              ))}
+              <div className="border-t-2 border-white border-opacity-40 pt-2 mt-2">
+                <div className="flex justify-between text-lg font-bold">
+                  <span>TOTAL:</span>
+                  <span>{totalEvaluacion}%</span>
+                </div>
+                {evaluacionValida ? (
+                  <p className="text-xs mt-1 text-green-200">✓ Suma correcta (100%)</p>
+                ) : (
+                  <p className="text-xs mt-1 text-red-200">✗ Debe sumar exactamente 100%</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
-    <div class="validation-indicator invalid" id="validationIndicator" style="display: none;">
-        <i class="fas fa-exclamation-circle" style="color: var(--danger);"></i>
-        <span>Documento incompleto</span>
+        <div className="bg-white bg-opacity-20 backdrop-blur rounded-xl p-6">
+          <h3 className="text-lg font-bold mb-4">✅ Lista de Verificación</h3>
+          <div className="grid md:grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center gap-3">
+              {formData.nombreCurso ? <CheckCircle className="w-5 h-5 text-green-300" /> : <AlertCircle className="w-5 h-5 text-red-300" />}
+              <span>Información General Completa</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {formData.objetivoGeneral.generado ? <CheckCircle className="w-5 h-5 text-green-300" /> : <AlertCircle className="w-5 h-5 text-red-300" />}
+              <span>Objetivo General Generado</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {formData.objetivosParticulares.every(o => o.accion && o.condicion) ? <CheckCircle className="w-5 h-5 text-green-300" /> : <AlertCircle className="w-5 h-5 text-red-300" />}
+              <span>4 Objetivos Particulares</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {formData.requerimientos.instalaciones ? <CheckCircle className="w-5 h-5 text-green-300" /> : <AlertCircle className="w-5 h-5 text-red-300" />}
+              <span>Requerimientos Definidos</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {evaluacionValida ? <CheckCircle className="w-5 h-5 text-green-300" /> : <AlertCircle className="w-5 h-5 text-red-300" />}
+              <span>Evaluación Válida (100%)</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {formData.desarrollo.temas.length > 0 ? <CheckCircle className="w-5 h-5 text-green-300" /> : <AlertCircle className="w-5 h-5 text-red-300" />}
+              <span>Temas del Desarrollo</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {tiempos.apertura > 0 ? <CheckCircle className="w-5 h-5 text-green-300" /> : <AlertCircle className="w-5 h-5 text-red-300" />}
+              <span>Apertura con Tiempos</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {tiempos.cierre > 0 ? <CheckCircle className="w-5 h-5 text-green-300" /> : <AlertCircle className="w-5 h-5 text-red-300" />}
+              <span>Cierre con Tiempos</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {tiempoValido ? <CheckCircle className="w-5 h-5 text-green-300" /> : <AlertCircle className="w-5 h-5 text-red-300" />}
+              <span>Tiempo Total Exacto</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {formData.evaluacionFormativa.duracion > 0 ? <CheckCircle className="w-5 h-5 text-green-300" /> : <AlertCircle className="w-5 h-5 text-red-300" />}
+              <span>Evaluación Formativa</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 bg-white bg-opacity-20 backdrop-blur rounded-xl p-6">
+          <h3 className="text-lg font-bold mb-3">🎯 Próximos Pasos:</h3>
+          <ul className="space-y-2 text-sm">
+            <li>• Completar todos los campos obligatorios (*)</li>
+            <li>• Asegurar que la evaluación sume exactamente 100%</li>
+            <li>• Verificar que el tiempo total coincida con la duración del encabezado</li>
+            <li>• Revisar que cada etapa tenga actividades, tiempos, técnicas y materiales</li>
+            <li>• Exportar la carta descriptiva en formato JSON</li>
+            <li>• Generar los productos derivados (manuales, evaluaciones, contratos, listas)</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-8 text-center text-sm text-gray-600 pb-8">
+        <p className="font-semibold">Sistema de Carta Descriptiva EC0301 - Diseño Instruccional Presencial</p>
+        <p className="mt-2">Los datos se guardan automáticamente en tu navegador cada vez que presionas "Guardar"</p>
+        <p className="mt-1 text-xs text-gray-500">Desarrollado con estándares EC0301 para cursos de capacitación presencial</p>
+      </div>
     </div>
+  );
+};
 
-    <script>
-        // ========== CONSTANTES Y CONFIGURACIÓN ==========
-        const VERBOS = {
-            cognitivo: {
-                conocimiento: ['Identificar', 'Reconocer', 'Listar', 'Nombrar', 'Definir', 'Describir'],
-                comprension: ['Explicar', 'Interpretar', 'Resumir', 'Clasificar', 'Comparar', 'Ejemplificar'],
-                aplicacion: ['Aplicar', 'Usar', 'Implementar', 'Ejecutar', 'Resolver', 'Demostrar'],
-                analisis: ['Analizar', 'Diferenciar', 'Organizar', 'Relacionar', 'Examinar', 'Contrastar'],
-                evaluacion: ['Evaluar', 'Criticar', 'Justificar', 'Argumentar', 'Validar', 'Decidir'],
-                creacion: ['Crear', 'Diseñar', 'Construir', 'Planear', 'Producir', 'Desarrollar']
-            },
-            psicomotriz: { 
-                imitacion: ['Imitar', 'Copiar', 'Repetir', 'Reproducir', 'Seguir'],
-                manipulacion: ['Manipular', 'Operar', 'Practicar', 'Ejecutar', 'Manejar'],
-                precision: ['Demostrar', 'Completar', 'Mostrar', 'Calibrar', 'Controlar'],
-                articulacion: ['Coordinar', 'Integrar', 'Adaptar', 'Modificar', 'Masterizar'],
-                naturalizacion: ['Diseñar', 'Especificar', 'Gestionar', 'Inventar', 'Proyectar']
-            },
-            afectivo: {
-                recepcion: ['Escuchar', 'Atender', 'Percibir', 'Recibir', 'Aceptar'],
-                respuesta: ['Participar', 'Responder', 'Asistir', 'Practicar', 'Informar'],
-                valoracion: ['Valorar', 'Apreciar', 'Justificar', 'Proponer', 'Compartir'],
-                organizacion: ['Organizar', 'Integrar', 'Sintetizar', 'Priorizar', 'Combinar'],
-                caracterizacion: ['Actuar', 'Discriminar', 'Influir', 'Modificar', 'Revisar']
-            },
-            relacional: { 
-                interaccion: ['Interactuar', 'Comunicar', 'Relacionar', 'Contactar', 'Dialogar'],
-                colaboracion: ['Colaborar', 'Cooperar', 'Contribuir', 'Ayudar', 'Apoyar'],
-                liderazgo: ['Liderar', 'Dirigir', 'Guiar', 'Motivar', 'Inspirar'],
-                negociacion: ['Negociar', 'Mediar', 'Conciliar', 'Acordar', 'Resolver'],
-                facilitacion: ['Facilitar', 'Moderar', 'Coordinar', 'Dinamizar', 'Gestionar']
-            }
-        };
-
-        // Variables globales
-        const $ = id => document.getElementById(id);
-        let objetivosCount = 1;
-        let temasCount = 0;
-
-        // ========== PROTECCIÓN DE PÁGINA ==========
-        
-        // ===== CORRECCIÓN: Lógica de protección movida a DOMContentLoaded =====
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🔍 Verificando sistema...');
-            
-            // Verificar módulos
-            if (typeof auth === 'undefined' || typeof EC0301Manager === 'undefined') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error Crítico del Sistema',
-                    html: '<p>No se pudieron cargar los módulos del sistema.</p><p>Verifica que existan:</p><ul style="text-align:left"><li>sistema_central/auth.js</li><li>sistema_central/ec0301-data-manager.js</li></ul>',
-                    confirmButtonColor: '#ef4444',
-                    allowOutsideClick: false
-                }).then(() => window.location.href = 'index.html');
-                return; // Detiene la ejecución
-            }
-
-            // Verificar autenticación
-            if (!auth.isLoggedIn()) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Acceso Denegado',
-                    text: 'Debes iniciar sesión para acceder a este módulo.',
-                    confirmButtonColor: '#6366f1',
-                    allowOutsideClick: false
-                }).then(() => window.location.href = 'index.html');
-                return; // Detiene la ejecución
-            }
-
-            console.log('✅ Sistema verificado correctamente');
-            initializeApp();
-        });
-
-        // ========== INICIALIZACIÓN ==========
-
-        function initializeApp() {
-            renderVerbos(1, 'cognitivo');
-            loadDraft();
-            // Si no hay temas cargados, añade uno por defecto
-            if (temasCount === 0) {
-                addTema();
-            }
-            recalcTimes();
-            recalcEval();
-            updateProgress();
-            
-            // Auto-guardar cada 30 segundos
-            setInterval(() => {
-                if (updateProgress() > 10) { // Solo si hay algo que guardar
-                    saveDraft(true); // true = silencioso
-                }
-            }, 30000);
-        }
-
-        // ========== FUNCIONES DE VERBOS ==========
-
-        function renderVerbos(n, dominio = 'cognitivo') {
-            const container = $(`verbs${n}`);
-            if (!container) return;
-
-            let html = '<small>💡 Verbos sugeridos (clic para usar):</small>';
-            const categorias = VERBOS[dominio] || VERBOS.cognitivo;
-
-            for (const [categoria, verbos] of Object.entries(categorias)) {
-                html += `<div class="verbo-category">
-                    <strong>${categoria.charAt(0).toUpperCase() + categoria.slice(1)}:</strong><br>
-                    ${verbos.map(v => `<span class="verbo" onclick="insertVerbo(${n}, '${v}')">${v}</span>`).join('')}
-                </div>`;
-            }
-            container.innerHTML = html;
-        }
-
-        function insertVerbo(n, verbo) {
-            const input = $(`op${n}_accion`);
-            if (!input) return;
-
-            const textoActual = input.value.trim();
-            if (!textoActual) {
-                input.value = verbo + ' ';
-            } else if (!textoActual.startsWith(verbo)) {
-                input.value = verbo + ' ' + textoActual.replace(/^[A-ZÁÉÍÓÚÑa-záéíóúñ]+\s*/, '');
-            }
-            input.focus();
-            updateProgress();
-        }
-
-        function selDom(n, dominio) {
-            document.querySelectorAll(`[data-op="${n}"] .dom`).forEach(d => d.classList.remove('active'));
-            document.querySelector(`[data-op="${n}"] .dom[data-d="${dominio}"]`)?.classList.add('active');
-            renderVerbos(n, dominio);
-            updateProgress();
-        }
-
-        // ========== OBJETIVOS ==========
-
-        function updateOG() {
-            const sujeto = 'Al finalizar el curso, el participante';
-            const accion = $('og_accion').value.trim();
-            const condicion = $('og_cond').value.trim();
-            const criterio = $('og_criterio').value.trim();
-
-            let preview = sujeto;
-            if (accion) preview += ' ' + accion;
-            if (condicion) preview += ', ' + condicion;
-            if (criterio) preview += ', ' + criterio;
-
-            $('og_preview').innerHTML = preview + '.';
-            updateProgress();
-        }
-
-        function addObjetivoParticular() {
-            objetivosCount++;
-            const container = $('objetivosParticulares');
-            const newObj = document.createElement('div');
-            newObj.className = 'box';
-            newObj.setAttribute('data-op', objetivosCount);
-            newObj.innerHTML = `
-                <h3>
-                    <span><i class="fas fa-tasks"></i> Objetivo Particular ${objetivosCount}</span>
-                    <button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="removeObjetivo(this)">
-                        <i class="fas fa-trash"></i> Eliminar
-                    </button>
-                </h3>
-                <div class="doms">
-                    <div class="dom active" data-op="${objetivosCount}" data-d="cognitivo" onclick="selDom(${objetivosCount}, 'cognitivo')">Cognitivo</div>
-                    <div class="dom" data-op="${objetivosCount}" data-d="psicomotriz" onclick="selDom(${objetivosCount}, 'psicomotriz')">Psicomotriz</div>
-                    <div class="dom" data-op="${objetivosCount}" data-d="afectivo" onclick="selDom(${objetivosCount}, 'afectivo')">Afectivo</div>
-                    <div class="dom" data-op="${objetivosCount}" data-d="relacional" onclick="selDom(${objetivosCount}, 'relacional')">Relacional</div>
-                </div>
-                <div class="verbos-container" id="verbs${objetivosCount}"></div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Verbo + Acción <span class="required">*</span></label>
-                        <input id="op${objetivosCount}_accion" placeholder="Ej: Aplicará las técnicas..." required>
-                    </div>
-                    <div class="form-group">
-                        <label>Condición/Contexto <span class="required">*</span></label>
-                        <textarea id="op${objetivosCount}_cond" placeholder="¿En qué condiciones?" required></textarea>
-                    </div>
-                </div>
-                <div class="form-group mt-1">
-                    <label>Temas relacionados</label>
-                    <textarea id="op${objetivosCount}_temas" placeholder="Liste los temas (uno por línea)"></textarea>
-                </div>
-                <div class="form-group mt-1">
-                    <label>Tiempo estimado (minutos)</label>
-                    <input type="number" id="op${objetivosCount}_tiempo" placeholder="120" min="15" onchange="recalcTimes()">
-                </div>
-            `;
-            container.appendChild(newObj);
-            renderVerbos(objetivosCount, 'cognitivo');
-            newObj.style.animation = 'slideUp 0.5s ease';
-            updateProgress();
-        }
-
-        function removeObjetivo(button) {
-            const totalObjetivos = document.querySelectorAll('#objetivosParticulares .box').length;
-            if (totalObjetivos <= 1) {
-                Swal.fire('Error', 'Debe mantener al menos un objetivo particular', 'warning');
-                return;
-            }
-            
-            Swal.fire({
-                title: '¿Eliminar objetivo?', text: 'Esta acción no se puede deshacer',
-                icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b', confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    button.closest('.box').remove(); // Busca el 'box' padre y lo elimina
-                    Swal.fire('Eliminado', 'Objetivo eliminado correctamente', 'success');
-                    updateProgress();
-                }
-            });
-        }
-
-        // ========== TEMAS ==========
-
-        function addTema() {
-            temasCount++;
-            const container = $('temasContainer');
-            const tema = document.createElement('div');
-            tema.className = 'box';
-            tema.setAttribute('data-tema', temasCount);
-            tema.innerHTML = `
-                <h3>
-                    <span>Tema/Módulo ${temasCount}</span>
-                    <button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="removeTema(this)">
-                        <i class="fas fa-trash"></i> Eliminar
-                    </button>
-                </h3>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Nombre del Tema/Módulo <span class="required">*</span></label>
-                        <input id="tema${temasCount}_nombre" placeholder="Título del tema" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Duración (minutos) <span class="required">*</span></label>
-                        <input type="number" id="tema${temasCount}_duracion" placeholder="60" min="15" onchange="recalcTimes()" required>
-                    </div>
-                </div>
-                <div class="form-group mt-1">
-                    <label>Actividades de aprendizaje (en plataforma)</label>
-                    <textarea id="tema${temasCount}_actividades" placeholder="Leer PDF, ver video, participar en foro, completar tarea..."></textarea>
-                </div>
-                <div class="grid-3 mt-1">
-                    <div class="form-group">
-                        <label>Recursos Didácticos Digitales</label>
-                        <input id="tema${temasCount}_recursos" placeholder="Video 'Intro', PDF 'Cap 1'...">
-                    </div>
-                    <div class="form-group">
-                        <label>Interacción (Tutor-Participante)</label>
-                        <select id="tema${temasCount}_interaccion">
-                            <option value="asincrona">Asíncrona (Foro, Email)</option>
-                            <option value="sincrona">Síncrona (Videoconferencia)</option>
-                            <option value="ninguna">Ninguna (Autogestivo)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Instrumento de Evaluación</label>
-                        <input id="tema${temasCount}_evaluacion" placeholder="Cuestionario, Rúbrica...">
-                    </div>
-                </div>
-            `;
-            container.appendChild(tema);
-            tema.style.animation = 'slideUp 0.5s ease';
-            recalcTimes();
-        }
-
-        function removeTema(button) {
-            Swal.fire({
-                title: '¿Eliminar tema?', text: 'Esta acción no se puede deshacer',
-                icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b', confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    button.closest('.box').remove(); // Busca el 'box' padre y lo elimina
-                    recalcTimes();
-                    Swal.fire('Eliminado', 'Tema eliminado correctamente', 'success');
-                }
-            });
-        }
-
-        // ========== CÁLCULOS ==========
-
-        function recalcTimes() {
-            const encuadre = parseInt($('dc_encuadre_t').value) || 0;
-            $('sum_encuadre').value = `${encuadre} minutos`;
-            $('encuadreTime').textContent = `${encuadre} min`;
-
-            const cierre = parseInt($('dc_cierre_t').value) || 0;
-            $('sum_cierre').value = `${cierre} minutos`;
-            $('cierreTime').textContent = `${cierre} min`;
-
-            let desarrollo = 0;
-            document.querySelectorAll('[data-op] input[type="number"]').forEach(input => {
-                if (input.id.includes('_tiempo')) desarrollo += parseInt(input.value) || 0;
-            });
-            document.querySelectorAll('[data-tema] input[type="number"]').forEach(input => {
-                if (input.id.includes('_duracion')) desarrollo += parseInt(input.value) || 0;
-            });
-
-            $('sum_desarrollo').value = `${desarrollo} minutos`;
-            $('desarrolloTime').textContent = `${desarrollo} min`;
-
-            const total = encuadre + desarrollo + cierre;
-            const horas = Math.floor(total / 60);
-            const minutos = total % 60;
-            $('sum_total').value = `${horas} horas ${minutos} minutos`;
-
-            updateProgress();
-        }
-
-        function recalcEval() {
-            const formPct = parseInt($('ev_form_pct').value) || 40;
-            $('ev_sum_pct').value = (100 - formPct) + '%';
-            updateProgress();
-        }
-
-        // ========== PROGRESO Y VALIDACIÓN ==========
-
-        function updateProgress() {
-            const campos = [
-                'cd_nombre', 'cd_duracion', 'cd_diseñador', 'cd_facilitador',
-                'cd_modalidad', 'cd_proposito', 'cd_psico', 'cd_conoc', 
-                'cd_hab', 'cd_num', 'cd_tipo',
-                'og_dom', 'og_accion', 'og_cond', 'og_criterio',
-                'op1_accion', 'op1_cond',
-                'rq_plataforma', 'rq_recursos', 'rq_evaluacion',
-                'ev_min'
-            ];
-            
-            let completados = 0;
-            campos.forEach(id => {
-                if ($(id) && $(id).value.trim()) completados++;
-            });
-            
-            if ($('tema1_nombre') && $('tema1_nombre').value.trim()) completados++;
-            
-            const totalCampos = campos.length + 1;
-            const porcentaje = Math.round((completados / totalCampos) * 100);
-            
-            if ($('progressBar')) $('progressBar').style.width = porcentaje + '%';
-            
-            const indicator = $('validationIndicator');
-            if (indicator) {
-                if (porcentaje >= 80) {
-                    indicator.className = 'validation-indicator valid';
-                    indicator.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i><span>Documento válido (' + porcentaje + '%)</span>';
-                } else {
-                    indicator.className = 'validation-indicator invalid';
-                    indicator.innerHTML = `<i class="fas fa-exclamation-circle" style="color: var(--danger);"></i><span>${porcentaje}% completado</span>`;
-                }
-                indicator.style.display = 'flex';
-            }
-            return porcentaje;
-        }
-
-        function validateForm() {
-            const porcentaje = updateProgress();
-            if (porcentaje < 80) {
-                Swal.fire({
-                    title: 'Validación',
-                    html: `<p>El documento está <strong>${porcentaje}% completo</strong>.</p><p>Se requiere al menos 80% para considerarlo válido según EC0301.</p>`,
-                    icon: 'warning',
-                    confirmButtonText: 'Entendido'
-                });
-            } else {
-                Swal.fire({
-                    title: '¡Documento válido!',
-                    text: 'La carta descriptiva cumple con los requisitos del EC0301',
-                    icon: 'success',
-                    confirmButtonText: 'Excelente'
-                });
-            }
-        }
-
-        // ========== GUARDAR Y CARGAR ==========
-
-        function collectData() {
-            const data = {
-                // Información General
-                nombre: $('cd_nombre').value,
-                duracion: $('cd_duracion').value,
-                diseñador: $('cd_diseñador').value,
-                facilitador: $('cd_facilitador').value,
-                modalidad: $('cd_modalidad').value,
-                proposito: $('cd_proposito').value,
-                // Perfil
-                psico: $('cd_psico').value,
-                conoc: $('cd_conoc').value,
-                hab: $('cd_hab').value,
-                actitudes: $('cd_actitudes').value,
-                num: $('cd_num').value,
-                tipo: $('cd_tipo').value,
-                // Obj General
-                og: {
-                    dom: $('og_dom').value,
-                    accion: $('og_accion').value,
-                    cond: $('og_cond').value,
-                    criterio: $('og_criterio').value
-                },
-                objetivos: [],
-                // Requerimientos
-                rq: {
-                    plataforma: $('rq_plataforma').value,
-                    recursos: $('rq_recursos').value,
-                    evaluacion: $('rq_evaluacion').value,
-                    hardware: $('rq_hardware').value,
-                    admin: $('rq_admin').value,
-                    rh: $('rq_rh').value
-                },
-                // Evaluación
-                ev: {
-                    min: $('ev_min').value,
-                    escala: $('ev_escala').value,
-                    cert: $('ev_cert').value,
-                    diag: { mom: $('ev_diag_mom').value, ins: $('ev_diag_ins').value, prop: $('ev_diag_prop').value },
-                    form: { pct: $('ev_form_pct').value, mom: $('ev_form_mom').value, ins: $('ev_form_ins').value },
-                    sum: { pct: $('ev_sum_pct').value, mom: $('ev_sum_mom').value, ins: $('ev_sum_ins').value }
-                },
-                // Desarrollo
-                dc: {
-                    integracion: $('dc_integracion').value,
-                    encuadre_t: $('dc_encuadre_t').value,
-                    cierre: $('dc_cierre').value,
-                    cierre_t: $('dc_cierre_t').value
-                },
-                temas: [],
-                fechaActualizacion: new Date().toISOString()
-            };
-
-            // Recopilar los objetivos particulares
-            document.querySelectorAll('#objetivosParticulares .box').forEach(box => {
-                const n = box.dataset.op;
-                if ($(`op${n}_accion`)) {
-                    data.objetivos.push({
-                        num: n,
-                        dom: document.querySelector(`[data-op="${n}"] .dom.active`)?.dataset.d || 'cognitivo',
-                        accion: $(`op${n}_accion`).value,
-                        cond: $(`op${n}_cond`).value,
-                        temas: $(`op${n}_temas`).value,
-                        tiempo: $(`op${n}_tiempo`)?.value || ''
-                    });
-                }
-            });
-            
-            // Recopilar los temas
-            document.querySelectorAll('#temasContainer .box').forEach(box => {
-                const n = box.dataset.tema;
-                if ($(`tema${n}_nombre`)) {
-                    data.temas.push({
-                        num: n,
-                        nombre: $(`tema${n}_nombre`).value,
-                        duracion: $(`tema${n}_duracion`).value,
-                        actividades: $(`tema${n}_actividades`).value,
-                        recursos: $(`tema${n}_recursos`).value,
-                        interaccion: $(`tema${n}_interaccion`).value,
-                        evaluacion: $(`tema${n}_evaluacion`).value
-                    });
-                }
-            });
-            return data;
-        }
-
-        function saveDraft(silent = false) {
-            if (!EC0301Manager) {
-                if (!silent) toast('Error: Módulo de datos no cargado', 'error');
-                return;
-            }
-            try {
-                const data = collectData();
-                EC0301Manager.saveData(data); // Guarda todo el objeto de la carta
-                if (!silent) toast('Borrador guardado', 'success');
-                updateProgress();
-            } catch (e) {
-                if (!silent) toast(`Error al guardar: ${e.message}`, 'error');
-            }
-        }
-
-        function loadDraft() {
-            if (!EC0301Manager) {
-                toast('Error: Módulo de datos no cargado', 'error');
-                return;
-            }
-            try {
-                const data = EC0301Manager.getData();
-                if (!data || !data.nombre) { 
-                    toast('No hay datos guardados. Empezando un nuevo documento.', 'info');
-                    addTema(); // Añade el primer tema si el documento está vacío
-                    return;
-                }
-                
-                // Cargar información general
-                $('cd_nombre').value = data.nombre || '';
-                $('cd_duracion').value = data.duracion || '';
-                $('cd_diseñador').value = data.diseñador || '';
-                $('cd_facilitador').value = data.facilitador || '';
-                $('cd_modalidad').value = data.modalidad || '';
-                $('cd_proposito').value = data.proposito || '';
-                // ... (Cargar el resto de los campos: psico, conoc, hab, etc.) ...
-                $('cd_psico').value = data.psico || '';
-                $('cd_conoc').value = data.conoc || '';
-                $('cd_hab').value = data.hab || '';
-                $('cd_actitudes').value = data.actitudes || '';
-                $('cd_num').value = data.num || '';
-                $('cd_tipo').value = data.tipo || '';
-                
-                if (data.og) {
-                    $('og_dom').value = data.og.dom || '';
-                    $('og_accion').value = data.og.accion || '';
-                    $('og_cond').value = data.og.cond || '';
-                    $('og_criterio').value = data.og.criterio || '';
-                    updateOG();
-                }
-                
-                if (data.rq) {
-                    $('rq_plataforma').value = data.rq.plataforma || '';
-                    $('rq_recursos').value = data.rq.recursos || '';
-                    $('rq_evaluacion').value = data.rq.evaluacion || '';
-                    $('rq_hardware').value = data.rq.hardware || '';
-                    $('rq_admin').value = data.rq.admin || '';
-                    $('rq_rh').value = data.rq.rh || '';
-                }
-                
-                if (data.ev) {
-                    $('ev_min').value = data.ev.min || '80';
-                    $('ev_escala').value = data.ev.escala || '0-100';
-                    $('ev_cert').value = data.ev.cert || 'constancia';
-                    if (data.ev.diag) {
-                        $('ev_diag_mom').value = data.ev.diag.mom || '';
-                        $('ev_diag_ins').value = data.ev.diag.ins || '';
-                        $('ev_diag_prop').value = data.ev.diag.prop || '';
-                    }
-                    if (data.ev.form) {
-                        $('ev_form_pct').value = data.ev.form.pct || '40';
-                        $('ev_form_mom').value = data.ev.form.mom || '';
-                        $('ev_form_ins').value = data.ev.form.ins || '';
-                    }
-                    if (data.ev.sum) {
-                        $('ev_sum_pct').value = data.ev.sum.pct || '60%';
-                        $('ev_sum_mom').value = data.ev.sum.mom || '';
-                        $('ev_sum_ins').value = data.ev.sum.ins || '';
-                    }
-                }
-                
-                if (data.dc) {
-                    $('dc_integracion').value = data.dc.integracion || '';
-                    $('dc_encuadre_t').value = data.dc.encuadre_t || '30';
-                    $('dc_cierre').value = data.dc.cierre || '';
-                    $('dc_cierre_t').value = data.dc.cierre_t || '60';
-                }
-                
-                // Cargar Objetivos Particulares
-                if (data.objetivos && data.objetivos.length > 0) {
-                    $('objetivosParticulares').innerHTML = '';
-                    objetivosCount = 0; 
-                    data.objetivos.forEach(obj => {
-                        objetivosCount++; // Asegura que el conteo sea 1, 2, 3...
-                        const container = $('objetivosParticulares');
-                        const newObj = document.createElement('div');
-                        newObj.className = 'box';
-                        newObj.setAttribute('data-op', objetivosCount);
-                        newObj.innerHTML = `
-                            <h3>
-                                <span><i class="fas fa-tasks"></i> Objetivo Particular ${objetivosCount}</span>
-                                <button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="removeObjetivo(this, ${objetivosCount})">
-                                    <i class="fas fa-trash"></i> Eliminar
-                                </button>
-                            </h3>
-                            <div class="doms">
-                                <div class="dom ${obj.dom === 'cognitivo' ? 'active' : ''}" data-op="${objetivosCount}" data-d="cognitivo" onclick="selDom(${objetivosCount}, 'cognitivo')">Cognitivo</div>
-                                <div class="dom ${obj.dom === 'psicomotriz' ? 'active' : ''}" data-op="${objetivosCount}" data-d="psicomotriz" onclick="selDom(${objetivosCount}, 'psicomotriz')">Psicomotriz</div>
-                                <div class="dom ${obj.dom === 'afectivo' ? 'active' : ''}" data-op="${objetivosCount}" data-d="afectivo" onclick="selDom(${objetivosCount}, 'afectivo')">Afectivo</div>
-                                <div class="dom ${obj.dom === 'relacional' ? 'active' : ''}" data-op="${objetivosCount}" data-d="relacional" onclick="selDom(${objetivosCount}, 'relacional')">Relacional</div>
-                            </div>
-                            <div class="verbos-container" id="verbs${objetivosCount}"></div>
-                            <div class="grid-2">
-                                <div class="form-group"><label>Verbo + Acción <span class="required">*</span></label><input id="op${objetivosCount}_accion" value="${obj.accion || ''}" required></div>
-                                <div class="form-group"><label>Condición/Contexto <span class="required">*</span></label><textarea id="op${objetivosCount}_cond" required>${obj.cond || ''}</textarea></div>
-                            </div>
-                            <div class="form-group mt-1"><label>Temas relacionados</label><textarea id="op${objetivosCount}_temas">${obj.temas || ''}</textarea></div>
-                            <div class="form-group mt-1"><label>Tiempo estimado (minutos)</label><input type="number" id="op${objetivosCount}_tiempo" value="${obj.tiempo || ''}" min="15" onchange="recalcTimes()"></div>
-                        `;
-                        container.appendChild(newObj);
-                        renderVerbos(objetivosCount, obj.dom || 'cognitivo');
-                    });
-                }
-
-                // Cargar Temas
-                if (data.temas && data.temas.length > 0) {
-                    $('temasContainer').innerHTML = '';
-                    temasCount = 0; 
-                    data.temas.forEach(tema => {
-                        temasCount++; // Asegura que el conteo sea 1, 2, 3...
-                        const container = $('temasContainer');
-                        const temaEl = document.createElement('div');
-                        temaEl.className = 'box';
-                        temaEl.setAttribute('data-tema', temasCount);
-                        temaEl.innerHTML = `
-                            <h3>
-                                <span>Tema/Módulo ${temasCount}</span>
-                                <button class="btn btn-danger" style="padding: 0.5rem 1rem;" onclick="removeTema(this, ${temasCount})">
-                                    <i class="fas fa-trash"></i> Eliminar
-                                </button>
-                            </h3>
-                            <div class="grid-2">
-                                <div class="form-group"><label>Nombre del Tema/Módulo <span class="required">*</span></label><input id="tema${temasCount}_nombre" value="${tema.nombre || ''}" required></div>
-                                <div class="form-group"><label>Duración (minutos) <span class="required">*</span></label><input type="number" id="tema${temasCount}_duracion" value="${tema.duracion || ''}" min="15" onchange="recalcTimes()" required></div>
-                            </div>
-                            <div class="form-group mt-1"><label>Actividades de aprendizaje (en plataforma)</label><textarea id="tema${temasCount}_actividades">${tema.actividades || ''}</textarea></div>
-                            <div class="grid-3 mt-1">
-                                <div class="form-group"><label>Recursos Didácticos Digitales</label><input id="tema${temasCount}_recursos" value="${tema.recursos || ''}"></div>
-                                <div class="form-group"><label>Interacción (Tutor-Participante)</label><select id="tema${temasCount}_interaccion"><option value="asincrona" ${tema.interaccion === 'asincrona' ? 'selected' : ''}>Asíncrona</option><option value="sincrona" ${tema.interaccion === 'sincrona' ? 'selected' : ''}>Síncrona</option><option value="ninguna" ${tema.interaccion === 'ninguna' ? 'selected' : ''}>Ninguna</option></select></div>
-                                <div class="form-group"><label>Instrumento de Evaluación</label><input id="tema${temasCount}_evaluacion" value="${tema.evaluacion || ''}"></div>
-                            </div>
-                        `;
-                        container.appendChild(temaEl);
-                    });
-                }
-                
-                recalcTimes();
-                recalcEval();
-                updateProgress();
-                toast('Datos cargados correctamente', 'success');
-            } catch (error) {
-                console.error(error);
-                toast('Error al cargar los datos. Se iniciará un documento vacío.', 'error');
-                if (temasCount === 0) addTema(); // Añade el primer tema si todo falla
-            }
-        }
-
-        // ========== EXPORTACIÓN ==========
-        function exportCarta(formato) { 
-            Swal.fire('Función en desarrollo', 'La exportación a PDF se habilitará en futuras versiones.', 'info');
-        }
-
-        // ========== AYUDA ==========
-        function showHelp() { 
-            Swal.fire({
-                title: 'Guía Rápida EC0301',
-                html: `<div style="text-align: left;">
-                         <h4>📝 Guion Instruccional (EC0301)</h4>
-                         <p>Este formulario te ayuda a crear el guion instruccional (carta descriptiva) para un <strong>curso en línea</strong>, según el estándar EC0301.</p>
-                         <h5 style="margin-top: 1rem;">✅ Elementos clave:</h5>
-                         <ul>
-                             <li><strong>Perfil:</strong> Debe incluir habilidades tecnológicas.</li>
-                             <li><strong>Requerimientos:</strong> Enfocados en plataforma y recursos digitales.</li>
-                             <li><strong>Guion:</strong> Detalla actividades <strong>en plataforma</strong> y tipo de interacción (síncrona/asíncrona).</li>
-                         </ul>
-                        </div>`,
-                width: 600, confirmButtonText: 'Entendido', confirmButtonColor: '#1E3A8A'
-            });
-        }
-
-        // ========== COMPLETAR ==========
-        async function markComplete() {
-            if (updateProgress() < 80) {
-                await Swal.fire({
-                    title: 'Documento incompleto', text: 'Se requiere mínimo 80%.',
-                    icon: 'warning', confirmButtonText: 'Entendido'
-                });
-                return;
-            }
-            
-            const result = await Swal.fire({
-                title: '¿Marcar como completado?',
-                text: 'Esto guardará la carta y la marcará como completa en el dashboard.',
-                icon: 'question', showCancelButton: true, confirmButtonText: 'Sí, completar',
-                cancelButtonText: 'Cancelar', confirmButtonColor: '#22C55E'
-            });
-            
-            if (result.isConfirmed) {
-                saveDraft(true); // Guardado silencioso
-                Swal.fire({
-                    title: '¡Completado!',
-                    text: 'La carta descriptiva ha sido marcada como completa. Serás redirigido al dashboard.',
-                    icon: 'success', confirmButtonText: 'Excelente', timer: 2000, timerProgressBar: true
-                }).then(() => {
-                    window.location.href = 'acceso.html'; // Volver al dashboard
-                });
-            }
-        }
-    </script>
-</body>
-</html>
+export default CartaDescriptivaEC0301;
