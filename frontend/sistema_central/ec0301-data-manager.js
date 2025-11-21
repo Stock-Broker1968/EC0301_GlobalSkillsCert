@@ -1,49 +1,125 @@
 // sistema_central/ec0301-data-manager.js
+// Gestor de datos maestro del proyecto EC0301
 
-const EC0301Manager = {
-    // Claves de almacenamiento
-    KEYS: {
-        CARTA: 'ec0301_carta_data',
-        EVALUACIONES: 'ec0301_evaluaciones',
-        MANUALES: 'ec0301_manuales',
-        PROGRESS: 'ec0301_progress'
-    },
-
-    // Guardar datos generales (Carta Descriptiva)
-    saveData: (data) => {
-        localStorage.setItem('ec0301_carta_data', JSON.stringify(data));
-        console.log('Datos guardados localmente');
-    },
-
-    // Obtener datos generales
-    getData: () => {
-        const data = localStorage.getItem('ec0301_carta_data');
-        return data ? JSON.parse(data) : {};
-    },
-
-    // Guardar un producto específico (ej: evaluacion-sumativa)
-    saveProduct: (key, data) => {
-        localStorage.setItem(`ec0301_prod_${key}`, JSON.stringify(data));
-    },
-
-    // Cargar un producto específico
-    loadProduct: (key) => {
-        const data = localStorage.getItem(`ec0301_prod_${key}`);
-        return data ? JSON.parse(data) : null;
-    },
-
-    // Marcar progreso de un módulo (para los candados)
-    markModuleProgress: (moduleName, percentage) => {
-        let progress = JSON.parse(localStorage.getItem('ec0301_progress') || '{}');
-        progress[moduleName] = percentage;
-        localStorage.setItem('ec0301_progress', JSON.stringify(progress));
-    },
-
-    // Obtener progreso
-    getProgress: () => {
-        return JSON.parse(localStorage.getItem('ec0301_progress') || '{}');
+const EC0301Manager = (function () {
+    'use strict';
+  
+    const DATA_KEY = 'EC0301_ProyectoData';
+    let projectData = {};
+  
+    // --- Inicialización ---
+    function loadDataFromStorage() {
+      try {
+        const stored = localStorage.getItem(DATA_KEY);
+        projectData = stored ? JSON.parse(stored) : {};
+        if (typeof projectData !== 'object' || projectData === null) {
+          projectData = {};
+        }
+        // console.log('[DataManager] Datos cargados correctamente.');
+      } catch (e) {
+        console.error('[DataManager] Error al cargar datos:', e);
+        projectData = {};
+      }
     }
-};
-
-// Exponer globalmente
-window.EC0301Manager = EC0301Manager;
+  
+    function saveDataToStorage() {
+      try {
+        localStorage.setItem(DATA_KEY, JSON.stringify(projectData));
+      } catch (e) {
+        console.error('[DataManager] Error al guardar en LocalStorage:', e);
+      }
+    }
+  
+    // --- Métodos Públicos ---
+  
+    // 1. Obtener todos los datos de la Carta Descriptiva
+    function getData() {
+      return JSON.parse(JSON.stringify(projectData));
+    }
+  
+    // 2. Guardar datos de la Carta Descriptiva (Sobreescribe raíz)
+    function saveData(data) {
+      try {
+        projectData = { ...projectData, ...data }; // Mantiene propiedades previas si no se sobreescriben
+        saveDataToStorage();
+        return true;
+      } catch (e) {
+        console.error('[DataManager] Error en saveData:', e);
+        return false;
+      }
+    }
+  
+    // 3. Guardar Productos Específicos (Evaluaciones, Manuales, etc.)
+    function saveProduct(productName, data) {
+      try {
+        if (!projectData.productos) projectData.productos = {};
+        projectData.productos[productName] = data;
+        saveDataToStorage();
+        return true;
+      } catch (e) {
+        console.error('[DataManager] Error al guardar producto:', e);
+        return false;
+      }
+    }
+  
+    function loadProduct(productName) {
+      try {
+        if (!projectData.productos) return null;
+        const prod = projectData.productos[productName];
+        return prod ? JSON.parse(JSON.stringify(prod)) : null;
+      } catch (e) {
+        console.error('[DataManager] Error al cargar producto:', e);
+        return null;
+      }
+    }
+  
+    // 4. Control de Avance y Candados (Módulos)
+    function markModuleProgress(moduleKey, percentage) {
+      try {
+        if (!projectData.modulos) projectData.modulos = {};
+        
+        projectData.modulos[moduleKey] = {
+          progress: percentage,
+          completed: percentage >= 100, // O el umbral que definas (ej. 80)
+          lastUpdate: new Date().toISOString()
+        };
+        
+        saveDataToStorage();
+        return true;
+      } catch (e) {
+        console.error('[DataManager] Error al marcar progreso:', e);
+        return false;
+      }
+    }
+  
+    function getModuleProgress(moduleKey) {
+      try {
+        if (!projectData.modulos || !projectData.modulos[moduleKey]) return 0;
+        return projectData.modulos[moduleKey].progress || 0;
+      } catch (e) {
+        return 0;
+      }
+    }
+  
+    function clearData() {
+      projectData = {};
+      localStorage.removeItem(DATA_KEY);
+      console.log('[DataManager] Datos borrados.');
+    }
+  
+    // Cargar datos al iniciar
+    loadDataFromStorage();
+  
+    return {
+      getData,
+      saveData,
+      saveProduct,
+      loadProduct,
+      markModuleProgress, // Vital para el dashboard
+      getModuleProgress,
+      clearData
+    };
+  })();
+  
+  // Exponer globalmente
+  window.EC0301Manager = EC0301Manager;
