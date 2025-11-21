@@ -3,176 +3,485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma EC0301 - Dashboard</title>
-
+    <title>Plataforma EC0301 - Panel</title>
+  
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+  
+    <!-- Cargar scripts en el orden correcto -->
     <script src="sistema_central/auth.js" defer></script>
-    <script src="sistema_central/ec0301-data-manager.js" defer></script>
+    <script src="js/login.js" defer></script> <!-- Asegúrate de que login.js esté aquí -->
+  
+    <style>
+        /* Tu CSS sigue aquí */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Esperamos un poco para asegurar que auth.js se cargó
-            setTimeout(() => {
-                if (typeof auth === 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error de Carga',
-                        text: 'No se pudo cargar el módulo de autenticación. Revisa tu conexión o recarga la página.',
-                        confirmButtonColor: '#ef4444'
-                    });
-                    return;
-                }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
 
-                // Verificar sesión
-                if (!auth.isLoggedIn()) {
-                    window.location.href = 'index.html';
-                } else {
-                    // Inicializar Dashboard
-                    initDashboard();
-                }
-            }, 100);
-        });
+        .header {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #ff6b35;
+        }
 
-        function initDashboard() {
-            const user = localStorage.getItem('ec0301_token'); // O decodificar si usas JWT
-            // Aquí puedes agregar lógica para mostrar el nombre del usuario si lo tienes guardado
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #1e3a8a;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .logo-text h1 {
+            color: #1e3a8a;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .logo-text p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .btn-sesion {
+            background: #1e3a8a;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-sesion:hover {
+            background: #152a6b;
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 200px);
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .welcome-box {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 600px;
+        }
+
+        .welcome-box h2 {
+            color: #1e3a8a;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-box p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .info-box strong {
+            color: #1e3a8a;
+        }
+
+        .btn-pagar {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            margin-top: 20px;
+        }
+
+        .btn-pagar:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+        }
+
+        .footer {
+            background: rgba(0,0,0,0.2);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
             
-            // Desbloqueo de módulos (Lógica de candados)
-            const cartaData = EC0301Manager.getData();
-            const cartaCompleta = cartaData && cartaData.nombre; // Lógica simple: si tiene nombre, avanza
+            .welcome-box {
+                padding: 30px 20px;
+            }
 
-            if (cartaCompleta) {
-                document.querySelectorAll('.module-card').forEach(card => {
-                    card.classList.remove('locked');
-                    const btn = card.querySelector('.btn-action');
-                    if(btn) {
-                        btn.disabled = false;
-                        btn.classList.remove('btn-disabled');
-                        btn.classList.add('btn-primary');
-                        btn.innerHTML = 'Acceder <i class="fas fa-arrow-right"></i>';
-                    }
-                });
+            .logo-text h1 {
+                font-size: 22px;
             }
         }
-
-        function logout() {
-            auth.logout();
-        }
-    </script>
-
-    <style>
-        :root {
-            --primary: #6366f1;
-            --dark: #1e293b;
-            --light: #f8fafc;
-        }
-        body { font-family: sans-serif; background: var(--light); margin: 0; }
-        .navbar { background: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-        .welcome-banner { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem; }
-        
-        .grid-modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-        .module-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.3s; border: 1px solid #e2e8f0; position: relative; }
-        .module-card:hover { transform: translateY(-5px); }
-        
-        /* Estilo Bloqueado */
-        .module-card.locked { opacity: 0.7; background: #f1f5f9; }
-        .module-card.locked::after { content: "\f023"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; color: #94a3b8; }
-        
-        .icon-box { width: 50px; height: 50px; background: #e0e7ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.5rem; margin-bottom: 1rem; }
-        h3 { margin: 0 0 0.5rem 0; color: var(--dark); }
-        p { color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem; }
-        
-        .btn-action { width: 100%; padding: 0.8rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: #4f46e5; }
-        .btn-disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; }
     </style>
 </head>
 <body>
-
-    <nav class="navbar">
-        <div class="logo"><i class="fas fa-graduation-cap"></i> Plataforma EC0301</div>
-        <button onclick="logout()" style="background:none; border:1px solid #e2e8f0; padding:0.5rem 1rem; border-radius:6px; cursor:pointer;">
-            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-        </button>
-    </nav>
-
-    <div class="container">
-        <div class="welcome-banner">
-            <h1>Bienvenido a tu Plataforma</h1>
-            <p>Selecciona un módulo para comenzar a generar tus productos.</p>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-section">
+            <div class="logo">🎓</div>
+            <div class="logo-text">
+                <h1>SkillsCert EC0301</h1>
+                <p>Sistema Integral de Diseño de Cursos</p>
+            </div>
         </div>
+        <button class="btn-sesion" id="login-button">🔑 Iniciar Sesión</button>
+    </header>
 
-        <div class="grid-modules">
-            <div class="module-card">
-                <div class="icon-box"><i class="fas fa-file-contract"></i></div>
-                <h3>Carta Descriptiva</h3>
-                <p>Genera el guion instruccional completo para tu curso en línea.</p>
-                <button class="btn-action btn-primary" onclick="window.location.href='carta_descriptiva.html'">
-                    Acceder <i class="fas fa-arrow-right"></i>
-                </button>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="welcome-box">
+            <h2>Bienvenido a SkillsCert</h2>
+            <p>
+                Inicia sesión con el código que recibiste por <strong>Email y WhatsApp</strong> para acceder a tu panel.
+            </p>
+            
+            <div class="info-box">
+                <strong>📋 ¿Cómo funciona?</strong><br>
+                1. Realiza el pago de $2500 MXN<br>
+                2. Recibirás un código de 6 dígitos<br>
+                3. Usa ese código para iniciar sesión<br>
+                4. Accede por 90 días al sistema EC0301
             </div>
 
-            <div class="module-card locked">
-                <div class="icon-box"><i class="fas fa-tasks"></i></div>
-                <h3>Instrumentos de Evaluación</h3>
-                <p>Crea las rúbricas, listas de cotejo y guías de observación.</p>
-                <button class="btn-action btn-disabled" onclick="window.location.href='evaluaciones.html'" disabled>
-                    Bloqueado <i class="fas fa-lock"></i>
-                </button>
-            </div>
-
-            <div class="module-card locked">
-                <div class="icon-box"><i class="fas fa-book-open"></i></div>
-                <h3>Manuales del Curso</h3>
-                <p>Desarrolla los manuales del participante y del facilitador.</p>
-                <button class="btn-action btn-disabled" onclick="window.location.href='manuales.html'" disabled>
-                    Bloqueado <i class="fas fa-lock"></i>
-                </button>
-            </div>
-
-            <div class="module-card locked">
-                <div class="icon-box"><i class="fas fa-truck"></i></div>
-                <h3>Logística y Formatos</h3>
-                <p>Genera la lista de asistencia, contrato y lista de requerimientos.</p>
-                <button class="btn-action btn-disabled" onclick="window.location.href='logistica.html'" disabled>
-                    Bloqueado <i class="fas fa-lock"></i>
-                </button>
-            </div>
-
-            <div class="module-card locked">
-                <div class="icon-box"><i class="fas fa-key"></i></div>
-                <h3>Hoja de Respuestas</h3>
-                <p>Genera la clave de respuestas de la evaluación sumativa.</p>
-                <button class="btn-action btn-disabled" onclick="window.location.href='respuestas.html'" disabled>
-                    Bloqueado <i class="fas fa-lock"></i>
-                </button>
-            </div>
-
-            <div class="module-card locked">
-                <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
-                <h3>Auditoría EC0301</h3>
-                <p>Valida tu portafolio de productos contra el estándar.</p>
-                <button class="btn-action btn-disabled" onclick="window.location.href='auditoria.html'" disabled>
-                    Bloqueado <i class="fas fa-lock"></i>
-                </button>
-            </div>
-
-             <div class="module-card locked" style="background-color: #475569; color: white; border: none;">
-                <div class="icon-box" style="background: rgba(255,255,255,0.2); color: white;"><i class="fas fa-file-archive"></i></div>
-                <h3 style="color: white;">Exportar Portafolio</h3>
-                <p style="color: #cbd5e1;">Genera tu portafolio final en PDF o .ZIP para la auditoría.</p>
-                <button class="btn-action btn-disabled" onclick="window.location.href='exportar.html'" disabled style="background: rgba(255,255,255,0.1); color: white;">
-                    Bloqueado <i class="fas fa-lock"></i>
-                </button>
-            </div>
-
+            <p>
+                <strong>Si no tienes un código, realiza el pago primero:</strong>
+            </p>
+            <button class="btn-pagar" id="payment-button">
+                💳 Pagar Acceso (2500 MXN)
+            </button>
         </div>
-    </div>
+    </main>
 
+    <!-- Footer -->
+    <footer class="footer">
+        © 2024 SkillsCert EC0301. Sistema profesional de diseño de cursos de capacitación.
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN
+        // ============================================================
+        const STRIPE_PUBLIC_KEY = 'pk_test_51SJ0gXFupe2fTa5zhuHZ6afa30Ddx6xSLXeFhERNMTgojjz03zsg3SlKptM38Bm6nBMxoDXhT3qH4vtIEyPIHF1m00ERGNCIpx'; // ⚠️ REEMPLAZA CON TU CLAVE PÚBLICA
+        const BACKEND_URL = 'https://ec0301-globalskillscert-backend.onrender.com';
+
+        console.log('✅ Sistema iniciado');
+        console.log('🌐 Backend:', BACKEND_URL);
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentButton = document.getElementById('payment-button');
+            const loginButton = document.getElementById('login-button');
+
+            // Verificar si ya hay sesión activa
+            const existingToken = localStorage.getItem('authToken');
+            if (existingToken) {
+                console.log('🔑 Token existente encontrado, verificando...');
+                verifyExistingSession(existingToken);
+            }
+
+            // ============================================================
+            // BOTÓN DE PAGO
+            // ============================================================
+            if (paymentButton) {
+                paymentButton.addEventListener('click', async function() {
+                    console.log('🎯 Iniciando proceso de pago');
+
+                    // Paso 1: Solicitar email
+                    const { value: email } = await Swal.fire({
+                        title: '📧 Ingresa tu correo electrónico',
+                        input: 'email',
+                        inputLabel: 'Recibirás tu código de acceso aquí',
+                        inputPlaceholder: 'correo@ejemplo.com',
+                        showCancelButton: true,
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonText: 'Continuar',
+                        confirmButtonColor: '#667eea',
+                        inputValidator: (value) => {
+                            if (!value) {
+                                return 'Debes ingresar un correo electrónico';
+                            }
+                            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                                return 'Por favor ingresa un correo válido';
+                            }
+                        }
+                    });
+
+                    if (!email) {
+                        console.log('❌ Proceso cancelado por el usuario');
+                        return;
+                    }
+
+                    // Paso 2: Solicitar WhatsApp (opcional)
+                    const { value: phone } = await Swal.fire({
+                        title: '📱 Número de WhatsApp (opcional)',
+                        input: 'tel',
+                        inputLabel: 'Para recibir tu código también por WhatsApp',
+                        inputPlaceholder: '+52 55 1234 5678',
+                        showCancelButton: true,
+                        cancelButtonText: 'Omitir',
+                        confirmButtonText: 'Proceder al pago',
+                        confirmButtonColor: '#667eea',
+                        allowOutsideClick: false
+                    });
+
+                    // Paso 3: Crear sesión de pago
+                    Swal.fire({
+                        title: 'Procesando...',
+                        html: 'Preparando tu sesión de pago segura<br><small>Esto puede tomar unos segundos</small>',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    try {
+                        console.log('📡 Conectando con backend...');
+                        console.log('📧 Email:', email);
+                        console.log('📱 Phone:', phone || 'No proporcionado');
+
+                        const response = await fetch(`${BACKEND_URL}/create-checkout-session`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: email,
+                                phone: phone || null
+                            })
+                        });
+
+                        console.log('📡 Respuesta recibida:', response.status);
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            console.error('❌ Error del servidor:', errorData);
+                            throw new Error(errorData.error || 'Error al crear sesión de pago');
+                        }
+
+                        const session = await response.json();
+                        console.log('✅ Sesión creada exitosamente:', session.id);
+
+                        // Paso 4: Redirigir a Stripe Checkout
+                        console.log('🔄 Redirigiendo a Stripe Checkout...');
+                        const stripe = Stripe(STRIPE_PUBLIC_KEY);
+                        const { error } = await stripe.redirectToCheckout({
+                            sessionId: session.id
+                        });
+
+                        if (error) {
+                            console.error('❌ Error de Stripe:', error);
+                            throw error;
+                        }
+
+                    } catch (error) {
+                        console.error('❌ Error completo:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al procesar el pago',
+                            html: `
+                                <p>${error.message || 'Error desconocido'}</p>
+                                <small>Por favor intenta nuevamente o contacta a soporte</small>
+                            `,
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                });
+            } else {
+                console.error('❌ No se encontró el botón de pago');
+            }
+
+            // ============================================================
+            // BOTÓN DE LOGIN
+            // ============================================================
+            if (loginButton) {
+                loginButton.addEventListener('click', async function() {
+                    console.log('🔑 Iniciando proceso de login');
+
+                    const { value: accessCode } = await Swal.fire({
+                        title: '🔐 Ingresa tu código de acceso',
+                        input: 'text',
+                        inputLabel: 'Código de 6 dígitos que recibiste por email/WhatsApp',
+                        inputPlaceholder: '123456',
+                        showCancelButton: true,
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonText: 'Iniciar Sesión',
+                        confirmButtonColor: '#667eea',
+                        inputAttributes: {
+                            maxlength: 6,
+                            autocomplete: 'off'
+                        },
+                        inputValidator: (value) => {
+                            if (!value) {
+                                return 'Debes ingresar el código';
+                            }
+                            if (!/^\d{6}$/.test(value)) {
+                                return 'El código debe tener exactamente 6 dígitos';
+                            }
+                        }
+                    });
+
+                    if (!accessCode) {
+                        console.log('❌ Login cancelado');
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Verificando...',
+                        html: 'Validando tu código de acceso<br><small>Por favor espera</small>',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    try {
+                        console.log('📡 Validando código:', accessCode);
+
+                        const response = await fetch(`${BACKEND_URL}/validate-access-code`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                accessCode: accessCode
+                            })
+                        });
+
+                        console.log('📡 Respuesta del servidor:', response.status);
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            console.error('❌ Error de validación:', data);
+                            throw new Error(data.message || 'Código inválido');
+                        }
+
+                        console.log('✅ Código validado correctamente');
+                        console.log('👤 Usuario:', data.email);
+
+                        // Guardar token en localStorage
+                        localStorage.setItem('authToken', data.token);
+                        localStorage.setItem('userEmail', data.email);
+                        localStorage.setItem('sessionExpiry', data.expiresAt);
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Bienvenido!',
+                            html: `
+                                <p>Acceso concedido exitosamente</p>
+                                <small>Redirigiendo a tu panel...</small>
+                            `,
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            console.log('🔄 Redirigiendo al dashboard');
+                            window.location.href = '/dashboard.html';
+                        });
+
+                    } catch (error) {
+                        console.error('❌ Error de autenticación:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error de autenticación',
+                            html: `
+                                <p>${error.message || 'Código inválido o expirado'}</p>
+                                <small>Verifica tu código e intenta nuevamente</small>
+                            `,
+                            confirmButtonText: 'Intentar nuevamente',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                });
+            }
+        });
+
+        // ============================================================
+        // VERIFICAR SESIÓN EXISTENTE
+        // ============================================================
+        async function verifyExistingSession(token) {
+            try {
+                const response = await fetch(`${BACKEND_URL}/validate-token`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.valid) {
+                    console.log('✅ Sesión válida detectada, redirigiendo...');
+                    window.location.href = '/dashboard.html';
+                } else {
+                    console.log('⚠️ Sesión inválida, limpiando localStorage');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('sessionExpiry');
+                }
+            } catch (error) {
+                console.error('❌ Error verificando sesión:', error);
+            }
+        }
+    </script>
 </body>
 </html>
