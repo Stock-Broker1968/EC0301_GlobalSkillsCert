@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carta Descriptiva - SkillsCert Professional</title>
+    <title>Carta Descriptiva EC0301 - SkillsCert Professional</title>
 
     <script src="sistema_central/auth.js" defer></script>
     <script src="sistema_central/ec0301-data-manager.js" defer></script>
@@ -13,56 +13,438 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/docx@7.8.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
         :root {
-            --primary: #6366f1; --primary-dark: #4f46e5; --accent: #FF6B35;
-            --success: #10b981; --warning: #F59E0B; --danger: #ef4444;
-            --dark: #1e293b; --light: #f1f5f9; --white: #ffffff; --border: #e2e8f0;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --accent: #FF6B35;
+            --success: #10b981;
+            --warning: #F59E0B;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 10px 30px rgba(99, 102, 241, 0.1);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #F1F5F9; color: var(--dark); line-height: 1.6; padding-bottom: 4rem; }
-        
-        .header { background: var(--white); position: sticky; top: 0; z-index: 1000; border-bottom: 3px solid var(--accent); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header-content { max-width: 1200px; margin: 0 auto; padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-        .header-title h1 { font-size: 1.5rem; margin: 0; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
-        
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-        
-        .section { background: var(--white); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .section-title { color: var(--primary); font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--light); display: flex; align-items: center; gap: 0.5rem; }
-        
-        .box { background: var(--light); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--border); }
-        .box h3 { margin-bottom: 1rem; font-size: 1.1rem; color: var(--dark); display: flex; justify-content: space-between; align-items: center; }
-        
-        .form-group { margin-bottom: 1.25rem; }
-        label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--dark); }
-        .required { color: var(--danger); }
-        input, select, textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; transition: border-color 0.3s; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
-        textarea { min-height: 100px; resize: vertical; }
-        
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
-        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-        
-        .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; transition: all 0.2s; }
-        .btn-primary { background: var(--primary); color: white; } .btn-primary:hover { background: var(--primary-dark); }
-        .btn-secondary { background: white; color: var(--dark); border: 1px solid var(--border); } .btn-secondary:hover { background: var(--light); }
-        .btn-success { background: var(--success); color: white; } .btn-success:hover { background: #059669; }
-        .btn-danger { background: var(--danger); color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; }
-        
-        .time-badge { background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; margin-left: 0.5rem; }
-        .progress-bar { height: 4px; background: var(--light); margin-top: 0; width: 100%; }
-        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.5s; }
-        
-        .doms { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
-        .dom { padding: 0.4rem 0.8rem; background: white; border: 1px solid var(--border); border-radius: 20px; font-size: 0.85rem; cursor: pointer; }
-        .dom.active { background: var(--primary); color: white; border-color: var(--primary); }
-        
-        .validation-indicator { position: fixed; bottom: 2rem; right: 2rem; background: white; padding: 1rem 1.5rem; border-radius: 50px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.8rem; font-weight: 600; z-index: 100; border: 2px solid var(--border); }
-        .validation-indicator.valid { border-color: var(--success); color: var(--success); }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--white);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .header-title .subtitle {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--white);
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .progress-container {
+            background: var(--light);
+            height: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            transition: width 0.5s ease;
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem 2rem;
+        }
+
+        .section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            font-size: 1.75rem;
+        }
+
+        .box {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .box h3 {
+            color: var(--dark);
+            margin-bottom: 1.25rem;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .box h3 i {
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        label .required {
+            color: var(--danger);
+            margin-left: 0.25rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.85rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s;
+            background: var(--white);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        input:disabled, select:disabled, textarea:disabled {
+            background: var(--light);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .doms {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dom {
+            padding: 0.75rem 1.25rem;
+            background: var(--white);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .dom:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .dom.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .validation-indicator {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--white);
+            padding: 1.25rem 1.75rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+            z-index: 999;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .validation-indicator.valid {
+            border-color: var(--success);
+            animation: pulse-success 2s infinite;
+        }
+
+        .validation-indicator.invalid {
+            border-color: var(--danger);
+        }
+
+        @keyframes pulse-success {
+            0%, 100% {
+                box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+            }
+            50% {
+                box-shadow: 0 10px 40px rgba(16, 185, 129, 0.6);
+            }
+        }
+
+        .validation-indicator i {
+            font-size: 1.5rem;
+        }
+
+        .help-tip {
+            display: inline-block;
+            background: var(--warning);
+            color: var(--white);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 0.85rem;
+            cursor: help;
+            margin-left: 0.5rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+
+            .doms {
+                flex-direction: column;
+            }
+
+            .dom {
+                text-align: center;
+            }
+
+            .validation-indicator {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                padding: 1rem;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mt-1 {
+            margin-top: 1rem;
+        }
+
+        .pulse {
+            animation: pulse-btn 2s infinite;
+        }
+
+        @keyframes pulse-btn {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
     </style>
 </head>
 <body>
@@ -71,548 +453,468 @@
         <div class="header-content">
             <div class="header-title">
                 <i class="fas fa-file-contract"></i>
-                <h1>Carta Descriptiva <span style="font-size: 0.9rem; font-weight: 400; color: #64748b; margin-left: 0.5rem;">(EC0217.01 / EC0301)</span></h1>
+                <div>
+                    <h1>Carta Descriptiva</h1>
+                    <span class="subtitle">Carta Descriptiva / Guion Instruccional (Presencial / Mixto)</span>
+                </div>
             </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <a href="acceso.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
-                <button class="btn btn-secondary" onclick="showHelp()"><i class="fas fa-question-circle"></i> Ayuda</button>
-                <button class="btn btn-primary" onclick="saveDraft()"><i class="fas fa-save"></i> Guardar</button>
-                <button class="btn btn-success" onclick="markComplete()"><i class="fas fa-check-circle"></i> Completar</button>
+            <div class="toolbar">
+                <a href="acceso.html" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Dashboard
+                </a>
+                <button class="btn btn-secondary" onclick="showHelp()">
+                    <i class="fas fa-question-circle"></i>
+                    Ayuda
+                </button>
+                <button class="btn btn-primary" onclick="saveDraft()">
+                    <i class="fas fa-save"></i>
+                    Guardar
+                </button>
+                <button class="btn btn-success" onclick="validateForm()">
+                    <i class="fas fa-check-circle"></i>
+                    Validar
+                </button>
+                <button class="btn btn-warning" onclick="exportCarta('pdf')">
+                    <i class="fas fa-file-pdf"></i>
+                    Exportar PDF
+                </button>
+                <button class="btn btn-success pulse" onclick="markComplete()">
+                    <i class="fas fa-trophy"></i>
+                    Completar
+                </button>
             </div>
         </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
     </header>
 
     <main class="container">
-
+        <!-- Información General -->
         <section class="section">
-            <h2 class="section-title"><i class="fas fa-info-circle"></i> 1. Información General</h2>
-            <div class="grid-3">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                1. Información General del Curso
+            </h2>
+            <div class="grid-2">
                 <div class="form-group">
-                    <label>Nombre del Curso <span class="required">*</span></label>
-                    <input id="cd_nombre" placeholder="Ej: Curso de Inducción en PLD/FT">
+                    <label for="cd_nombre">Nombre del Curso/Taller <span class="required">*</span></label>
+                    <input id="cd_nombre" placeholder="Ej: Diseño de cursos de capacitación presencial" required>
                 </div>
                 <div class="form-group">
-                    <label>Nombre del Facilitador <span class="required">*</span></label>
-                    <input id="cd_facilitador" placeholder="Nombre completo">
+                    <label for="cd_duracion">Duración total (horas) <span class="required">*</span></label>
+                    <input id="cd_duracion" type="number" placeholder="Ej: 8" min="1" max="500" required>
                 </div>
                 <div class="form-group">
-                    <label>Lugar de Instrucción</label>
-                    <input id="cd_lugar" placeholder="Ej: Sala de Capacitación A">
-                </div>
-            </div>
-            <div class="grid-3">
-                <div class="form-group">
-                    <label>Duración (horas) <span class="required">*</span></label>
-                    <input type="number" id="cd_duracion" placeholder="Ej: 5" min="1" onchange="recalcTimes()">
+                    <label for="cd_facilitador">Nombre del facilitador/instructor <span class="required">*</span></label>
+                    <input id="cd_facilitador" placeholder="Nombre completo del facilitador" required>
                 </div>
                 <div class="form-group">
-                    <label>Fecha(s)</label>
-                    <input id="cd_fecha" placeholder="Ej: 15 y 16 de Octubre">
+                    <label for="cd_lugar">Lugar de Instrucción</label>
+                    <input id="cd_lugar" placeholder="Ej: Insurgentes Sur No. 700, CDMX">
                 </div>
                 <div class="form-group">
-                    <label>Modalidad <span class="required">*</span></label>
-                    <select id="cd_modalidad">
-                        <option value="presencial">Presencial (EC0217.01)</option>
+                    <label for="cd_fecha">Fecha(s) de impartición</label>
+                    <input id="cd_fecha" type="text" placeholder="Ej: 14 agosto 2025">
+                </div>
+                <div class="form-group">
+                    <label for="cd_modalidad">Modalidad del curso <span class="required">*</span></label>
+                    <select id="cd_modalidad" required>
+                        <option value="">Seleccione una opción...</option>
+                        <option value="presencial">Presencial (EC0217)</option>
                         <option value="mixto">Mixto (Línea y Presencial)</option>
+                        <option value="linea_sincrono">En línea Síncrono (EC0301)</option>
+                        <option value="linea_asincrono">En línea Asíncrono (EC0301)</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="cd_diseñador">Nombre del diseñador <span class="required">*</span></label>
+                    <input id="cd_diseñador" placeholder="Nombre completo del diseñador" required>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Nombre del Diseñador <span class="required">*</span></label>
-                <input id="cd_diseñador">
-            </div>
-            <div class="form-group">
-                <label>Propósito/Beneficio del Curso <span class="required">*</span></label>
-                <textarea id="cd_proposito" placeholder="El participante obtendrá..."></textarea>
+            <div class="form-group mt-1">
+                <label for="cd_proposito">Propósito/Beneficio del curso <span class="required">*</span></label>
+                <textarea id="cd_proposito" placeholder="Describa el propósito del curso y los beneficios que obtendrá el participante y la organización..." required></textarea>
             </div>
         </section>
 
+        <!-- Perfil del Participante -->
         <section class="section">
-            <h2 class="section-title"><i class="fas fa-users"></i> 2. Perfil del Participante</h2>
+            <h2 class="section-title">
+                <i class="fas fa-users"></i>
+                2. Perfil del Participante
+            </h2>
             <div class="grid-2">
                 <div class="form-group">
-                    <label>Perfil de Ingreso (Conocimientos/Habilidades) <span class="required">*</span></label>
-                    <textarea id="cd_perfil" placeholder="Conocimientos previos, nivel académico..."></textarea>
+                    <label for="cd_psico">Perfil del participante <span class="required">*</span></label>
+                    <textarea id="cd_psico" placeholder="Edad, ocupación, nivel educativo, experiencia previa, motivaciones, estilo de aprendizaje..." required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Conocimientos Previos Requeridos</label>
-                    <textarea id="cd_conoc" placeholder="¿Qué debe saber antes?"></textarea>
+                    <label for="cd_conoc">Conocimientos previos requeridos <span class="required">*</span></label>
+                    <textarea id="cd_conoc" placeholder="¿Qué debe saber el participante antes de iniciar el curso?" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Habilidades Tecnológicas</label>
-                    <textarea id="cd_hab" placeholder="Uso de PC, Internet..."></textarea>
+                    <label for="cd_hab">Habilidades requeridas (técnicas/tecnológicas) <span class="required">*</span></label>
+                    <textarea id="cd_hab" placeholder="Uso de equipo de cómputo, software específico, o herramientas manuales (si aplica)..." required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Actitudes Deseables</label>
-                    <textarea id="cd_actitudes" placeholder="Participación, apertura..."></textarea>
-                </div>
-            </div>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Número de Participantes <span class="required">*</span></label>
-                    <input type="number" id="cd_num" placeholder="Ej: 15">
+                    <label for="cd_actitudes">Actitudes deseables</label>
+                    <textarea id="cd_actitudes" placeholder="Disposición al aprendizaje, trabajo colaborativo, autogestión del tiempo, proactividad..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Tipo de Grupo</label>
-                    <select id="cd_tipo">
-                        <option value="homogeneo">Homogéneo</option>
-                        <option value="heterogeneo">Heterogéneo</option>
+                    <label for="cd_num">Número de participantes <span class="required">*</span></label>
+                    <input id="cd_num" placeholder="Ej: 15-25 personas" required>
+                </div>
+                <div class="form-group">
+                    <label for="cd_tipo">Tipo de grupo <span class="required">*</span></label>
+                    <select id="cd_tipo" required>
+                        <option value="">Seleccione una opción...</option>
+                        <option value="homogeneo">Homogéneo (mismo perfil)</option>
+                        <option value="heterogeneo">Heterogéneo (perfiles diversos)</option>
+                        <option value="mixto">Mixto</option>
                     </select>
                 </div>
             </div>
         </section>
 
+        <!-- Objetivos de Aprendizaje -->
         <section class="section">
-            <h2 class="section-title"><i class="fas fa-bullseye"></i> 3. Objetivos de Aprendizaje</h2>
-            
+            <h2 class="section-title">
+                <i class="fas fa-bullseye"></i>
+                3. Objetivos de Aprendizaje
+            </h2>
+
             <div class="box">
-                <h3>Objetivo General</h3>
-                <div class="form-group">
-                    <label>Sujeto (El participante...)</label>
-                    <input value="Al finalizar el curso, el participante..." disabled style="background: #e2e8f0;">
+                <h3>
+                    <span><i class="fas fa-star"></i> Objetivo General</span>
+                    <span class="help-tip" title="Debe cumplir con criterios SMART: Específico, Medible, Alcanzable, Relevante, Temporal">?</span>
+                </h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Sujeto (predefinido)</label>
+                        <input value="Al finalizar el curso, el participante" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Dominio principal <span class="required">*</span></label>
+                        <select id="og_dom" required onchange="updateOG()">
+                            <option value="">Seleccione el dominio...</option>
+                            <option value="cognitivo">Cognitivo (Conocimientos)</option>
+                            <option value="psicomotriz">Psicomotriz (Habilidades prácticas)</option>
+                            <option value="afectivo">Afectivo (Actitudes y valores)</option>
+                            <option value="relacional">Relacional-Social</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Acción/Comportamiento (Verbo en futuro) <span class="required">*</span></label>
-                    <textarea id="og_accion" placeholder="Ej: identificará los principios de..."></textarea>
+                <div class="form-group mt-1">
+                    <label>Acción/Comportamiento observable <span class="required">*</span></label>
+                    <textarea id="og_accion" placeholder="¿Qué será capaz de hacer el participante al finalizar? Use verbos en futuro (diseñará, aplicará, evaluará...)" required onkeyup="updateOG()"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Condición de Operación <span class="required">*</span></label>
-                    <textarea id="og_cond" placeholder="Ej: a través del análisis de casos..."></textarea>
-                </div>
+                <div class="form-group mt-1">
+                    <label>Condición de operación <span class="required">*</span></label>
+                    <textarea id="og_cond" placeholder="¿En qué contexto o bajo qué condiciones? (a partir de casos prácticos, con las herramientas proporcionadas...)" required onkeyup="updateOG()"></textarea>
                 </div>
 
-            <div id="objetivosParticulares"></div>
-            </section>
+                <input type="hidden" id="og_criterio" value="según lo establecido en la sección de evaluación">
 
+                <div class="preview-box">
+                    <strong>Vista previa del objetivo:</strong>
+                    <div id="og_preview">Complete los campos anteriores para visualizar el objetivo general...</div>
+                </div>
+            </div>
+
+            <div id="objetivosParticulares">
+                <div class="box" data-op="1">
+                    <h3>
+                        <span><i class="fas fa-tasks"></i> Objetivo Particular 1</span>
+                    </h3>
+                    <div class="doms">
+                        <div class="dom active" data-op="1" data-d="cognitivo" onclick="selDom(1, 'cognitivo')">Cognitivo</div>
+                        <div class="dom" data-op="1" data-d="psicomotriz" onclick="selDom(1, 'psicomotriz')">Psicomotriz</div>
+                        <div class="dom" data-op="1" data-d="afectivo" onclick="selDom(1, 'afectivo')">Afectivo</div>
+                        <div class="dom" data-op="1" data-d="relacional" onclick="selDom(1, 'relacional')">Relacional</div>
+                    </div>
+                    <div class="verbos-container" id="verbs1"></div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Verbo + Acción <span class="required">*</span></label>
+                            <input id="op1_accion" placeholder="Ej: Identificará los elementos clave de..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Condición/Contexto <span class="required">*</span></label>
+                            <textarea id="op1_cond" placeholder="¿En qué condiciones o con qué recursos?" required></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group mt-1">
+                        <label>Temas relacionados</label>
+                        <textarea id="op1_temas" placeholder="Liste los temas o módulos que apoyan este objetivo (uno por línea)"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary mt-1" onclick="addObjetivoParticular()">
+                <i class="fas fa-plus"></i>
+                Agregar Objetivo Particular
+            </button>
+        </section>
+
+        <!-- Requerimientos del Curso -->
         <section class="section">
-            <h2 class="section-title"><i class="fas fa-clipboard-list"></i> 4. Requerimientos del Curso</h2>
+            <h2 class="section-title">
+                <i class="fas fa-clipboard-list"></i>
+                4. Requerimientos del Curso (Para ser llenado por el usuario)
+            </h2>
             <div class="grid-2">
                 <div class="form-group">
-                    <label>Instalaciones, mobiliario y distribución <span class="required">*</span></label>
-                    <textarea id="rq_instalaciones" placeholder="Salón con iluminación, mesas en herradura..."></textarea>
+                    <label>Instalaciones, mobiliario y su distribución <span class="required">*</span></label>
+                    <textarea id="rq_instalaciones" placeholder="1. Salón o aula para X personas...&#10;2. Mesas y sillas...&#10;3. Distribución en 'U' o herradura...&#10;4. Acceso a sanitarios y rutas de evacuación..." required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Equipo de apoyo <span class="required">*</span></label>
-                    <textarea id="rq_equipo" placeholder="Laptop, proyector, pantalla, bocinas..."></textarea>
+                    <label>Equipo de apoyo y su distribución <span class="required">*</span></label>
+                    <textarea id="rq_equipo" placeholder="1. Laptop para el instructor&#10;2. Pantalla o proyector...&#10;3. Pizarrón blanco o pintarrón...&#10;4. Extensión eléctrica y multicontactos..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Material y equipo para medidas de salud/seguridad <span class="required">*</span></label>
+                    <textarea id="rq_seguridad" placeholder="1. Gel antibacterial...&#10;2. Señalización de rutas de evacuación...&#10;3. Botiquín de primeros auxilios..." required></textarea>
                 </div>
                 <div class="form-group">
                     <label>Materiales de apoyo (didácticos) <span class="required">*</span></label>
-                    <textarea id="rq_materiales" placeholder="Manuales, bolígrafos, hojas, evaluaciones..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Humanos</label>
-                    <textarea id="rq_humanos" placeholder="Instructor, asistente..."></textarea>
+                    <textarea id="rq_materiales" placeholder="1. Formatos de evaluación (diagnóstica, formativa, sumativa)&#10;2. Contratos de aprendizaje...&#10;3. Manual del participante...&#10;4. Plumones, hojas, bolígrafos..." required></textarea>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Material de seguridad / higiene / protección civil <span class="required">*</span></label>
-                <textarea id="rq_seguridad" placeholder="Rutas de evacuación, extintor, botiquín..."></textarea>
+            <div class="form-group mt-1">
+                <label>Requerimientos humanos <span class="required">*</span></label>
+                <textarea id="rq_humanos" placeholder="1. Instructor certificado en EC0217...&#10;2. Personal de apoyo logístico (opcional)..." required></textarea>
             </div>
         </section>
 
+        <!-- Sistema de Evaluación -->
         <section class="section">
-            <h2 class="section-title"><i class="fas fa-check-double"></i> 5. Sistema de Evaluación</h2>
-            <div class="grid-4">
-                <div class="box">
-                    <h4>Diagnóstica</h4>
-                    <div class="form-group"><label>Porcentaje (%)</label><input type="number" id="ev_diag_pct" value="10" onchange="sumarPorcentajes()"></div>
-                    <div class="form-group"><label>Instrumento</label><input id="ev_diag_ins" value="Cuestionario"></div>
-                </div>
-                <div class="box">
-                    <h4>Formativa</h4>
-                    <div class="form-group"><label>Porcentaje (%)</label><input type="number" id="ev_form_pct" value="50" onchange="sumarPorcentajes()"></div>
-                    <div class="form-group"><label>Instrumento</label><input id="ev_form_ins" value="Guía de observación"></div>
-                </div>
-                <div class="box">
-                    <h4>Sumativa</h4>
-                    <div class="form-group"><label>Porcentaje (%)</label><input type="number" id="ev_sum_pct" value="40" onchange="sumarPorcentajes()"></div>
-                    <div class="form-group"><label>Instrumento</label><input id="ev_sum_ins" value="Cuestionario"></div>
-                </div>
-                <div class="box">
-                    <h4>Satisfacción</h4>
-                    <div class="form-group"><label>Porcentaje (%)</label><input type="number" id="ev_sat_pct" value="0" disabled style="background: #e2e8f0;"></div>
-                    <div class="form-group"><label>Instrumento</label><input id="ev_sat_ins" value="Cuestionario" disabled></div>
+            <h2 class="section-title">
+                <i class="fas fa-chart-line"></i>
+                5. Sistema de Evaluación
+            </h2>
+            
+            <div class="box">
+                <h3>Criterios Generales</h3>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label>Calificación mínima aprobatoria <span class="required">*</span></label>
+                        <select id="ev_min" required>
+                            <option value="">Seleccione...</option>
+                            <option value="70">70%</option>
+                            <option value="80" selected>80%</option>
+                            <option value="85">85%</option>
+                            <option value="90">90%</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Escala de calificación</label>
+                        <select id="ev_escala">
+                            <option value="0-100" selected>0-100</option>
+                            <option value="0-10">0-10</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de acreditación</label>
+                        <select id="ev_cert">
+                            <option value="constancia">Constancia de participación</option>
+                            <option value="diploma">Diploma de acreditación</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <p style="text-align: right; font-weight: bold;">Suma Total: <span id="ev_total_pct">100%</span></p>
+
+            <div class="box">
+                <h3>Evaluación Diagnóstica <span class="time">Inicio</span></h3>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label>Porcentaje (%)</label>
+                        <input type="number" id="ev_diag_pct" placeholder="Ej: 10" onchange="sumarPorcentajes()">
+                    </div>
+                    <div class="form-group">
+                        <label>Instrumento</label>
+                        <input id="ev_diag_ins" placeholder="Ej: Cuestionario" value="Cuestionario">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <input id="ev_diag_tipo" value="Heteroevaluación" placeholder="Heteroevaluación, Coevaluación...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <h3>Evaluación Formativa <span class="time">Durante</span></h3>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label>Porcentaje (%)</label>
+                        <input type="number" id="ev_form_pct" placeholder="Ej: 50" onchange="sumarPorcentajes()">
+                    </div>
+                    <div class="form-group">
+                        <label>Instrumentos</label>
+                        <input id="ev_form_ins" placeholder="Ej: Guía de observación, Prácticas" value="Guía de observación">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <input id="ev_form_tipo" value="Heteroevaluación" placeholder="Heteroevaluación...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <h3>Evaluación Sumativa <span class="time">Final</span></h3>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label>Porcentaje (%)</label>
+                        <input type="number" id="ev_sum_pct" placeholder="Ej: 40" onchange="sumarPorcentajes()">
+                    </div>
+                    <div class="form-group">
+                        <label>Instrumentos</label>
+                        <input id="ev_sum_ins" placeholder="Ej: Cuestionario, Proyecto" value="Cuestionario">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <input id="ev_sum_tipo" value="Heteroevaluación" placeholder="Heteroevaluación...">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="box" style="background: var(--light);">
+                <h3 style="justify-content: flex-end;">
+                    Suma Total de Porcentajes: 
+                    <span id="ev_total_pct" style="color: var(--primary); font-size: 1.5rem; margin-left: 1rem;">0%</span>
+                </h3>
+            </div>
         </section>
 
+        <!-- Desarrollo Cronológico / Guion Instruccional -->
         <section class="section">
-            <h2 class="section-title"><i class="fas fa-list-ol"></i> 6. Desarrollo Cronológico</h2>
+            <h2 class="section-title">
+                <i class="fas fa-clock"></i>
+                6. Desarrollo Cronológico / Guion Instruccional
+            </h2>
 
-            <div class="box" style="border-left: 4px solid var(--warning);">
-                <h3>6.1 Comprobación de Recursos (Previo) <span class="time-badge">30 min</span></h3>
+            <div class="box" style="border-color: var(--warning);">
+                <h3>
+                    <i class="fas fa-tasks"></i> 6.1 Comprobación de Recursos (Previo al curso)
+                    <span class="time" id="precursoTime">30 min</span>
+                </h3>
                 <div class="form-group">
-                    <label>Actividades de Verificación:</label>
-                    <textarea id="dc_verificacion" rows="4">1. Verificar mobiliario y distribución.&#10;2. Probar equipo de cómputo y proyección.&#10;3. Verificar material didáctico.&#10;4. Verificar condiciones de seguridad.</textarea>
+                    <label>Actividades de Verificación (basado en EC0217)</label>
+                    <textarea id="dc_verificacion" rows="5" placeholder="1. Aplicar la lista de verificación de requerimientos.&#10;2. Realizar pruebas de funcionamiento del equipo.&#10;3. Verificar la distribución del mobiliario y equipo.&#10;4. Verificar la suficiencia de material..."></textarea>
                 </div>
-                <div class="form-group"><label>Tiempo (min)</label><input type="number" id="dc_precurso_t" value="30" onchange="recalcTimes()"></div>
+                <div class="form-group mt-1">
+                    <label>Tiempo estimado (minutos)</label>
+                    <input type="number" id="dc_precurso_t" value="30" min="5" onchange="recalcTimes()">
+                </div>
             </div>
 
             <div class="box">
-                <h3>6.2 Apertura o Encuadre <span class="time-badge">22 min</span></h3>
-                <div class="form-group"><label>1. Presentación del instructor y participantes (Técnica Rompehielo)</label><textarea id="enc_1_presentacion" rows="2"></textarea></div>
-                <div class="form-group"><label>2. Presentación del curso (Objetivos, Temario, Beneficios)</label><textarea id="enc_2_curso" rows="2"></textarea></div>
-                <div class="form-group"><label>3. Momentos e instrumentos de evaluación</label><textarea id="enc_3_evaluacion" rows="2"></textarea></div>
-                <div class="form-group"><label>4. Acuerdos y compromisos (Reglas)</label><textarea id="enc_4_acuerdos" rows="2"></textarea></div>
-                <div class="form-group"><label>5. Evaluación diagnóstica</label><textarea id="enc_5_diagnostico" rows="2"></textarea></div>
-                <div class="form-group"><label>Tiempo Encuadre (min)</label><input type="number" id="dc_encuadre_t" value="22" onchange="recalcTimes()"></div>
+                <h3>6.2 Apertura o Encuadre <span class="time" id="encuadreTime">20 min</span></h3>
+                
+                <div class="form-group">
+                    <label>1. Presentación del instructor y participantes</label>
+                    <textarea id="enc_1_presentacion" rows="3" placeholder="Técnica rompehielo, presentación del instructor, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>2. Presentación del curso</label>
+                    <textarea id="enc_2_curso" rows="3" placeholder="Objetivo general, particulares, temario, beneficios."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>3. Momentos e instrumentos de evaluación</label>
+                    <textarea id="enc_3_evaluacion" rows="3" placeholder="Explicar evaluación diagnóstica, formativa, sumativa, y sus porcentajes."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>4. Acuerdos y compromisos</label>
+                    <textarea id="enc_4_acuerdos" rows="3" placeholder="Reglas de operación (puntualidad, participación, etc.), Contrato de Aprendizaje."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>5. Evaluación diagnóstica</label>
+                    <textarea id="enc_5_diagnostico" rows="3" placeholder="Explicar alcance, instrucciones, tiempo para contestar y aclarar dudas."></textarea>
+                </div>
+
+                <div class="form-group mt-1">
+                    <label>Tiempo total del Encuadre (minutos)</label>
+                    <input type="number" id="dc_encuadre_t" value="20" min="5" onchange="recalcTimes()">
+                </div>
             </div>
 
             <div class="box">
-                <h3>6.3 Desarrollo (Temario) <span class="time-badge" id="desarrolloTime">0 min</span></h3>
+                <h3>6.3 Desarrollo de Contenidos <span class="time" id="desarrolloTime">0 min</span></h3>
                 <div id="temasContainer"></div>
-                <button class="btn btn-primary" onclick="addTema()">+ Agregar Tema</button>
+                <button class="btn btn-primary mt-1" onclick="addTema()">
+                    <i class="fas fa-plus"></i>
+                    Agregar Tema/Módulo
+                </button>
             </div>
 
             <div class="box">
-                <h3>6.4 Cierre <span class="time-badge">10 min</span></h3>
-                <div class="form-group"><label>1. Conclusiones y resumen</label><textarea id="cierre_1_resumen" rows="2"></textarea></div>
-                <div class="form-group"><label>2. Logro de expectativas y objetivos</label><textarea id="cierre_2_logro" rows="2"></textarea></div>
-                <div class="form-group"><label>3. Sugerencias de continuidad</label><textarea id="cierre_3_sugerencias" rows="2"></textarea></div>
-                <div class="form-group"><label>4. Evaluación de satisfacción</label><textarea id="cierre_4_satisfaccion" rows="2"></textarea></div>
-                <div class="form-group"><label>5. Despedida</label><textarea id="cierre_5_despedida" rows="2"></textarea></div>
-                <div class="form-group"><label>Tiempo Cierre (min)</label><input type="number" id="dc_cierre_t" value="10" onchange="recalcTimes()"></div>
+                <h3>6.4 Cierre <span class="time" id="cierreTime">10 min</span></h3>
+                
+                <div class="form-group">
+                    <label>1. Conclusiones y resumen</label>
+                    <textarea id="cierre_1_resumen" rows="2" placeholder="Generar conclusión de contenidos, mencionar logros."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>2. Logro de expectativas y objetivos</label>
+                    <textarea id="cierre_2_logro" rows="2" placeholder="Revisar cumplimiento de expectativas y objetivos."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>3. Sugerencias de continuidad y referencias</label>
+                    <textarea id="cierre_3_sugerencias" rows="2" placeholder="Sugerir acciones para continuidad, compartir bibliografía."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>4. Evaluación de satisfacción</label>
+                    <textarea id="cierre_4_satisfaccion" rows="2" placeholder="Explicar alcance, entregar instrumento y aclarar dudas."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>5. Despedida y agradecimientos</label>
+                    <textarea id="cierre_5_despedida" rows="2" placeholder="Agradecer la participación y cerrar el curso."></textarea>
+                </div>
+
+                <div class="form-group mt-1">
+                    <label>Tiempo total del Cierre (minutos)</label>
+                    <input type="number" id="dc_cierre_t" value="10" min="5" onchange="recalcTimes()">
+                </div>
             </div>
 
-            <div class="box" style="background: #e0e7ff; text-align: right;">
-                <h3>Tiempo Total: <span id="sum_total">0 min</span></h3>
-                <small id="time_warning" style="color: var(--danger); display:none;">No coincide con la duración total.</small>
+            <div class="box">
+                <h3>Distribución del Tiempo Total</h3>
+                <div class="grid-4">
+                    <div class="form-group">
+                        <label>Pre-Curso</label>
+                        <input id="sum_precurso" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Encuadre</label>
+                        <input id="sum_encuadre" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Desarrollo</label>
+                        <input id="sum_desarrollo" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Cierre</label>
+                        <input id="sum_cierre" disabled>
+                    </div>
+                </div>
+                <div class="form-group mt-1" style="text-align: right;">
+                    <label>Total del Curso (calculado)</label>
+                    <input id="sum_total" disabled style="font-weight: bold; color: var(--primary); max-width: 250px; display: inline-block;">
+                </div>
             </div>
         </section>
-
     </main>
 
-    <div class="validation-indicator invalid" id="validationIndicator">0%</div>
+    <div class="validation-indicator invalid" id="validationIndicator" style="display: none;">
+        <i class="fas fa-exclamation-circle" style="color: var(--danger);"></i>
+        <span>Documento incompleto</span>
+    </div>
 
     <script>
-        let objetivosCount = 0;
-        let temasCount = 0;
+        // Funciones y lógica de implementación de la Carta Descriptiva
+        // Funciones como: saveDraft(), validateForm(), recalcTimes(), etc.
 
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                if (typeof auth === 'undefined' || typeof EC0301Manager === 'undefined') {
-                    Swal.fire('Error', 'No se cargaron los módulos del sistema.', 'error');
-                    return;
-                }
-                if (!auth.isLoggedIn()) window.location.href = 'index.html';
-
-                initForm();
-            }, 50);
-        });
-
-        function initForm() {
-            // Crear los 4 objetivos fijos si no existen
-            if (objetivosCount === 0) {
-                addObjetivoParticular('Cognitivo');
-                addObjetivoParticular('Psicomotriz');
-                addObjetivoParticular('Afectivo');
-                addObjetivoParticular('Relacional');
-            }
-            loadDraft();
-            if (temasCount === 0) addTema();
-            
-            recalcTimes();
-            sumarPorcentajes();
-            updateProgress();
-            
-            // Listener global para inputs
-            document.querySelectorAll('input, textarea, select').forEach(el => {
-                el.addEventListener('input', updateProgress);
-                el.addEventListener('change', () => { updateProgress(); recalcTimes(); });
-            });
-
-            setInterval(() => { if (updateProgress() > 5) saveDraft(true); }, 30000);
-        }
-
-        function addObjetivoParticular(dom) {
-            objetivosCount++;
-            const container = document.getElementById('objetivosParticulares');
-            const div = document.createElement('div');
-            div.className = 'box';
-            div.setAttribute('data-op', objetivosCount);
-            div.innerHTML = `
-                <h3>Objetivo Particular ${objetivosCount}: <span style="color:var(--primary)">${dom}</span></h3>
-                <div class="grid-2">
-                    <div class="form-group"><label>Verbo + Acción</label><input id="op${objetivosCount}_accion"></div>
-                    <div class="form-group"><label>Condición</label><textarea id="op${objetivosCount}_cond"></textarea></div>
-                </div>
-                <div class="form-group"><label>Temas Relacionados</label><textarea id="op${objetivosCount}_temas"></textarea></div>
-            `;
-            container.appendChild(div);
-        }
-
-        function addTema() {
-            temasCount++;
-            const container = document.getElementById('temasContainer');
-            const div = document.createElement('div');
-            div.className = 'box';
-            div.setAttribute('data-tema', temasCount);
-            div.innerHTML = `
-                <h3>Tema ${temasCount} <button class="btn btn-danger" onclick="this.closest('.box').remove(); recalcTimes();">X</button></h3>
-                <div class="grid-2">
-                    <div class="form-group"><label>Nombre</label><input id="tema${temasCount}_nombre"></div>
-                    <div class="form-group"><label>Duración (min)</label><input type="number" id="tema${temasCount}_duracion" value="0" onchange="recalcTimes()"></div>
-                </div>
-                <div class="form-group"><label>Actividades</label><textarea id="tema${temasCount}_actividades"></textarea></div>
-                <div class="grid-2">
-                    <div class="form-group"><label>Técnicas</label><input id="tema${temasCount}_tecnicas"></div>
-                    <div class="form-group"><label>Material</label><input id="tema${temasCount}_material"></div>
-                </div>
-            `;
-            container.appendChild(div);
-            // Re-adjuntar listeners a nuevos elementos
-            div.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', updateProgress));
-        }
-
-        function recalcTimes() {
-            let desarrollo = 0;
-            document.querySelectorAll('[id^="tema"][id$="_duracion"]').forEach(el => desarrollo += parseInt(el.value) || 0);
-            const encuadre = parseInt(document.getElementById('dc_encuadre_t').value) || 0;
-            const cierre = parseInt(document.getElementById('dc_cierre_t').value) || 0;
-            
-            const total = encuadre + desarrollo + cierre;
-            document.getElementById('desarrolloTime').innerText = `${desarrollo} min`;
-            document.getElementById('sum_total').innerText = `${total} min (${(total/60).toFixed(1)} hrs)`;
-            
-            // Validar
-            const duracionObj = (parseInt(document.getElementById('cd_duracion').value) || 0) * 60;
-            const warning = document.getElementById('time_warning');
-            if(duracionObj > 0 && Math.abs(duracionObj - total) > 5) warning.style.display = 'block';
-            else warning.style.display = 'none';
-        }
-
-        function sumarPorcentajes() {
-            const total = (parseInt(document.getElementById('ev_diag_pct').value)||0) + 
-                          (parseInt(document.getElementById('ev_form_pct').value)||0) + 
-                          (parseInt(document.getElementById('ev_sum_pct').value)||0);
-            const el = document.getElementById('ev_total_pct');
-            el.innerText = total + '%';
-            el.style.color = total === 100 ? 'var(--success)' : 'var(--danger)';
-        }
-
-        function updateProgress() {
-            const ids = ['cd_nombre', 'cd_facilitador', 'cd_duracion', 'og_accion', 'rq_instalaciones', 'ev_min', 'enc_1_presentacion'];
-            let filled = 0;
-            ids.forEach(id => { if(document.getElementById(id)?.value) filled++; });
-            if(document.getElementById('tema1_nombre')?.value) filled++;
-            
-            const pct = Math.round((filled / (ids.length + 1)) * 100);
-            document.getElementById('progressBar').style.width = pct + '%';
-            
-            const ind = document.getElementById('validationIndicator');
-            if(pct >= 80) {
-                ind.className = 'validation-indicator valid';
-                ind.innerHTML = `<i class="fas fa-check-circle"></i> ${pct}% Completo`;
-            } else {
-                ind.className = 'validation-indicator invalid';
-                ind.innerHTML = `${pct}%`;
-            }
-            return pct;
-        }
-
-        function collectData() {
-            const data = {
-                nombre: document.getElementById('cd_nombre').value,
-                facilitador: document.getElementById('cd_facilitador').value,
-                duracion: document.getElementById('cd_duracion').value,
-                lugar: document.getElementById('cd_lugar').value,
-                fecha: document.getElementById('cd_fecha').value,
-                modalidad: document.getElementById('cd_modalidad').value,
-                proposito: document.getElementById('cd_proposito').value,
-                perfil: document.getElementById('cd_perfil').value,
-                conoc: document.getElementById('cd_conoc').value,
-                hab: document.getElementById('cd_hab').value,
-                actitudes: document.getElementById('cd_actitudes').value,
-                num: document.getElementById('cd_num').value,
-                tipo: document.getElementById('cd_tipo').value,
-                diseñador: document.getElementById('cd_diseñador').value,
-                og: {
-                    accion: document.getElementById('og_accion').value,
-                    cond: document.getElementById('og_cond').value
-                },
-                rq: {
-                    instalaciones: document.getElementById('rq_instalaciones').value,
-                    equipo: document.getElementById('rq_equipo').value,
-                    materiales: document.getElementById('rq_materiales').value,
-                    humanos: document.getElementById('rq_humanos').value,
-                    seguridad: document.getElementById('rq_seguridad').value
-                },
-                ev: {
-                    diag_pct: document.getElementById('ev_diag_pct').value,
-                    diag_ins: document.getElementById('ev_diag_ins').value,
-                    form_pct: document.getElementById('ev_form_pct').value,
-                    form_ins: document.getElementById('ev_form_ins').value,
-                    sum_pct: document.getElementById('ev_sum_pct').value,
-                    sum_ins: document.getElementById('ev_sum_ins').value
-                },
-                dev: {
-                    verificacion: document.getElementById('dc_verificacion').value,
-                    precurso_t: document.getElementById('dc_precurso_t').value,
-                    enc_1: document.getElementById('enc_1_presentacion').value,
-                    enc_2: document.getElementById('enc_2_curso').value,
-                    enc_3: document.getElementById('enc_3_evaluacion').value,
-                    enc_4: document.getElementById('enc_4_acuerdos').value,
-                    enc_5: document.getElementById('enc_5_diagnostico').value,
-                    encuadre_t: document.getElementById('dc_encuadre_t').value,
-                    cierre_1: document.getElementById('cierre_1_resumen').value,
-                    cierre_2: document.getElementById('cierre_2_logro').value,
-                    cierre_3: document.getElementById('cierre_3_sugerencias').value,
-                    cierre_4: document.getElementById('cierre_4_satisfaccion').value,
-                    cierre_5: document.getElementById('cierre_5_despedida').value,
-                    cierre_t: document.getElementById('dc_cierre_t').value
-                },
-                objetivos: [],
-                temas: []
-            };
-
-            // Objetivos
-            for(let i=1; i<=4; i++) {
-                if(document.getElementById(`op${i}_accion`)) {
-                    data.objetivos.push({
-                        num: i,
-                        accion: document.getElementById(`op${i}_accion`).value,
-                        cond: document.getElementById(`op${i}_cond`).value,
-                        temas: document.getElementById(`op${i}_temas`).value
-                    });
-                }
-            }
-
-            // Temas
-            document.querySelectorAll('[data-tema]').forEach(el => {
-                const id = el.getAttribute('data-tema');
-                data.temas.push({
-                    nombre: document.getElementById(`tema${id}_nombre`).value,
-                    duracion: document.getElementById(`tema${id}_duracion`).value,
-                    actividades: document.getElementById(`tema${id}_actividades`).value,
-                    tecnicas: document.getElementById(`tema${id}_tecnicas`).value,
-                    material: document.getElementById(`tema${id}_material`).value
-                });
-            });
-
-            return data;
-        }
-
-        function saveDraft(silent) {
-            try {
-                const data = collectData();
-                EC0301Manager.saveData(data);
-                if (!silent) Swal.fire('Guardado', 'Datos guardados.', 'success');
-            } catch (e) { console.error(e); }
-        }
-
-        function loadDraft() {
-            const data = EC0301Manager.getData();
-            if (!data || !data.nombre) return;
-
-            // Función helper
-            const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).value = val || ''; };
-
-            // Carga General
-            setVal('cd_nombre', data.nombre);
-            setVal('cd_duracion', data.duracion);
-            setVal('cd_facilitador', data.facilitador);
-            setVal('cd_lugar', data.lugar);
-            setVal('cd_fecha', data.fecha);
-            setVal('cd_modalidad', data.modalidad);
-            setVal('cd_diseñador', data.diseñador);
-            setVal('cd_proposito', data.proposito);
-            
-            // Perfil
-            setVal('cd_perfil', data.perfil);
-            setVal('cd_conoc', data.conoc);
-            setVal('cd_hab', data.hab);
-            setVal('cd_actitudes', data.actitudes);
-            setVal('cd_num', data.num);
-            setVal('cd_tipo', data.tipo);
-
-            // OG
-            if(data.og) {
-                setVal('og_accion', data.og.accion);
-                setVal('og_cond', data.og.cond);
-            }
-
-            // RQ
-            if(data.rq) {
-                setVal('rq_instalaciones', data.rq.instalaciones);
-                setVal('rq_equipo', data.rq.equipo);
-                setVal('rq_materiales', data.rq.materiales);
-                setVal('rq_humanos', data.rq.humanos);
-                setVal('rq_seguridad', data.rq.seguridad);
-            }
-
-            // EV
-            if(data.ev) {
-                setVal('ev_min', data.ev.min);
-                setVal('ev_escala', data.ev.escala);
-                setVal('ev_cert', data.ev.cert);
-                setVal('ev_diag_pct', data.ev.diag_pct);
-                setVal('ev_diag_ins', data.ev.diag_ins);
-                setVal('ev_form_pct', data.ev.form_pct);
-                setVal('ev_form_ins', data.ev.form_ins);
-                setVal('ev_sum_pct', data.ev.sum_pct);
-                setVal('ev_sum_ins', data.ev.sum_ins);
-            }
-
-            // DEV
-            if(data.dev) {
-                setVal('dc_verificacion', data.dev.verificacion);
-                setVal('dc_precurso_t', data.dev.precurso_t);
-                setVal('enc_1_presentacion', data.dev.enc_1);
-                setVal('enc_2_curso', data.dev.enc_2);
-                setVal('enc_3_evaluacion', data.dev.enc_3);
-                setVal('enc_4_acuerdos', data.dev.enc_4);
-                setVal('enc_5_diagnostico', data.dev.enc_5);
-                setVal('dc_encuadre_t', data.dev.encuadre_t);
-                setVal('cierre_1_resumen', data.dev.cierre_1);
-                setVal('cierre_2_logro', data.dev.cierre_2);
-                setVal('cierre_3_sugerencias', data.dev.cierre_3);
-                setVal('cierre_4_satisfaccion', data.dev.cierre_4);
-                setVal('cierre_5_despedida', data.dev.cierre_5);
-                setVal('dc_cierre_t', data.dev.cierre_t);
-            }
-
-            // Objetivos
-            if (data.objetivos) {
-                data.objetivos.forEach(obj => {
-                    setVal(`op${obj.num}_accion`, obj.accion);
-                    setVal(`op${obj.num}_cond`, obj.cond);
-                    setVal(`op${obj.num}_temas`, obj.temas);
-                });
-            }
-
-            // Temas
-            if (data.temas) {
-                document.getElementById('temasContainer').innerHTML = '';
-                temasCount = 0;
-                data.temas.forEach(t => {
-                    addTema();
-                    setVal(`tema${temasCount}_nombre`, t.nombre);
-                    setVal(`tema${temasCount}_duracion`, t.duracion);
-                    setVal(`tema${temasCount}_actividades`, t.actividades);
-                    setVal(`tema${temasCount}_tecnicas`, t.tecnicas);
-                    setVal(`tema${temasCount}_material`, t.material);
-                });
-            }
-        }
-
-        function showHelp() {
-            Swal.fire({
-                title: 'Guía Rápida',
-                html: '<div style="text-align:left"><p>Esta carta descriptiva sigue el estándar EC0217.01 para cursos presenciales.</p><ul><li><strong>Encuadre:</strong> Inicio del curso (reglas, objetivos).</li><li><strong>Desarrollo:</strong> Temas y actividades principales.</li><li><strong>Cierre:</strong> Conclusiones y evaluación final.</li></ul></div>'
-            });
-        }
-
-        function markComplete() {
-            if (updateProgress() < 80) {
-                Swal.fire('Incompleto', 'Completa al menos el 80% para continuar.', 'warning');
-                return;
-            }
-            saveDraft(true);
-            EC0301Manager.markModuleProgress('carta', 100);
-            Swal.fire('¡Felicidades!', 'Módulo completado.', 'success').then(() => window.location.href = 'acceso.html');
-        }
     </script>
 </body>
 </html>
