@@ -3,316 +3,567 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkillsCert EC0301 - Sistema Integral de Diseño de Cursos</title>
-
-    <script src="sistema_central/auth.js" defer></script>
-    <script src="sistema_central/ec0301-data-manager.js" defer></script>
-
+    <title>SkillsCert - EC0301 Profesional</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-
     <style>
-        /* Tu CSS completo aquí */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --primary: #6366f1; --primary-dark: #4f46e5; --secondary: #ec4899; --success: #10b981; --dark: #1e293b; --light: #f1f5f9; --white: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; overflow-x: hidden; }
-        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; position: relative; overflow: hidden; }
-        .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>'); background-size: cover; animation: wave 15s linear infinite; }
-        @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .container { max-width: 1200px; width: 100%; position: relative; z-index: 1; }
-        .hero-content { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-        .hero-left { color: white; }
-        .logo { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
-        .logo-icon { width: 60px; height: 60px; background: white; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .logo-icon i { font-size: 2rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-text h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.25rem; }
-        .logo-text p { font-size: 1.1rem; opacity: 0.9; }
-        .hero-title { font-size: 3.5rem; font-weight: 900; line-height: 1.2; margin-bottom: 1.5rem; background: linear-gradient(to right, white, rgba(255,255,255,0.8)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero-subtitle { font-size: 1.3rem; line-height: 1.8; opacity: 0.95; margin-bottom: 2rem; }
-        .features { display: grid; gap: 1rem; margin-bottom: 2rem; }
-        .feature { display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 1rem 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); }
-        .feature i { font-size: 1.5rem; color: var(--secondary); }
-        .feature span { font-size: 1rem; font-weight: 500; }
-        .hero-right { background: white; border-radius: 24px; padding: 3rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid var(--light); }
-        .tab { flex: 1; padding: 1rem; border: none; background: none; font-size: 1.1rem; font-weight: 600; color: #94a3b8; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; }
-        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .form-content { display: none; }
-        .form-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; font-weight: 600; color: var(--dark); margin-bottom: 0.5rem; font-size: 0.9rem; }
-        .input-group { position: relative; }
-        .input-group i { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; }
-        input { width: 100%; padding: 1rem 1rem 1rem 3rem; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; transition: all 0.3s; }
-        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
-        .btn { width: 100%; padding: 1.2rem; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4); }
-        .btn-success { background: linear-gradient(135deg, var(--success), #059669); color: white; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); }
-        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
-        .price-box { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 2rem; border-radius: 16px; text-align: center; margin-bottom: 2rem; }
-        .price { font-size: 3rem; font-weight: 900; margin-bottom: 0.5rem; }
-        .price-detail { font-size: 1rem; opacity: 0.95; }
-        .divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; color: #94a3b8; font-size: 0.9rem; }
-        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
-        .link { text-align: center; margin-top: 1rem; color: #64748b; font-size: 0.9rem; }
-        .link a { color: var(--primary); text-decoration: none; font-weight: 600; }
-        .link a:hover { text-decoration: underline; }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; border-radius: 24px; padding: 3rem; max-width: 500px; width: 90%; text-align: center; }
-        .modal-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--success), #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
-        .modal-icon i { font-size: 2.5rem; color: white; }
-        .access-code { font-size: 2.5rem; font-weight: 900; color: var(--primary); background: var(--light); padding: 1.5rem; border-radius: 16px; margin: 1.5rem 0; letter-spacing: 0.3rem; }
-        @media (max-width: 968px) {
-            .hero-content { grid-template-columns: 1fr; gap: 2rem; }
-            .hero-left { text-align: center; }
-            .hero-title { font-size: 2.5rem; }
-            .logo { justify-content: center; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            gap: 4rem;
+            flex-wrap: wrap;
+        }
+        .hero {
+            max-width: 500px;
+            color: white;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .logo i {
+            font-size: 3rem;
+            background: rgba(255,255,255,0.2);
+            padding: 1rem;
+            border-radius: 16px;
+        }
+        .logo h1 { font-size: 2rem; }
+        .logo span { display: block; font-size: 0.9rem; opacity: 0.9; }
+        .hero h2 {
+            font-size: 2.5rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+        .hero p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255,255,255,0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        .feature i {
+            font-size: 1.5rem;
+            width: 40px;
+            text-align: center;
+        }
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+        .tab:hover { color: #6366f1; }
+        .tab.active {
+            color: #6366f1;
+            border-bottom-color: #6366f1;
+        }
+        .tab i { margin-right: 0.5rem; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
+        }
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99,102,241,0.3);
+        }
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        .register-link {
+            text-align: center;
+            margin-top: 1rem;
+            color: #64748b;
+        }
+        .register-link a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .register-link a:hover { text-decoration: underline; }
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+        }
+        @media (max-width: 900px) {
+            .container { flex-direction: column; gap: 2rem; }
+            .hero { text-align: center; }
+            .hero h2 { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-left">
-                    <div class="logo">
-                        <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
-                        <div class="logo-text">
-                            <h1>SkillsCert</h1>
-                            <p>EC0301 Profesional</p>
-                        </div>
-                    </div>
-                    <h2 class="hero-title">Genera tus Documentos EC0301 en Minutos</h2>
-                    <p class="hero-subtitle">Sistema inteligente para diseñar cursos de capacitación profesionales con IA y cumplimiento total del estándar CONOCER.</p>
-                    <div class="features">
-                        <div class="feature"><i class="fas fa-robot"></i><span>Asistente IA para objetivos y contenido</span></div>
-                        <div class="feature"><i class="fas fa-file-alt"></i><span>Generación automática de formatos</span></div>
-                        <div class="feature"><i class="fas fa-download"></i><span>Exportación a PDF y Word</span></div>
-                        <div class="feature"><i class="fas fa-shield-check"></i><span>100% alineado al estándar EC0301</span></div>
-                    </div>
+    <div class="container">
+        <div class="hero">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <div>
+                    <h1>SkillsCert</h1>
+                    <span>EC0301 Profesional</span>
                 </div>
-
-                <div class="hero-right">
-                    <div class="tabs">
-                        <button class="tab active" onclick="switchTab('login')"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
-                        <button class="tab" onclick="switchTab('register')"><i class="fas fa-user-plus"></i> Registrarse</button>
-                    </div>
-
-                    <div id="loginForm" class="form-content active">
-                        <form onsubmit="handleLogin(event)">
-                            <div class="form-group">
-                                <label>Correo Electrónico</label>
-                                <div class="input-group">
-                                    <i class="fas fa-envelope"></i>
-                                    <input type="email" id="loginEmail" placeholder="tu@email.com" required>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Código de Acceso</label>
-                                <div class="input-group">
-                                    <i class="fas fa-key"></i>
-                                    <input type="text" id="loginCode" placeholder="Tu código de 8 dígitos" required maxlength="8">
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Acceder al Sistema</button>
-                            <div class="link">¿No tienes código? <a href="#" onclick="switchTab('register'); return false;">Regístrate aquí</a></div>
-                        </form>
-                    </div>
-
-                    <div id="registerForm" class="form-content">
-                        <div class="price-box">
-                            <div class="price">$999 MXN</div>
-                            <div class="price-detail">Acceso por 90 días</div>
-                        </div>
-                        <form onsubmit="handlePayment(event)">
-                            <div class="form-group">
-                                <label>Nombre Completo</label>
-                                <div class="input-group"><i class="fas fa-user"></i><input type="text" id="registerName" placeholder="Tu nombre completo" required></div>
-                            </div>
-                            <div class="form-group">
-                                <label>Correo Electrónico</label>
-                                <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="registerEmail" placeholder="tu@email.com" required></div>
-                            </div>
-                            <div class="form-group">
-                                <label>WhatsApp</label>
-                                <div class="input-group"><i class="fab fa-whatsapp"></i><input type="tel" id="registerPhone" placeholder="Tu número a 10 dígitos" required></div>
-                            </div>
-                            <button type="submit" class="btn btn-success" id="payButton"><i class="fas fa-credit-card"></i> Pagar con Stripe</button>
-                            <div class="divider">o</div>
-                            <button type="button" class="btn btn-primary" onclick="payWithTransfer()"><i class="fas fa-university"></i> Pagar con Transferencia</button>
-                            <div class="link">¿Ya tienes cuenta? <a href="#" onclick="switchTab('login'); return false;">Inicia sesión</a></div>
-                        </form>
-                    </div>
+            </div>
+            <h2>Genera tus Documentos EC0301 en Minutos</h2>
+            <p>Sistema inteligente para diseñar cursos de capacitación profesionales con IA y cumplimiento total del estándar CONOCER.</p>
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-robot"></i>
+                    <span>Asistente IA para objetivos y contenido</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Generación automática de formatos</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Exportación a PDF y Word</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-check-circle"></i>
+                    <span>100% alineado al estándar EC0301</span>
                 </div>
             </div>
         </div>
-    </section>
 
-    <div id="successModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-icon"><i class="fas fa-check"></i></div>
-            <h2 style="font-size: 2rem; color: var(--dark); margin-bottom: 1rem;">¡Pago Exitoso!</h2>
-            <p style="color: #64748b; margin-bottom: 1.5rem;">Tu código de acceso ha sido enviado a tu correo y WhatsApp</p>
-            <div class="access-code" id="displayCode">XXXXXXXX</div>
-            <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 2rem;">Guarda este código para acceder al sistema</p>
-            <button class="btn btn-primary" onclick="closeModalAndLogin()"><i class="fas fa-sign-in-alt"></i> Ir a Iniciar Sesión</button>
+        <div class="login-card">
+            <div class="tabs">
+                <div class="tab active" data-tab="login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Iniciar Sesión
+                </div>
+                <div class="tab" data-tab="register">
+                    <i class="fas fa-user-plus"></i>
+                    Registrarse
+                </div>
+            </div>
+
+            <!-- Alertas -->
+            <div class="alert alert-success" id="alertSuccess"></div>
+            <div class="alert alert-error" id="alertError"></div>
+            <div class="alert alert-info" id="alertInfo"></div>
+
+            <!-- Tab Login -->
+            <div class="tab-content active" id="tab-login">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">
+                            <i class="fas fa-envelope"></i> Correo Electrónico
+                        </label>
+                        <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginCode">
+                            <i class="fas fa-key"></i> Código de Acceso
+                        </label>
+                        <input type="text" id="loginCode" placeholder="Tu código de 8 dígitos" maxlength="8" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="btnLogin">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Acceder al Sistema
+                    </button>
+                </form>
+                <div class="register-link">
+                    ¿No tienes código? <a href="#" id="linkToRegister">Regístrate aquí</a>
+                </div>
+            </div>
+
+            <!-- Tab Registro -->
+            <div class="tab-content" id="tab-register">
+                <p style="text-align: center; color: #64748b; margin-bottom: 1.5rem;">
+                    Adquiere tu acceso por <strong style="color: #6366f1;">MXN $999.00</strong><br>
+                    <small>Sistema completo - 90 días de acceso</small>
+                </p>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="regName">
+                            <i class="fas fa-user"></i> Nombre Completo
+                        </label>
+                        <input type="text" id="regName" placeholder="Tu nombre completo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail">
+                            <i class="fas fa-envelope"></i> Correo Electrónico
+                        </label>
+                        <input type="email" id="regEmail" placeholder="tu@email.com" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="btnRegister">
+                        <i class="fas fa-credit-card"></i>
+                        Proceder al Pago
+                    </button>
+                </form>
+                <div class="register-link">
+                    ¿Ya tienes código? <a href="#" id="linkToLogin">Inicia sesión aquí</a>
+                </div>
+            </div>
         </div>
     </div>
 
+    <footer class="footer">
+        <p>© 2024 GlobalSkillsCert - Sistema profesional de diseño de cursos EC0301</p>
+    </footer>
+
     <script>
-        const STRIPE_PUBLIC_KEY = "pk_test_51SJ0gXFupe2fTa5zdrZlQfwpB1Y3esGAdUBw1r4Hc9vIerMj90cm0w4t6tJUJmVV7bEqZ3v5d11cqvPrFps4P31600xqM9IUsj";
-        const BACKEND_URL = "https://ec0301-globalskillscert-backend.onrender.com";
-        const stripe = Stripe(STRIPE_PUBLIC_KEY);
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.form-content').forEach(f => f.classList.remove('active'));
-            if (tab === 'login') {
-                document.querySelectorAll('.tab')[0].classList.add('active');
-                document.getElementById('loginForm').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                document.getElementById('registerForm').classList.add('active');
+        // =====================================================
+        // CONFIGURACIÓN
+        // =====================================================
+        const API_URL = 'https://ec0301-globalskillscert-backend.onrender.com';
+        
+        // =====================================================
+        // ELEMENTOS DEL DOM
+        // =====================================================
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const btnLogin = document.getElementById('btnLogin');
+        const btnRegister = document.getElementById('btnRegister');
+        const alertSuccess = document.getElementById('alertSuccess');
+        const alertError = document.getElementById('alertError');
+        const alertInfo = document.getElementById('alertInfo');
+        
+        // =====================================================
+        // VERIFICAR SI YA ESTÁ LOGUEADO
+        // =====================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Si ya tiene token, redirigir al dashboard
+            const token = localStorage.getItem('ec0301_token');
+            if (token) {
+                console.log('✅ Usuario ya autenticado, redirigiendo al dashboard...');
+                window.location.href = 'dashboard.html';
+                return;
             }
-        }
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const code = document.getElementById('loginCode').value.toUpperCase();
-
-            try {
-                const response = await fetch(`${BACKEND_URL}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, accessCode: code })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    
-                    // ===== CORRECCIÓN: Usar auth.js para guardar sesión =====
-                    if (typeof auth !== 'undefined') {
-                        auth.login(data.token); // Guarda el token en auth.js
-                        localStorage.setItem('userEmail', email); // Guarda el email para la bienvenida
-                    } else {
-                        // Fallback (si auth.js falló, pero no debería)
-                        localStorage.setItem('authToken', data.token);
-                        localStorage.setItem('userEmail', email);
-                    }
-                    // ======================================================
-                    await Swal.fire({
-                        icon: 'success', title: '¡Bienvenido!',
-                        text: 'Acceso concedido. Redirigiendo...',
-                        timer: 2000, showConfirmButton: false
-                    });
-                    window.location.href = 'acceso.html'; // Redirige al dashboard
-                } else {
-                    Swal.fire({ icon: 'error', title: 'Error de Acceso', text: data.error || 'Credenciales inválidas' });
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo conectar con el servidor' });
-            }
-        }
-
-        async function handlePayment(e) {
-            e.preventDefault();
-            const button = document.getElementById('payButton');
-            const originalText = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-            button.disabled = true;
-
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const phone = document.getElementById('registerPhone').value;
-
-            try {
-                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, phone })
-                });
-                if (!response.ok) { throw new Error('Error al crear sesión de pago'); }
-                const session = await response.json();
-                if (session.id) {
-                    const result = await stripe.redirectToCheckout({ sessionId: session.id });
-                    if (result.error) { throw new Error(result.error.message); }
-                } else {
-                    throw new Error('Respuesta inválida del servidor');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                Swal.fire({ icon: 'error', title: 'Error de Pago', text: error.message });
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }
-        }
-
-        async function payWithTransfer() {
-            await Swal.fire({
-                title: 'Pago por Transferencia',
-                html: `
-                    <div style="text-align: left;">
-                        <h3>Datos Bancarios:</h3>
-                        <p><strong>Banco:</strong> BBVA</p><p><strong>Cuenta:</strong> 0123456789</p>
-                        <p><strong>CLABE:</strong> 012180001234567890</p>
-                        <p><strong>Beneficiario:</strong> SkillsCert EC0301</p><hr>
-                        <p style="margin-top: 1rem;">Envía tu comprobante a:</p>
-                        <p><strong>WhatsApp:</strong> +52 55 3882 2334</p>
-                        <p><strong>Email:</strong> info@skillscert.com</p>
-                    </div>
-                `,
-                confirmButtonText: 'Entendido',
-                confirmButtonColor: '#6366f1'
-            });
-        }
-
-        function closeModalAndLogin() {
-            document.getElementById('successModal').classList.remove('active');
-            switchTab('login');
-        }
-
-        window.addEventListener('DOMContentLoaded', async () => {
             
-            // ===== CORRECCIÓN: Lógica de Auto-Login ELIMINADA =====
-            // Esta página (index.html) NO debe redirigir automáticamente.
-            // La lógica de auto-login está en acceso.html.
-            // ====================================================
-
+            // Verificar si viene de Stripe con session_id
             const urlParams = new URLSearchParams(window.location.search);
             const sessionId = urlParams.get('session_id');
-
-            // Esta parte SÍ es correcta: maneja la redirección del pago
+            
             if (sessionId) {
-                try {
-                    const response = await fetch(`${BACKEND_URL}/verify-payment`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ sessionId })
-                    });
-                    const data = await response.json();
-                    if (data.success) {
-                        document.getElementById('displayCode').textContent = data.accessCode;
-                        document.getElementById('successModal').classList.add('active');
-                        document.getElementById('loginEmail').value = data.email;
-                        document.getElementById('loginCode').value = data.accessCode;
-                    } else {
-                        Swal.fire({
-                            icon: 'error', title: 'Error de Verificación',
-                            text: data.error || 'No se pudo verificar el pago'
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo verificar el pago' });
-                }
+                console.log('🔄 Session ID detectado desde Stripe:', sessionId);
+                handleStripeCallback(sessionId);
             }
         });
+        
+        // =====================================================
+        // MANEJAR CALLBACK DE STRIPE
+        // =====================================================
+        async function handleStripeCallback(sessionId) {
+            showAlert('info', 'Verificando pago con Stripe...');
+            btnLogin.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_URL}/verify-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // ✅ Pago verificado - Guardar sesión
+                    localStorage.setItem('ec0301_token', data.token || sessionId);
+                    
+                    if (data.user) {
+                        localStorage.setItem('ec0301_user', JSON.stringify(data.user));
+                    }
+                    
+                    showAlert('success', '¡Pago verificado! Redirigiendo al sistema...');
+                    
+                    // Limpiar URL y redirigir
+                    setTimeout(() => {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } else {
+                    showAlert('error', data.message || 'No se pudo verificar el pago. Intenta iniciar sesión con tu código.');
+                    btnLogin.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error verificando pago:', error);
+                showAlert('error', 'Error de conexión. Por favor intenta iniciar sesión con tu código.');
+                btnLogin.disabled = false;
+            }
+        }
+        
+        // =====================================================
+        // TABS
+        // =====================================================
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
+                
+                // Actualizar tabs activos
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Mostrar contenido correcto
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === `tab-${targetTab}`) {
+                        content.classList.add('active');
+                    }
+                });
+                
+                // Limpiar alertas
+                hideAlerts();
+            });
+        });
+        
+        // Links para cambiar entre tabs
+        document.getElementById('linkToRegister').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelector('[data-tab="register"]').click();
+        });
+        
+        document.getElementById('linkToLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelector('[data-tab="login"]').click();
+        });
+        
+        // =====================================================
+        // LOGIN
+        // =====================================================
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            hideAlerts();
+            
+            const email = document.getElementById('loginEmail').value.trim();
+            const code = document.getElementById('loginCode').value.trim();
+            
+            if (!email || !code) {
+                showAlert('error', 'Por favor completa todos los campos.');
+                return;
+            }
+            
+            // Mostrar loading
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<span class="spinner"></span> Verificando...';
+            
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // ✅ Login exitoso - Guardar token
+                    localStorage.setItem('ec0301_token', data.token || code);
+                    
+                    if (data.user) {
+                        localStorage.setItem('ec0301_user', JSON.stringify(data.user));
+                    } else {
+                        // Guardar al menos el email
+                        localStorage.setItem('ec0301_user', JSON.stringify({ email }));
+                    }
+                    
+                    showAlert('success', '¡Bienvenido! Acceso concedido. Redirigiendo...');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } else {
+                    showAlert('error', data.message || 'Código o correo incorrecto.');
+                    resetLoginButton();
+                }
+            } catch (error) {
+                console.error('Error en login:', error);
+                showAlert('error', 'Error de conexión con el servidor. Intenta de nuevo.');
+                resetLoginButton();
+            }
+        });
+        
+        function resetLoginButton() {
+            btnLogin.disabled = false;
+            btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Acceder al Sistema';
+        }
+        
+        // =====================================================
+        // REGISTRO (Redirige a Stripe)
+        // =====================================================
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            hideAlerts();
+            
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            
+            if (!name || !email) {
+                showAlert('error', 'Por favor completa todos los campos.');
+                return;
+            }
+            
+            // Mostrar loading
+            btnRegister.disabled = true;
+            btnRegister.innerHTML = '<span class="spinner"></span> Procesando...';
+            
+            try {
+                const response = await fetch(`${API_URL}/create-checkout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.url) {
+                    // Redirigir a Stripe Checkout
+                    showAlert('success', 'Redirigiendo a la página de pago...');
+                    window.location.href = data.url;
+                } else {
+                    showAlert('error', data.message || 'Error al crear la sesión de pago.');
+                    resetRegisterButton();
+                }
+            } catch (error) {
+                console.error('Error en registro:', error);
+                showAlert('error', 'Error de conexión. Intenta de nuevo.');
+                resetRegisterButton();
+            }
+        });
+        
+        function resetRegisterButton() {
+            btnRegister.disabled = false;
+            btnRegister.innerHTML = '<i class="fas fa-credit-card"></i> Proceder al Pago';
+        }
+        
+        // =====================================================
+        // ALERTAS
+        // =====================================================
+        function showAlert(type, message) {
+            hideAlerts();
+            const alert = type === 'success' ? alertSuccess : 
+                         type === 'error' ? alertError : alertInfo;
+            alert.textContent = message;
+            alert.style.display = 'block';
+        }
+        
+        function hideAlerts() {
+            alertSuccess.style.display = 'none';
+            alertError.style.display = 'none';
+            alertInfo.style.display = 'none';
+        }
     </script>
 </body>
 </html>
