@@ -46,6 +46,7 @@
             line-height: 1.6;
         }
 
+        /* ========== HEADER ========== */
         .header {
             background: var(--white);
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
@@ -157,7 +158,7 @@
             background: #dc2626;
         }
 
-        /* Barra de progreso */
+        /* ========== PROGRESS BAR ========== */
         .progress-container {
             background: var(--light);
             height: 8px;
@@ -173,14 +174,14 @@
             box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
         }
 
-        /* Contenedor principal */
+        /* ========== MAIN CONTAINER ========== */
         .container {
             max-width: 1400px;
             margin: 2rem auto;
             padding: 0 2rem 2rem;
         }
 
-        /* Secciones */
+        /* ========== SECTIONS ========== */
         .section {
             background: var(--white);
             border-radius: 12px;
@@ -196,6 +197,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -218,7 +220,31 @@
             font-size: 1.75rem;
         }
 
-        /* Elementos del formulario */
+        /* ========== BOX COMPONENTS ========== */
+        .box {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .box h3 {
+            color: var(--dark);
+            margin-bottom: 1.25rem;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .box h3 i {
+            color: var(--primary);
+        }
+
+        /* ========== FORM ELEMENTS ========== */
         .form-group {
             margin-bottom: 1.25rem;
         }
@@ -236,9 +262,12 @@
             margin-left: 0.25rem;
         }
 
-        input, select, textarea {
+        input,
+        select,
+        textarea {
             width: 100%;
-            padding: 0.85rem;
+            /* ===== MEJORA 1: Campos más altos ===== */
+            padding: 0.85rem; /* Aumentado de 0.75rem */
             border: 2px solid var(--border);
             border-radius: 8px;
             font-size: 0.95rem;
@@ -247,23 +276,30 @@
             background: var(--white);
         }
 
-        input:focus, select:focus, textarea:focus {
+        input:focus,
+        select:focus,
+        textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         textarea {
+            /* ===== MEJORA 2: Textareas más grandes ===== */
             min-height: 130px;
+            /* Aumentado de 100px */
             resize: vertical;
         }
 
-        input:disabled, select:disabled, textarea:disabled {
+        input:disabled,
+        select:disabled,
+        textarea:disabled {
             background: var(--light);
             cursor: not-allowed;
             opacity: 0.7;
         }
 
+        /* ========== GRID LAYOUTS ========== */
         .grid-2 {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -282,6 +318,14 @@
             gap: 1.25rem;
         }
 
+        /* === NUEVO: GRID 4 === */
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+        }
+
+        /* ========== DOMAIN SELECTOR ========== */
         .doms {
             display: flex;
             gap: 0.75rem;
@@ -311,6 +355,92 @@
             border-color: var(--primary);
         }
 
+        /* ========== VERBOS SELECTOR ========== */
+        .verbos-container {
+            background: var(--white);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .verbos-container small {
+            display: block;
+            color: #64748b;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .verbo-category {
+            margin: 0.75rem 0;
+        }
+
+        .verbo-category strong {
+            display: block;
+            color: var(--primary);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .verbo {
+            display: inline-block;
+            padding: 0.4rem 0.9rem;
+            margin: 0.25rem;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .verbo:hover {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        /* ========== PREVIEW BOX ========== */
+        .preview-box {
+            background: linear-gradient(135deg, #e0e7ff 0%, #fef3c7 100%);
+            padding: 1.25rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            margin-top: 1rem;
+        }
+
+        .preview-box strong {
+            display: block;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .preview-box #og_preview {
+            color: var(--dark);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        /* ========== TIME BADGES ========== */
+        .time {
+            background: var(--primary);
+            color: var(--white);
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== VALIDATION INDICATOR ========== */
         .validation-indicator {
             position: fixed;
             bottom: 2rem;
@@ -338,9 +468,11 @@
         }
 
         @keyframes pulse-success {
-            0%, 100% {
+            0%,
+            100% {
                 box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
             }
+
             50% {
                 box-shadow: 0 10px 40px rgba(16, 185, 129, 0.6);
             }
@@ -350,6 +482,7 @@
             font-size: 1.5rem;
         }
 
+        /* ========== HELP TIP ========== */
         .help-tip {
             display: inline-block;
             background: var(--warning);
@@ -365,6 +498,7 @@
             font-weight: 700;
         }
 
+        /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -380,7 +514,9 @@
                 justify-content: center;
             }
 
-            .grid-2, .grid-3, .grid-4 {
+            .grid-2,
+            .grid-3,
+            .grid-4 {
                 grid-template-columns: 1fr;
             }
 
@@ -400,12 +536,13 @@
             }
         }
 
-        /* ========== ANIMACIONES ========== */
+        /* ========== ANIMATIONS ========== */
         @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -421,9 +558,11 @@
         }
 
         @keyframes pulse-btn {
-            0%, 100% {
+            0%,
+            100% {
                 transform: scale(1);
             }
+
             50% {
                 transform: scale(1.05);
             }
@@ -432,7 +571,6 @@
 </head>
 
 <body>
-    <!-- Encabezado y barra de progreso -->
     <header class="header">
         <div class="header-content">
             <div class="header-title">
@@ -474,9 +612,7 @@
         </div>
     </header>
 
-    <!-- Contenido principal -->
     <main class="container">
-        <!-- Sección de Información General -->
         <section class="section">
             <h2 class="section-title">
                 <i class="fas fa-info-circle"></i>
@@ -495,6 +631,7 @@
                     <label for="cd_facilitador">Nombre del facilitador/instructor <span class="required">*</span></label>
                     <input id="cd_facilitador" placeholder="Nombre completo del facilitador" required>
                 </div>
+
                 <div class="form-group">
                     <label for="cd_lugar">Lugar de Instrucción</label>
                     <input id="cd_lugar" placeholder="Ej: Insurgentes Sur No. 700, CDMX">
@@ -503,6 +640,7 @@
                     <label for="cd_fecha">Fecha(s) de impartición</label>
                     <input id="cd_fecha" type="text" placeholder="Ej: 14 agosto 2025">
                 </div>
+
                 <div class="form-group">
                     <label for="cd_modalidad">Modalidad del curso <span class="required">*</span></label>
                     <select id="cd_modalidad" required>
@@ -513,20 +651,274 @@
                         <option value="linea_asincrono">En línea Asíncrono (EC0301)</option>
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label for="cd_diseñador">Nombre del diseñador <span class="required">*</span></label>
                     <input id="cd_diseñador" placeholder="Nombre completo del diseñador" required>
                 </div>
+
             </div>
             <div class="form-group mt-1">
                 <label for="cd_proposito">Propósito/Beneficio del curso <span class="required">*</span></label>
                 <textarea id="cd_proposito" placeholder="Describa el propósito del curso y los beneficios que obtendrá el participante y la organización..." required></textarea>
             </div>
         </section>
+        
+        <section class="section">
+            <h2 class="section-title">
+                <i class="fas fa-users"></i>
+                2. Perfil del Participante
+            </h2>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="cd_psico">Perfil del participante <span class="required">*</span></label>
+                    <textarea id="cd_psico" placeholder="Edad, ocupación, nivel educativo, experiencia previa, motivaciones, estilo de aprendizaje..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="cd_conoc">Conocimientos previos requeridos <span class="required">*</span></label>
+                    <textarea id="cd_conoc" placeholder="¿Qué debe saber el participante antes de iniciar el curso?" required></textarea>
+                </div>
 
-        <!-- Más secciones siguen... -->
+                <div class="form-group">
+                    <label for="cd_hab">Habilidades requeridas (técnicas/tecnológicas) <span class="required">*</span></label>
+                    <textarea id="cd_hab" placeholder="Uso de equipo de cómputo, software específico, o herramientas manuales (si aplica)..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="cd_actitudes">Actitudes deseables</label>
+                    <textarea id="cd_actitudes" placeholder="Disposición al aprendizaje, trabajo colaborativo, autogestión del tiempo, proactividad..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="cd_num">Número de participantes <span class="required">*</span></label>
+                    <input id="cd_num" placeholder="Ej: 15-25 personas" required>
+                </div>
+                <div class="form-group">
+                    <label for="cd_tipo">Tipo de grupo <span class="required">*</span></label>
+                    <select id="cd_tipo" required>
+                        <option value="">Seleccione una opción...</option>
+                        <option value="homogeneo">Homogéneo (mismo perfil)</option>
+                        <option value="heterogeneo">Heterogéneo (perfiles diversos)</option>
+                        <option value="mixto">Mixto</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Objetivo General, Particular, y Evaluación -->
+        <!-- Completar esta sección con los temas e información detallada. -->
 
     </main>
-</body>
 
+    <div class="validation-indicator invalid" id="validationIndicator" style="display: none;">
+        <i class="fas fa-exclamation-circle" style="color: var(--danger);"></i>
+        <span>Documento incompleto</span>
+    </div>
+
+    <script>
+// Sección para la validación y control de progreso (progreso general de llenado)
+function updateProgress() {
+    const camposRequeridos = [
+        'cd_nombre', 'cd_duracion', 'cd_diseñador', 'cd_facilitador',
+        'cd_modalidad', 'cd_proposito', 'cd_psico', 'cd_conoc',
+        'cd_hab', 'cd_num', 'cd_tipo',
+        'og_dom', 'og_accion', 'og_cond',
+        'op1_accion', 'op1_cond',
+        'rq_instalaciones', 'rq_equipo', 'rq_seguridad', 'rq_materiales', 'rq_humanos',
+        'ev_min'
+    ];
+    
+    let pesoTotal = 0;
+    let pesoCompletado = 0;
+    
+    camposRequeridos.forEach(campo => {
+        pesoTotal += 1;
+        const el = $(campo);
+        if (el && el.value && el.value.trim() !== '') {
+            pesoCompletado += 1;
+        }
+    });
+    
+    const porcentaje = Math.round((pesoCompletado / pesoTotal) * 100);
+    
+    if ($('progressBar')) $('progressBar').style.width = porcentaje + '%';
+    
+    const indicator = $('validationIndicator');
+    if (indicator) {
+        if (porcentaje >= 80) {
+            indicator.className = 'validation-indicator valid';
+            indicator.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i><span>Documento válido (' + porcentaje + '%)</span>';
+        } else {
+            indicator.className = 'validation-indicator invalid';
+            indicator.innerHTML = `<i class="fas fa-exclamation-circle" style="color: var(--danger);"></i><span>${porcentaje}% completado</span>`;
+        }
+        indicator.style.display = 'flex';
+    }
+    return porcentaje;
+}
+
+// Función de vista previa
+function showPrintPreview() {
+    const data = collectData();
+    
+    const previewHTML = `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; border-bottom: 3px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px;">
+                <h1 style="color: #6366f1; margin: 0;">CARTA DESCRIPTIVA</h1>
+                <p style="color: #64748b; margin: 10px 0 0;">Guion Instruccional EC0301</p>
+            </div>
+            
+            <section style="margin-bottom: 25px;">
+                <h2 style="color: #1e293b; border-left: 4px solid #6366f1; padding-left: 10px; font-size: 1.2rem;">
+                    1. Información General
+                </h2>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc; width: 30%;"><strong>Nombre del curso:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${data.nombre || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc;"><strong>Duración:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${data.duracion || '-'} horas</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc;"><strong>Facilitador:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${data.facilitador || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc;"><strong>Diseñador:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${data.diseñador || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc;"><strong>Modalidad:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${data.modalidad || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc;"><strong>Lugar:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${data.lugar || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc;"><strong>Fecha:</strong></td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${data.fecha || '-'}</td>
+                    </tr>
+                </table>
+            </section>
+            
+            <section style="margin-bottom: 25px;">
+                <h2 style="color: #1e293b; border-left: 4px solid #6366f1; padding-left: 10px; font-size: 1.2rem;">
+                    2. Propósito del Curso
+                </h2>
+                <p style="padding: 15px; background: #f8fafc; border-radius: 8px; line-height: 1.6;">
+                    ${data.proposito || '<em>Sin definir</em>'}
+                </p>
+            </section>
+            
+            <section style="margin-bottom: 25px;">
+                <h2 style="color: #1e293b; border-left: 4px solid #6366f1; padding-left: 10px; font-size: 1.2rem;">
+                    3. Objetivo General
+                </h2>
+                <div style="padding: 15px; background: linear-gradient(135deg, #e0e7ff 0%, #fef3c7 100%); border-radius: 8px; border-left: 4px solid #6366f1;">
+                    <p style="margin: 0; line-height: 1.6;">
+                        Al finalizar el curso, el participante <strong>${data.og?.accion || '[acción]'}</strong>${data.og?.cond ? ', ' + data.og.cond : ''}.
+                    </p>
+                </div>
+            </section>
+            
+            <section style="margin-bottom: 25px;">
+                <h2 style="color: #1e293b; border-left: 4px solid #6366f1; padding-left: 10px; font-size: 1.2rem;">
+                    4. Objetivos Particulares
+                </h2>
+                ${(data.objetivos || []).map((obj, i) => `
+                    <div style="padding: 10px 15px; background: #f8fafc; border-radius: 8px; margin: 10px 0; border-left: 3px solid #10b981;">
+                        <strong>OP${i + 1}:</strong> El participante ${obj.accion || '[acción]'}${obj.cond ? ', ' + obj.cond : ''}.
+                    </div>
+                `).join('') || '<p><em>Sin objetivos particulares definidos</em></p>'}
+            </section>
+            
+            <section style="margin-bottom: 25px;">
+                <h2 style="color: #1e293b; border-left: 4px solid #6366f1; padding-left: 10px; font-size: 1.2rem;">
+                    5. Sistema de Evaluación
+                </h2>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <tr style="background: #6366f1; color: white;">
+                        <th style="padding: 10px; border: 1px solid #e2e8f0;">Tipo</th>
+                        <th style="padding: 10px; border: 1px solid #e2e8f0;">Porcentaje</th>
+                        <th style="padding: 10px; border: 1px solid #e2e8f0;">Instrumento</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">Diagnóstica</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${data.ev?.diag?.pct || 0}%</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${data.ev?.diag?.ins || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">Formativa</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${data.ev?.form?.pct || 0}%</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${data.ev?.form?.ins || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">Sumativa</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${data.ev?.sum?.pct || 0}%</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">${data.ev?.sum?.ins || '-'}</td>
+                    </tr>
+                    <tr style="background: #f8fafc; font-weight: bold;">
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;">TOTAL</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${(parseInt(data.ev?.diag?.pct) || 0) + (parseInt(data.ev?.form?.pct) || 0) + (parseInt(data.ev?.sum?.pct) || 0)}%</td>
+                        <td style="padding: 8px; border: 1px solid #e2e8f0;"></td>
+                    </tr>
+                </table>
+            </section>
+            
+            <section style="margin-bottom: 25px;">
+                <h2 style="color: #1e293b; border-left: 4px solid #6366f1; padding-left: 10px; font-size: 1.2rem;">
+                    6. Desarrollo Temático
+                </h2>
+                ${(data.temas || []).map((tema, i) => `
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; margin: 10px 0;">
+                        <h4 style="margin: 0 0 10px; color: #6366f1;">Tema ${i + 1}: ${tema.nombre || 'Sin nombre'}</h4>
+                        <p><strong>Duración:</strong> ${tema.duracion || 0} minutos</p>
+                        <p><strong>Técnicas:</strong> ${tema.tecnicas || '-'}</p>
+                        <p><strong>Materiales:</strong> ${tema.material || '-'}</p>
+                    </div>
+                `).join('') || '<p><em>Sin temas definidos</em></p>'}
+            </section>
+            
+            <div style="text-align: center; padding: 20px; border-top: 2px solid #e2e8f0; margin-top: 30px; color: #64748b; font-size: 0.9rem;">
+                <p>Documento generado por SkillsCert EC0301</p>
+                <p>Fecha: ${new Date().toLocaleDateString('es-MX')}</p>
+            </div>
+        </div>
+    `;
+
+    // Mostrar modal con vista previa
+    Swal.fire({
+        title: 'Vista Preliminar - Carta Descriptiva',
+        html: `
+            <div style="max-height: 60vh; overflow-y: auto; text-align: left; border: 1px solid #e2e8f0; border-radius: 8px;">
+                ${previewHTML}
+            </div>
+        `,
+        width: '90%',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-file-pdf"></i> Exportar PDF',
+        cancelButtonText: 'Cerrar',
+        confirmButtonColor: '#6366f1'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            exportToPDF(previewHTML);
+        }
+    });
+}
+
+// Función para exportar a PDF
+function exportToPDF(htmlContent) {
+    const doc = new jsPDF();
+    doc.html(htmlContent, {
+        callback: function (doc) {
+            doc.save('Carta_Descriptiva.pdf');
+        },
+        x: 10,
+        y: 10
+    });
+}
+    </script>
+
+</body>
 </html>
