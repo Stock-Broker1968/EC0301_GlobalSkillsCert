@@ -7,11 +7,13 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
+   "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "mysql2": "^3.9.1",
-    "postmark": "^4.0.2"
-    "stripe": "^14.10.0"
+    "mysql2": "^3.6.5",
+    "postmark": "^4.0.2",
+    "stripe": "^14.10.0",
+    "twilio": "^4.19.0"
   },
   "engines": {
     "node": ">=18.0.0"
