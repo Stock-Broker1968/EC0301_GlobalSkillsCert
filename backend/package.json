@@ -1,21 +1,29 @@
 {
-  "name": "ec0301-backend",
-  "version": "3.0.0",
-  "description": "Backend EC0301 con MySQL Hostinger",
+  "name": "ec0301-globalskillscert",
+  "version": "1.0.0",
+  "description": "Backend para EC0301 GlobalSkillsCert",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "npm install"
   },
   "dependencies": {
-   "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "mysql2": "^3.6.5",
-    "postmark": "^4.0.2",
-    "stripe": "^14.10.0",
+    "express": "^4.19.0",
+    "cors": "^2.8.5",
+    "mysql2": "^2.3.3",
+    "stripe": "^8.174.0",
+    "postmark": "^2.6.0",
+    "node-cron": "^3.0.0",
     "twilio": "^4.19.0",
+    "dotenv": "^10.0.0",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   },
   "engines": {
-    "node": ">=18.0.0"
-  }
+    "node": "22.16.0"
+  },
+  "author": "Stock-Broker1968",
+  "license": "MIT"
 }
