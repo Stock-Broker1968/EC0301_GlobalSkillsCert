@@ -1120,4 +1120,53 @@ process.on('SIGTERM', async () => {
 startServer().catch(error => {
     console.error('❌ Error fatal al iniciar servidor:', error);
     process.exit(1);
+    // 1. POST /create-checkout-session
+app.post('/create-checkout-session', async (req, res) => {
+  const { nombre, email, telefono } = req.body;
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price: 'prod_TOYcBbqNsWEKUt', // Tu product ID
+        quantity: 1
+      }],
+      mode: 'payment',
+      success_url: `https://ec0301-globalskillscert.onrender.com/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://ec0301-globalskillscert.onrender.com/payment`,
+      customer_email: email,
+      metadata: { nombre, email, telefono }
+    });
+    res.json({ sessionId: session.id });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 2. POST /verify-payment
+app.post('/verify-payment', async (req, res) => {
+  const { sessionId } = req.body;
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status === 'paid') {
+      const accessCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      const { nombre, email, telefono } = session.metadata;
+      
+      // Guardar en MySQL
+      await pool.execute(
+        "INSERT INTO access_codes (email, code, nombre, telefono, created_at, expires_at, status) VALUES (?, ?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1)",
+        [email, accessCode, nombre, telefono]
+      );
+      
+      res.json({ success: true, accessCode, email });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 3. POST /resend-notification
+app.post('/resend-notification', async (req, res) => {
+  res.json({ success: true });
+});
+
 });
